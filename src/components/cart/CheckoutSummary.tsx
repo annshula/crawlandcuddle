@@ -1,0 +1,160 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+
+import { useCart } from "@/components/providers/CartProvider";
+import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
+import { cn, formatPrice } from "@/lib/utils";
+
+/**
+ * Order review. Payment is intentionally not wired: swap the submit handler for
+ * your provider's session call (Razorpay / Stripe) when keys are available.
+ */
+export function CheckoutSummary() {
+  const { lines, subtotalCents, setQty, remove } = useCart();
+
+  if (lines.length === 0) {
+    return (
+      <div className="mt-12 flex flex-col items-start gap-5">
+        <p className="text-body text-ink-soft">
+          Your bag is empty. Pick a style and it will show up here.
+        </p>
+        <Button href="/products" withArrow>
+          Browse the ten styles
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-10 grid gap-12 lg:grid-cols-[1.3fr_0.7fr] lg:gap-16">
+      <ul className="min-w-0">
+        {lines.map((line) => (
+          <li
+            key={line.slug}
+            className="flex gap-5 border-b border-hairline py-6 first:border-t first:pt-6"
+          >
+            <Link
+              href={`/products/${line.slug}`}
+              className={cn(
+                "relative size-24 shrink-0 overflow-hidden rounded-card",
+                line.tone,
+              )}
+            >
+              <Image
+                src={line.image}
+                alt={line.name}
+                fill
+                sizes="96px"
+                className="object-cover"
+              />
+            </Link>
+
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <Link
+                    href={`/products/${line.slug}`}
+                    className="font-headline text-lg text-ink transition-colors hover:text-rose-600"
+                  >
+                    {line.name}
+                  </Link>
+                  <p className="mt-1 text-body-sm text-ink-faint">
+                    {formatPrice(line.unitPriceCents)} each
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => remove(line.slug)}
+                  aria-label={`Remove ${line.name}`}
+                  className="text-ink-faint transition-colors hover:text-rose-600"
+                >
+                  <Icon name="close" className="size-4" />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <span className="inline-flex items-center rounded-btn border border-hairline">
+                  <button
+                    type="button"
+                    onClick={() => setQty(line.slug, line.qty - 1)}
+                    aria-label={`Decrease quantity of ${line.name}`}
+                    className="grid size-10 place-items-center text-ink hover:text-rose-600"
+                  >
+                    <Icon name="minus" className="size-4" strokeWidth={2} />
+                  </button>
+                  <span className="w-9 text-center font-headline text-base text-ink">
+                    {line.qty}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQty(line.slug, line.qty + 1)}
+                    aria-label={`Increase quantity of ${line.name}`}
+                    className="grid size-10 place-items-center text-ink hover:text-rose-600"
+                  >
+                    <Icon name="plus" className="size-4" strokeWidth={2} />
+                  </button>
+                </span>
+                <span className="font-headline text-lg text-ink">
+                  {formatPrice(line.lineTotalCents)}
+                </span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <aside className="h-fit rounded-panel bg-paper p-7 shadow-drift lg:sticky lg:top-28">
+        <h2 className="font-display text-heading-sm text-ink uppercase">
+          Order summary
+        </h2>
+
+        <dl className="mt-6 flex flex-col gap-3 text-body-sm">
+          <div className="flex justify-between">
+            <dt className="text-ink-soft">Subtotal</dt>
+            <dd className="text-ink">{formatPrice(subtotalCents)}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-ink-soft">Shipping</dt>
+            <dd className="text-rose-600">Free</dd>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between border-t border-hairline pt-4">
+            <dt className="eyebrow text-ink-faint">Total</dt>
+            <dd className="font-mega text-3xl font-black text-ink">
+              {formatPrice(subtotalCents)}
+            </dd>
+          </div>
+        </dl>
+
+        <Button
+          onClick={() =>
+            window.alert(
+              "Payment is not connected yet. Wire this button to your payment provider's checkout session.",
+            )
+          }
+          withArrow
+          className="mt-7 w-full justify-center"
+        >
+          Pay now
+        </Button>
+
+        <ul className="mt-6 flex flex-col gap-2.5 text-body-sm text-ink-soft">
+          {["Free tracked delivery", "30-day easy returns", "Secure checkout"].map(
+            (item) => (
+              <li key={item} className="flex items-center gap-2.5">
+                <Icon
+                  name="check"
+                  className="size-4 text-rose-600"
+                  strokeWidth={2.2}
+                />
+                {item}
+              </li>
+            ),
+          )}
+        </ul>
+      </aside>
+    </div>
+  );
+}
