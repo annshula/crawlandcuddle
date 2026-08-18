@@ -209,7 +209,7 @@ export function Header() {
         style={{ pointerEvents: "none" }}
         aria-hidden={!menuOpen}
       >
-        <div className="paper-grain relative flex h-full flex-col overflow-y-auto bg-lilac-700 px-6 pt-6 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] text-paper">
+        <div className="paper-grain relative flex h-full flex-col overflow-x-hidden overflow-y-auto bg-lilac-700 px-6 pt-6 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] text-paper">
           {/* Decorative theme blobs so the panel never reads as a flat block. */}
           <div
             aria-hidden="true"
