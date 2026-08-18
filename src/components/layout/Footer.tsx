@@ -41,20 +41,22 @@ export function Footer() {
                 <p className="font-script text-3xl text-rose-200">
                   {site.tagline}
                 </p>
-                <ul className="flex flex-wrap gap-x-6 gap-y-2">
-                  {site.socials.map((social) => (
-                    <li key={social.label}>
-                      <a
-                        href={social.href}
-                        rel="noopener noreferrer me"
-                        target="_blank"
-                        className="link-underline font-label text-[0.7rem] tracking-[0.2em] text-paper/80 uppercase"
-                      >
-                        {social.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+                {site.socials.length > 0 && (
+                  <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                    {site.socials.map((social) => (
+                      <li key={social.label}>
+                        <a
+                          href={social.href}
+                          rel="noopener noreferrer me"
+                          target="_blank"
+                          className="link-underline font-label text-[0.7rem] tracking-[0.2em] text-paper/80 uppercase"
+                        >
+                          {social.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </Reveal>
 

@@ -12,6 +12,20 @@ import {
   productPriceCents,
 } from "@/lib/catalog";
 
+export type SocialLink = { label: string; href: string };
+
+/**
+ * Declared separately and annotated so the list can legally be empty. Inline
+ * inside the `as const` object an empty literal infers `never[]`, and every
+ * `.map(s => s.label)` over it became a build error the moment the accounts
+ * were commented out.
+ */
+const socials: ReadonlyArray<SocialLink> = [
+  // { label: "Instagram", href: "https://instagram.com/crawlandcuddle" },
+  // { label: "Pinterest", href: "https://pinterest.com/crawlandcuddle" },
+  // { label: "YouTube", href: "https://youtube.com/@crawlandcuddle" },
+];
+
 export const site = {
   name: "Crawl & Cuddle",
   legalName: "Crawl & Cuddle Ltd",
@@ -32,11 +46,7 @@ export const site = {
   },
   /** Markets this storefront actually ships to — used in shipping/returns copy. */
   shipsTo: ["United States", "Canada", "United Kingdom", "Australia"],
-  socials: [
-    // { label: "Instagram", href: "https://instagram.com/crawlandcuddle" },
-    // { label: "Pinterest", href: "https://pinterest.com/crawlandcuddle" },
-    // { label: "YouTube", href: "https://youtube.com/@crawlandcuddle" },
-  ],
+  socials,
 } as const;
 
 /**

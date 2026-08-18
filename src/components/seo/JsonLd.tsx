@@ -29,7 +29,10 @@ export function JsonLd() {
     email: site.email,
     telephone: site.phone,
     description: site.description,
-    sameAs: site.socials.map((s) => s.href),
+    // Omitted entirely when there are no profiles — an empty sameAs is invalid.
+    ...(site.socials.length > 0
+      ? { sameAs: site.socials.map((s) => s.href) }
+      : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: site.address.street,
