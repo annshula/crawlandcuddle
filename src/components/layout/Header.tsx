@@ -150,15 +150,15 @@ export function Header() {
               >
                 <svg
                   width="2"
-                  height="12"
-                  viewBox="0 0 2 12"
+                  height="44"
+                  viewBox="0 0 2 44"
                   className="text-ink-faint/50"
                 >
                   <line
                     x1="1"
                     y1="0"
                     x2="1"
-                    y2="12"
+                    y2="44"
                     stroke="currentColor"
                     strokeWidth="1.5"
                     strokeDasharray="2 3"
