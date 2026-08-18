@@ -92,10 +92,10 @@ export function Footer() {
               © {year} {site.legalName}. All rights reserved.
             </p>
             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <li className="flex items-center gap-2">
+              {/* <li className="flex items-center gap-2">
                 <Icon name="globe" className="size-4" />
                 {site.domain}
-              </li>
+              </li> */}
               <li className="flex items-center gap-2">
                 <Icon name="shield" className="size-4" />
                 Trusted by parents
