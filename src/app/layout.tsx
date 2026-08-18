@@ -81,7 +81,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
-      <body className="antialiased">
+      {/* suppressHydrationWarning: some Chrome extensions inject attributes
+          (e.g. cz-shortcut-listen) onto <body>; without this the client DOM
+          would not match the server HTML and React logs a hydration error. */}
+      <body className="antialiased" suppressHydrationWarning>
         <a
           href="#top"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-70 focus:rounded-btn focus:bg-rose-600 focus:px-5 focus:py-3 focus:text-paper"
