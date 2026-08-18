@@ -79,7 +79,7 @@ export function HowItWorks() {
       <Blob
         shape="c"
         spin={70}
-        className="pointer-events-none absolute top-1/3 -right-56 w-[40rem] text-lilac-100"
+        className="pointer-events-none absolute top-0 right-0 w-104 text-lilac-100"
       />
 
       <div className="container-page relative z-10">

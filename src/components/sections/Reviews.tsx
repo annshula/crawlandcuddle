@@ -57,7 +57,7 @@ function ReviewCard({
   role: string;
 }) {
   return (
-    <figure className="card-soft mx-3 flex w-[20rem] shrink-0 flex-col justify-between gap-6 p-7 sm:w-[24rem]">
+    <figure className="mx-3 flex w-[20rem] shrink-0 flex-col justify-between gap-6 rounded-card border border-hairline bg-paper p-7 sm:w-[24rem]">
       <span className="flex gap-1 text-rose-500" aria-hidden="true">
         {Array.from({ length: 5 }).map((_, i) => (
           <Icon key={i} name="star" className="size-4 fill-current" strokeWidth={1} />

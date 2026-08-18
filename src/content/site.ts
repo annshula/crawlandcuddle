@@ -14,14 +14,16 @@ export const site = {
   shortDescription:
     "Feather-light anti-fall head & back cushion for babies 5–24 months. Ten styles. One promise.",
   email: "hello@crawlandcuddle.com",
-  phone: "+91 80 4718 2277",
+  phone: "+1 (512) 555-0148",
   address: {
-    street: "27 Willow Lane, Indiranagar",
-    city: "Bengaluru",
-    region: "KA",
-    postalCode: "560038",
-    country: "IN",
+    street: "482 Maple Street, Suite 210",
+    city: "Austin",
+    region: "TX",
+    postalCode: "78701",
+    country: "US",
   },
+  /** Markets this storefront actually ships to — used in shipping/returns copy. */
+  shipsTo: ["United States", "Canada", "United Kingdom", "Australia"],
   socials: [
     { label: "Instagram", href: "https://instagram.com/crawlandcuddle" },
     { label: "Pinterest", href: "https://pinterest.com/crawlandcuddle" },
@@ -35,6 +37,7 @@ export const site = {
  * "/#hash" form when we are already on the home page.
  */
 export const nav = [
+  { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
   { label: "Why it works", href: "/#why" },
   { label: "Fitting", href: "/#how" },
@@ -42,8 +45,8 @@ export const nav = [
 ] as const;
 
 export const announcements = [
-  "Free gift worth ₹1,200 in every box",
-  "Free shipping across India",
+  "Free gift worth $15 in every box",
+  "Free shipping to the US, Canada, UK & Australia",
   "Ten styles · one promise",
   "Loved by 40,000+ parents",
   "Tracked delivery · easy returns",
@@ -169,7 +172,7 @@ export const trustBadges = [
   { label: "Protects head & back", detail: "Impact-absorbing cushion" },
   { label: "Soft & lightweight", detail: "Just 190 grams" },
   { label: "Breathable comfort", detail: "3D air-mesh shell" },
-  { label: "Free gift inside", detail: "Worth ₹1,200" },
+  { label: "Free gift inside", detail: "Worth $15" },
 ] as const;
 
 export const pillars = [
@@ -257,33 +260,33 @@ export const specs = [
 export const reviews = [
   {
     quote:
-      "Third baby, first time I've stopped hovering. She goes backwards onto the floorboards and just giggles.",
-    name: "Meera A.",
-    role: "Mum of three · Bengaluru",
+      "Third baby, first time I've stopped hovering. She goes backwards onto the hardwood and just giggles.",
+    name: "Emily R.",
+    role: "Mum of three · Toronto, Canada",
   },
   {
     quote:
       "He asks for 'butterfly' before he'll crawl anywhere now. It's a toy to him and a helmet to me.",
-    name: "Daniel R.",
-    role: "Dad · Pune",
+    name: "Jake T.",
+    role: "Dad · Austin, TX",
   },
   {
     quote:
-      "Washed it eleven times this winter and it's still as puffy as day one. The straps have never dug in.",
-    name: "Yuki T.",
-    role: "Mum of twins · Mumbai",
+      "Washed it a dozen times this winter and it's still as puffy as day one. The straps have never dug in.",
+    name: "Sophie L.",
+    role: "Mum of twins · Manchester, UK",
   },
   {
     quote:
       "We bought the owl for our daycare floor. Hardwood, six fearless toddlers, zero tears since.",
-    name: "Ana-Lucía P.",
-    role: "Nursery lead · Goa",
+    name: "Chloe M.",
+    role: "Nursery lead · Sydney, Australia",
   },
   {
     quote:
       "The 3D mesh is the detail that sold me — no sweaty back after an hour on the playmat.",
-    name: "Rohit S.",
-    role: "Dad of one · Delhi",
+    name: "Liam K.",
+    role: "Dad of one · Vancouver, Canada",
   },
 ] as const;
 
@@ -291,14 +294,14 @@ export const product = {
   name: "Baby Head Protector Backpack — Toddler Anti-Fall Cushion Pillow",
   shortName: "Baby Head Protector Backpack",
   sku: "CC-BHP-001",
-  priceCents: 450000,
-  compareAtCents: 520000,
-  currency: "INR",
-  locale: "en-IN",
+  priceCents: 4500,
+  compareAtCents: 5200,
+  currency: "USD",
+  locale: "en-US",
   includes: [
     "Head & back protector in your chosen style",
     "Adjustable shoulder harness with chest clip",
-    "Free gift: muslin comforter (worth ₹1,200)",
+    "Free gift: muslin comforter (worth $15)",
     "Wash bag and care card",
   ],
   rating: { value: 4.9, count: 2841 },
@@ -327,7 +330,7 @@ export const faqs = [
   },
   {
     q: "What is the delivery and returns policy?",
-    a: "Every order ships tracked and free across India, usually within three to five working days. Changed your mind? Start a return from your order history within thirty days.",
+    a: "Every order ships tracked and free to the US, Canada, UK and Australia, usually within three to seven working days. Changed your mind? Start a return from your order history within thirty days.",
   },
 ] as const;
 

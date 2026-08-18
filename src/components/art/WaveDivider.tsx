@@ -28,7 +28,7 @@ export function WaveDivider({
   return (
     <div
       aria-hidden="true"
-      className={cn("pointer-events-none w-full leading-[0]", className)}
+      className={cn("pointer-events-none w-full leading-0", className)}
       style={{ height }}
     >
       <svg

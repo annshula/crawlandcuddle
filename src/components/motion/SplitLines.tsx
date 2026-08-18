@@ -63,7 +63,7 @@ export function SplitLines({
   return (
     <span ref={ref} className={cn("block", className)}>
       {lines.map((line, i) => (
-        <span key={i} className="block overflow-hidden pb-[0.08em]">
+        <span key={i} className="block overflow-hidden pb-[0.22em]">
           <span
             data-line-inner
             className={cn("block will-change-transform", lineClassName)}

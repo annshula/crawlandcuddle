@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Blob } from "@/components/art/Blob";
+import { LineArt } from "@/components/art/LineArt";
 import { BuyBox } from "@/components/product/BuyBox";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
@@ -103,14 +104,19 @@ export default async function ProductPage({
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: site.legalName },
     },
-    isVariantOf: { "@id": absoluteUrl("/#product") },
+    isVariantOf: { "@id": absoluteUrl("/products#product") },
   };
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl("/"),
+      },
       {
         "@type": "ListItem",
         position: 2,
@@ -137,11 +143,31 @@ export default async function ProductPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      <section className="relative -mt-[var(--nav-height)] overflow-hidden bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28">
+      {/*
+        Full-screen like the home hero (min-height, never fixed — this panel
+        carries far more content than the home fold, so it is free to grow
+        past 100vh rather than clip). clip-path (not overflow-hidden) lets the
+        blobs bleed up into the transparent nav while still being cut clean at
+        the section's own bottom edge, matching the home hero's rule: no shape
+        may spill into the section after it.
+      */}
+      <section
+        style={{ clipPath: "inset(-160px 0 0 0)" }}
+        className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28"
+      >
         <Blob
-          shape="e"
-          spin={-30}
-          className="pointer-events-none absolute -top-32 -left-44 w-[32rem] text-rose-50"
+          shape="d"
+          spin={22}
+          className="pointer-events-none absolute -top-28 -left-40 w-120 text-rose-50"
+        />
+        <Blob
+          shape="a"
+          spin={-18}
+          className="pointer-events-none absolute -right-56 -bottom-40 w-136 text-lilac-100"
+        />
+        <LineArt
+          name="butterfly"
+          className="pointer-events-none absolute top-24 right-[6%] hidden w-16 rotate-6 text-rose-200 lg:block"
         />
 
         <div className="container-page relative z-10">
@@ -253,9 +279,9 @@ export default async function ProductPage({
 
               <p className="mt-6 max-w-lg text-body text-ink-soft">
                 {variant.tagline} Underneath the design it is the same protector
-                every parent trusts: an impact-absorbing ring behind the head,
-                a breathable 3D air-mesh shell and a harness that adjusts from
-                the first crawl to confident walking.
+                every parent trusts: an impact-absorbing ring behind the head, a
+                breathable 3D air-mesh shell and a harness that adjusts from the
+                first crawl to confident walking.
               </p>
 
               <BuyBox variant={variant} />
@@ -284,7 +310,10 @@ export default async function ProductPage({
 
               <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
                 {specs.map((spec) => (
-                  <div key={spec.label} className="border-t border-hairline pt-3">
+                  <div
+                    key={spec.label}
+                    className="border-t border-hairline pt-3"
+                  >
                     <dt className="eyebrow text-ink-faint">{spec.label}</dt>
                     <dd className="mt-1.5 font-headline text-base text-ink">
                       {spec.value}
@@ -317,9 +346,14 @@ export default async function ProductPage({
 
           <ul className="flex flex-col">
             {faqs.map((faq) => (
-              <li key={faq.q} className="border-b border-hairline py-6 first:border-t first:pt-6">
+              <li
+                key={faq.q}
+                className="border-b border-hairline py-6 first:border-t first:pt-6"
+              >
                 <h3 className="font-headline text-lg text-ink">{faq.q}</h3>
-                <p className="mt-3 max-w-2xl text-body text-ink-soft">{faq.a}</p>
+                <p className="mt-3 max-w-2xl text-body text-ink-soft">
+                  {faq.a}
+                </p>
               </li>
             ))}
           </ul>
@@ -327,7 +361,10 @@ export default async function ProductPage({
       </section>
 
       {/* --- related --- */}
-      <section aria-labelledby="related-heading" className="bg-cream py-16 md:py-20">
+      <section
+        aria-labelledby="related-heading"
+        className="bg-cream py-16 md:py-20"
+      >
         <div className="container-page">
           <div className="flex items-end justify-between gap-6">
             <h2
@@ -347,7 +384,10 @@ export default async function ProductPage({
           <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
             {related.map((item) => (
               <li key={item.slug} className="group">
-                <Link href={variantHref(item.slug)} className="flex flex-col gap-3">
+                <Link
+                  href={variantHref(item.slug)}
+                  className="flex flex-col gap-3"
+                >
                   <span
                     className={cn(
                       "relative block aspect-square overflow-hidden rounded-panel transition-shadow duration-500 group-hover:shadow-drift",

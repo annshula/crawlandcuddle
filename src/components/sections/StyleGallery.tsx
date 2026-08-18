@@ -24,10 +24,10 @@ export function StyleGallery() {
       <Blob
         shape="c"
         spin={35}
-        className="pointer-events-none absolute -top-40 -right-52 w-[36rem] text-lilac-100"
+        className="pointer-events-none absolute -top-40 -right-52 w-xl text-lilac-100"
       />
       <LineArt
-        name="sprig"
+        name="butterfly"
         className="pointer-events-none absolute bottom-16 -left-6 hidden w-28 rotate-12 text-lilac-200 lg:block"
       />
 

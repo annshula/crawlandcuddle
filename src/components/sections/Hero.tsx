@@ -60,12 +60,6 @@ export function Hero() {
           1.1,
         )
         .fromTo(
-          "[data-hero='stat']",
-          { y: 18, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, stagger: 0.07 },
-          1.2,
-        )
-        .fromTo(
           "[data-hero='product']",
           { y: 56, scale: 0.92, opacity: 0 },
           { y: 0, scale: 1, opacity: 1, duration: 1.5 },
@@ -76,18 +70,14 @@ export function Hero() {
           { scale: 0.75, opacity: 0 },
           { scale: 1, opacity: 1, duration: 1.5, stagger: 0.1 },
           0,
-        )
-        .fromTo(
-          "[data-hero='badge']",
-          { scale: 0.6, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.9, ease: "back.out(2)" },
-          1.3,
         );
 
-      // The composition drifts and fades as the fold leaves.
+      // The composition drifts and eases out as the fold leaves — kept gentle
+      // (small drift, never below ~65% opacity) so the headline and both CTAs
+      // stay fully readable while the hero scrolls away.
       gsap.to("[data-hero='fold']", {
-        yPercent: 8,
-        opacity: 0.3,
+        yPercent: 3,
+        opacity: 0.65,
         ease: "none",
         scrollTrigger: {
           trigger: el,
@@ -106,24 +96,31 @@ export function Hero() {
       ref={root}
       id="top"
       aria-labelledby="hero-heading"
-      className="relative -mt-[var(--nav-height)] flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center overflow-hidden pt-[calc(var(--nav-height)+clamp(0.75rem,2.2vh,2.5rem))] pb-[clamp(0.75rem,2.2vh,2.5rem)]"
+      /* clip-path, not overflow-hidden: `inset(-160px 0 0 0)` clips normally on
+         the right/bottom/left edges but lets content render up to 160px above
+         the box — enough for the decorative blobs to bleed into the
+         transparent nav above (intentional). At the bottom the hero cuts
+         cleanly: the shapes behind the main image are allowed to be trimmed by
+         the section below rather than spilling over it. */
+      style={{ clipPath: "inset(-160px 0 0 0)" }}
+      className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center pt-[calc(var(--nav-height)+clamp(0.75rem,2.2vh,2.5rem))] pb-[clamp(4rem,9.5vh,6rem)]"
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div
           data-hero="blob"
-          className="absolute -top-32 -left-40 w-[34rem] text-blush animate-drift"
+          className="absolute -top-32 -left-40 w-136 text-blush animate-drift"
         >
           <Blob shape="c" />
         </div>
         <div
           data-hero="blob"
-          className="absolute top-1/4 -right-40 w-[40rem] text-lilac-100 animate-drift"
+          className="absolute top-1/4 -right-40 w-160 text-lilac-100 animate-drift"
         >
           <Blob shape="b" spin={30} />
         </div>
         <div
           data-hero="blob"
-          className="absolute -bottom-48 left-1/3 w-[28rem] text-rose-50"
+          className="absolute bottom-0 left-1/3 w-md text-rose-50"
         >
           <Blob shape="e" spin={-15} />
         </div>
@@ -146,7 +143,7 @@ export function Hero() {
 
             <h1
               id="hero-heading"
-              className="mt-[clamp(0.75rem,2vh,1.25rem)] font-mega text-[clamp(2.5rem,min(7vw,9.2vh),5.25rem)] leading-[0.88] font-black tracking-[-0.01em] text-ink"
+              className="mt-[clamp(0.75rem,2vh,1.25rem)] font-mega text-[clamp(2.5rem,min(6.6vw,8.6vh),5.25rem)] leading-[1.02] font-black tracking-[-0.01em] text-ink"
             >
               <SplitLines lines={[...hero.headline]} immediate delay={0.2} />
               <span className="relative mt-1 inline-block overflow-visible">
@@ -203,62 +200,67 @@ export function Hero() {
                 {hero.secondaryCta.label}
               </Button>
             </div>
-
-            <dl className="mt-[clamp(1.25rem,3vh,2rem)] flex flex-wrap gap-x-10 gap-y-4">
-              {hero.stats.map((stat) => (
-                <div key={stat.label} data-hero="stat" className="opacity-0">
-                  <dt className="eyebrow mt-1 text-ink-faint">{stat.label}</dt>
-                  <dd className="font-display text-heading-sm text-ink">
-                    {stat.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
           {/* ---------------- lifestyle photograph ---------------- */}
           <div className="relative order-1 lg:order-2">
             <div
               data-hero="product"
-              className="relative mx-auto aspect-[3/4] w-[min(100%,20rem)] opacity-0 sm:w-[min(100%,24rem)] lg:h-[min(72vh,34rem)] lg:w-auto lg:max-w-full"
+              className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] opacity-0 sm:w-[min(100%,25rem)] lg:h-[min(74vh,36rem)] lg:w-auto lg:max-w-full"
             >
-              {/* Organic halo peeks out behind the photo so the crop never
-                  reads as a pasted-on rectangle. */}
+              {/* Organic halo fills the space the photo's own background used
+                  to occupy — the halo IS the background now. */}
               <Blob
                 shape="b"
-                className="absolute inset-[-16%] h-[132%] w-[132%] text-blush"
+                className="absolute inset-[-18%] h-[136%] w-[136%] text-blush"
               />
-              <div className="relative h-full w-full animate-float-slow overflow-hidden rounded-panel shadow-drift">
+              <Blob
+                shape="e"
+                spin={-20}
+                className="absolute inset-[6%] h-[88%] w-[88%] text-lilac-100/70"
+              />
+
+              {/* No photo background survives here: a soft radial mask fades
+                  the source photo's own dark backdrop to nothing at the edges.
+                  The ellipse is sized generously (70% / 92%) and the image is
+                  never scaled beyond its natural contain-fit, so the whole
+                  figure — head to feet — clears the fade instead of being
+                  cropped by it. */}
+              <div
+                className="relative h-full w-full animate-float-slow"
+                style={{
+                  WebkitMaskImage:
+                    "radial-gradient(ellipse 70% 92% at 50% 46%, black 66%, transparent 100%)",
+                  maskImage:
+                    "radial-gradient(ellipse 70% 92% at 50% 46%, black 66%, transparent 100%)",
+                }}
+              >
                 <Image
                   src={heroImage.src}
                   alt={heroImage.alt}
                   fill
                   priority
                   sizes="(min-width: 1024px) 26rem, (min-width: 640px) 24rem, 80vw"
-                  className="object-cover"
+                  className="object-contain object-center"
                 />
-              </div>
-
-              <div
-                data-hero="badge"
-                className="absolute -top-3 -right-3 z-20 rotate-6 rounded-tag bg-rose-500 px-4 py-2.5 text-center text-paper opacity-0 shadow-lift"
-              >
-                <p className="font-label text-[0.62rem] leading-tight tracking-[0.16em] uppercase">
-                  Free gift
-                  <br />
-                  worth ₹1,200
-                </p>
               </div>
 
               <LineArt
                 name="star"
-                className="absolute -bottom-4 -left-5 w-10 text-rose-400/70 animate-wobble"
+                className="absolute -bottom-2 left-0 w-10 text-rose-400/70 animate-wobble"
+              />
+              <LineArt
+                name="heart"
+                className="absolute top-6 -left-6 w-8 text-lilac-400/60 animate-float"
+              />
+              <LineArt
+                name="butterfly"
+                className="absolute right-0 -bottom-6 w-14 rotate-12 text-mint/80"
               />
             </div>
           </div>
         </div>
       </div>
-
     </section>
   );
 }

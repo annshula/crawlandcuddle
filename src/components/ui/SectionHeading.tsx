@@ -13,6 +13,11 @@ interface SectionHeadingProps {
   body?: string;
   align?: "left" | "center";
   tone?: "ink" | "light";
+  /** Tighten the vertical rhythm — for pinned sections with little headroom. */
+  compact?: boolean;
+  /** Scale type by viewport height so the heading fits pinned full-screen
+   *  sections on shorter windows without shrinking the cards below. */
+  size?: "default" | "sm";
   className?: string;
   children?: ReactNode;
 }
@@ -30,15 +35,19 @@ export function SectionHeading({
   body,
   align = "left",
   tone = "ink",
+  compact = false,
+  size = "default",
   className,
   children,
 }: SectionHeadingProps) {
   const light = tone === "light";
+  const sm = size === "sm";
 
   return (
     <div
       className={cn(
-        "flex max-w-3xl flex-col gap-5",
+        "flex max-w-3xl flex-col",
+        compact ? (sm ? "gap-2" : "gap-3") : "gap-5",
         align === "center" && "mx-auto items-center text-center",
         className,
       )}
@@ -66,7 +75,10 @@ export function SectionHeading({
       <h2
         id={id}
         className={cn(
-          "font-display text-heading uppercase",
+          "font-display uppercase",
+          sm
+            ? "text-[clamp(2rem,min(5vw,7.4vh),3.5rem)] leading-[1.02]"
+            : "text-heading",
           light ? "text-paper" : "text-ink",
         )}
       >
@@ -77,7 +89,10 @@ export function SectionHeading({
         <Reveal variant="up" delay={0.15}>
           <p
             className={cn(
-              "font-script text-3xl leading-tight md:text-4xl",
+              "font-script leading-tight",
+              sm
+                ? "text-[clamp(1.35rem,min(3vw,4.2vh),2.25rem)]"
+                : "text-3xl md:text-4xl",
               light ? "text-rose-200" : "text-rose-500",
             )}
             aria-hidden="true"
@@ -91,7 +106,10 @@ export function SectionHeading({
         <Reveal variant="up" delay={0.1}>
           <p
             className={cn(
-              "max-w-xl text-body",
+              "max-w-xl",
+              sm
+                ? "text-[clamp(0.875rem,min(1.5vw,1.9vh),1.0625rem)] leading-relaxed"
+                : "text-body",
               light ? "text-paper/75" : "text-ink-soft",
               align === "center" && "mx-auto",
             )}

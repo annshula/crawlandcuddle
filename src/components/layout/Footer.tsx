@@ -1,6 +1,6 @@
 import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
-import { WaveDivider } from "@/components/art/WaveDivider";
+import { FooterWave } from "@/components/layout/FooterWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Logo";
@@ -11,22 +11,18 @@ export function Footer() {
 
   return (
     <footer id="contact" className="relative">
-      {/* Wave carries the footer colour; the strip behind it matches the
-          newsletter band above so no canvas gap shows through. */}
-      <WaveDivider
-        className="-mb-px bg-blush text-lilac-700"
-        shape="swell"
-        height={110}
-      />
+      {/* Wave carries the footer colour; its backing strip adapts to the
+          section above so the transition is seamless on every page. */}
+      <FooterWave />
 
       <div className="paper-grain relative overflow-hidden bg-lilac-700 text-paper">
         <Blob
           shape="c"
           spin={40}
-          className="pointer-events-none absolute -top-40 -right-32 w-[34rem] text-lilac-600/40"
+          className="pointer-events-none absolute top-0 right-0 w-136 text-lilac-600/40"
         />
         <LineArt
-          name="sprig"
+          name="butterfly"
           className="pointer-events-none absolute bottom-10 -left-6 w-40 rotate-12 text-lilac-300/25"
         />
         <LineArt

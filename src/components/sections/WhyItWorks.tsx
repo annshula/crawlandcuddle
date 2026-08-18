@@ -25,7 +25,7 @@ export function WhyItWorks() {
       <Blob
         shape="d"
         spin={20}
-        className="pointer-events-none absolute -top-36 -left-48 w-[32rem] text-rose-50"
+        className="pointer-events-none absolute -top-36 -left-48 w-lg text-rose-50"
       />
       <Parallax
         speed={0.12}
@@ -79,7 +79,7 @@ export function WhyItWorks() {
           {/* Mesh close-up — the proof behind "breathable". */}
           <Reveal variant="left">
             <figure className="relative">
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-panel bg-lilac-50 shadow-drift">
+              <div className="relative aspect-4/5 w-full overflow-hidden rounded-panel bg-lilac-50 shadow-drift">
                 <Image
                   src="/images/product/mesh-detail.jpg"
                   alt="Close-up of the breathable 3D air-mesh shell on the baby head protector backpack"

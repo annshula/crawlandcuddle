@@ -24,6 +24,14 @@ const cardArt: LineArtName[] = [
  * moment. On desktop the section pins at exactly one viewport tall and the rail
  * scrubs sideways; on touch it degrades to a native snap-scroller so nothing is
  * trapped behind JS.
+ *
+ * The pinned height is a full 100svh and deliberately does NOT subtract
+ * --announce-height. The announcement bar is not sticky, so by the time this
+ * section pins to the top of the viewport that bar has already scrolled away.
+ * Subtracting it left a 34px strip of the *next* section visible beneath the
+ * rail for the entire horizontal scrub — the wave divider only appeared to
+ * "attach" once the pin released on the last card. Top padding clears the
+ * sticky header instead.
  */
 export function Milestones() {
   const root = useRef<HTMLElement | null>(null);
@@ -66,18 +74,25 @@ export function Milestones() {
 
   return (
     <>
-      <WaveDivider className="-mb-px text-rose-500" shape="drip" height={110} />
+      {/* bg-paper fills the sliver above the wave curve — without it that gap
+          shows the page's cream body colour instead of the white section
+          (WhyItWorks) actually sitting above, which read as a mismatched seam. */}
+      <WaveDivider
+        className="-mb-px bg-paper text-rose-500"
+        shape="drip"
+        height={110}
+      />
 
       <section
         ref={root}
         id="milestones"
         aria-labelledby="milestones-heading"
-        className="paper-grain relative flex flex-col justify-center overflow-hidden bg-rose-500 py-20 text-paper lg:h-[calc(100svh-var(--announce-height))] lg:py-0"
+        className="paper-grain relative flex flex-col justify-center overflow-hidden bg-rose-500 py-20 text-paper lg:h-svh lg:py-0 lg:pt-(--nav-height)"
       >
         <Blob
           shape="a"
           spin={-25}
-          className="pointer-events-none absolute -top-24 right-1/4 w-[30rem] text-rose-400/50"
+          className="pointer-events-none absolute -top-24 right-1/4 w-120 text-rose-400/50"
         />
 
         <div className="container-page relative z-10">
@@ -89,6 +104,8 @@ export function Milestones() {
               title={["Every wobble", "has a season"]}
               script="and every season has a landing"
               body="Five months to two years is the window where every new skill arrives with a fresh way to fall. Here is what to expect, and what the cushion is doing at each stage."
+              compact
+              size="sm"
               className="lg:max-w-xl"
             />
             <Button
@@ -102,19 +119,19 @@ export function Milestones() {
           </div>
         </div>
 
-        <div className="relative z-10 mt-12 overflow-hidden lg:mt-10">
+        <div className="relative z-10 mt-10 overflow-hidden lg:mt-3 lg:mb-3">
           <ul
             ref={railRef}
-            className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-[var(--page-gutter)] pb-6 lg:overflow-visible lg:px-[max(var(--page-gutter),calc((100vw-var(--page-max-width))/2))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory gap-6 overflow-x-auto px-(--page-gutter) pb-4 lg:overflow-visible lg:px-[max(var(--page-gutter),calc((100vw-var(--page-max-width))/2))] scrollbar-none [&::-webkit-scrollbar]:hidden"
           >
             {milestones.map((item, i) => (
               <li
                 key={item.month}
-                className="group card-soft relative flex w-[19rem] shrink-0 snap-start flex-col justify-between overflow-hidden p-7 text-ink sm:w-[21rem] lg:h-[min(22rem,44vh)] lg:w-[23rem]"
+                className="group relative flex w-76 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-card bg-paper p-7 text-ink sm:w-84 lg:h-auto lg:min-h-[min(20rem,42vh)] lg:w-92"
               >
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute -top-10 -right-10 w-40 text-rose-50 transition-transform duration-700 ease-[var(--ease-out-soft)] group-hover:scale-110"
+                  className="pointer-events-none absolute -top-10 -right-10 w-40 text-rose-50 transition-transform duration-700 ease-out-soft group-hover:scale-110"
                 >
                   <Blob shape="e" spin={i * 55} />
                 </span>
@@ -129,7 +146,7 @@ export function Milestones() {
                   <p className="mt-4 text-body-sm text-ink-soft">{item.body}</p>
                 </div>
 
-                <div className="relative mt-10 flex items-end justify-between">
+                <div className="relative mt-6 flex items-end justify-between">
                   <span className="font-mega text-5xl leading-none font-black text-rose-100">
                     0{i + 1}
                   </span>
@@ -148,7 +165,7 @@ export function Milestones() {
       </section>
 
       <WaveDivider
-        className="-mt-px text-rose-500"
+        className="-mt-px bg-cream text-rose-500"
         shape="wave"
         flip
         height={110}

@@ -74,11 +74,32 @@ export function SmoothScrollProvider({
   }, []);
 
   /* App Router keeps the DOM alive across navigations: reset the inertial
-     position and re-measure every ScrollTrigger for the new page. */
+     position and re-measure every ScrollTrigger for the new page. A nav link
+     like "/#why" clicked from a different route (e.g. /products) lands here
+     as a real navigation, not a same-page anchor click — Next.js does not
+     reliably scroll to the hash itself once Lenis owns the scroll position,
+     so do it explicitly once the new page's content has painted. */
   useEffect(() => {
-    lenisRef.current?.scrollTo(0, { immediate: true });
-    if (!window.location.hash) window.scrollTo(0, 0);
-    const id = window.setTimeout(() => ScrollTrigger.refresh(), 120);
+    const hash = window.location.hash;
+
+    if (!hash) {
+      lenisRef.current?.scrollTo(0, { immediate: true });
+      window.scrollTo(0, 0);
+      const id = window.setTimeout(() => ScrollTrigger.refresh(), 120);
+      return () => window.clearTimeout(id);
+    }
+
+    const id = window.setTimeout(() => {
+      const target = document.getElementById(hash.slice(1));
+      if (target) {
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo(target, { offset: -96, immediate: true });
+        } else {
+          target.scrollIntoView({ block: "start" });
+        }
+      }
+      ScrollTrigger.refresh();
+    }, 150);
     return () => window.clearTimeout(id);
   }, [pathname]);
 

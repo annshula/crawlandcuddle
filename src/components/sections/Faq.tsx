@@ -88,7 +88,7 @@ function FaqItem({
             <span className="absolute h-px w-3.5 bg-current" />
             <span
               className={cn(
-                "absolute h-3.5 w-px bg-current transition-transform duration-400 ease-[var(--ease-out-soft)]",
+                "absolute h-3.5 w-px bg-current transition-transform duration-400 ease-out-soft",
                 isOpen && "scale-y-0",
               )}
             />
@@ -99,7 +99,7 @@ function FaqItem({
       {/* grid-rows trick: animates to auto height without measuring in JS */}
       <div
         className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-soft)]",
+          "grid transition-[grid-template-rows,opacity] duration-500 ease-out-soft",
           isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
         )}
       >

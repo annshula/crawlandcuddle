@@ -43,7 +43,7 @@ export function Button(props: ButtonAsLink | ButtonAsButton) {
       {withArrow && (
         <Icon
           name="arrow-right"
-          className="size-4 transition-transform duration-500 ease-[var(--ease-out-soft)] group-hover/btn:translate-x-1"
+          className="size-4 transition-transform duration-500 ease-out-soft group-hover/btn:translate-x-1"
         />
       )}
     </>

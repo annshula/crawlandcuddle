@@ -7,7 +7,13 @@ import { LineArt } from "@/components/art/LineArt";
 import { Reveal } from "@/components/motion/Reveal";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
-import { product, site, trustBadges, variantHref, variants } from "@/content/site";
+import {
+  product,
+  site,
+  trustBadges,
+  variantHref,
+  variants,
+} from "@/content/site";
 import { absoluteUrl, cn, formatPrice } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -26,11 +32,14 @@ export const metadata: Metadata = {
 export default function ProductsPage() {
   return (
     <>
-      <section className="relative -mt-[var(--nav-height)] overflow-hidden bg-cream pt-[calc(var(--nav-height)+3.5rem)] pb-14">
+      <section
+        style={{ clipPath: "inset(-160px 0 0 0)" }}
+        className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+3.5rem)] pb-14"
+      >
         <Blob
           shape="c"
           spin={25}
-          className="pointer-events-none absolute -top-40 -right-48 w-[36rem] text-lilac-100"
+          className="pointer-events-none absolute -top-40 -right-48 w-xl text-lilac-100"
         />
         <LineArt
           name="butterfly"
@@ -74,9 +83,7 @@ export default function ProductsPage() {
         className="relative bg-paper py-16 md:py-20"
       >
         <div className="container-page">
-          <p className="eyebrow text-ink-faint">
-            {variants.length} products
-          </p>
+          <p className="eyebrow text-ink-faint">{variants.length} products</p>
 
           <Reveal
             as="ul"

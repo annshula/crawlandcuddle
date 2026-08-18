@@ -89,7 +89,7 @@ export function JsonLd() {
       },
       shippingDestination: {
         "@type": "DefinedRegion",
-        addressCountry: site.address.country,
+        addressCountry: ["US", "CA", "GB", "AU"],
       },
     },
     hasMerchantReturnPolicy: {
@@ -113,7 +113,7 @@ export function JsonLd() {
 
   const productGroup = {
     "@type": "ProductGroup",
-    "@id": absoluteUrl("/#product"),
+    "@id": absoluteUrl("/products#product"),
     name: product.name,
     description: site.description,
     productGroupID: product.sku,

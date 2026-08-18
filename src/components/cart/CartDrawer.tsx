@@ -27,13 +27,14 @@ export function CartDrawer() {
 
     if (prefersReducedMotion()) {
       gsap.set([panel, scrim], { autoAlpha: isOpen ? 1 : 0 });
-      gsap.set(panel, { xPercent: 0 });
+      gsap.set(panel, { xPercent: isOpen ? 0 : 100 });
       return;
     }
 
     const tl = gsap.timeline();
     if (isOpen) {
-      tl.set([scrim, panel], { autoAlpha: 1 })
+      tl.set(panel, { xPercent: 100 })
+        .set([scrim, panel], { autoAlpha: 1 })
         .fromTo(scrim, { opacity: 0 }, { opacity: 1, duration: 0.35 }, 0)
         .fromTo(
           panel,
@@ -44,7 +45,13 @@ export function CartDrawer() {
         .fromTo(
           panel.querySelectorAll("[data-cart-item]"),
           { x: 24, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.5, stagger: 0.05, ease: "power3.out" },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power3.out",
+          },
           0.15,
         );
     } else {
@@ -60,7 +67,7 @@ export function CartDrawer() {
 
   return (
     <div
-      className={cn("fixed inset-0 z-[80]", !isOpen && "pointer-events-none")}
+      className={cn("fixed inset-0 z-80", !isOpen && "pointer-events-none")}
       aria-hidden={!isOpen}
     >
       <div
@@ -69,19 +76,26 @@ export function CartDrawer() {
         className="absolute inset-0 bg-ink/45 opacity-0 backdrop-blur-[2px]"
       />
 
+      {/*
+        No static transform (neither a `translate-x-full` class nor an inline
+        `translateX(100%)`) may sit on this element. GSAP parses any existing
+        transform into its own base x/y and then applies xPercent *in addition*
+        to it — so a 100% baseline plus an xPercent:0 tween still resolves to
+        `translate(0%) translate3d(448px,0,0)`, i.e. fully off-screen. GSAP
+        owns the transform outright; `invisible` keeps the panel hidden until
+        the first effect run positions it.
+      */}
       <aside
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Shopping bag"
-        className="absolute inset-y-0 right-0 flex w-full max-w-md translate-x-full flex-col bg-paper opacity-0 shadow-drift"
+        className="invisible absolute inset-y-0 right-0 isolate flex w-full max-w-md flex-col bg-paper opacity-0 shadow-drift"
       >
         <header className="flex items-center justify-between border-b border-hairline px-6 py-5">
           <h2 className="font-display text-heading-sm text-ink uppercase">
             Your bag
-            {count > 0 && (
-              <span className="ml-2 text-rose-500">({count})</span>
-            )}
+            {count > 0 && <span className="ml-2 text-rose-500">({count})</span>}
           </h2>
           <button
             type="button"

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: "Baby Head Protector Backpack — Ten Styles, One Promise",
     description: site.shortDescription,
-    locale: "en_IN",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
@@ -83,7 +83,7 @@ export default function RootLayout({
       <body className="antialiased">
         <a
           href="#top"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:rounded-btn focus:bg-rose-600 focus:px-5 focus:py-3 focus:text-paper"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-70 focus:rounded-btn focus:bg-rose-600 focus:px-5 focus:py-3 focus:text-paper"
         >
           Skip to content
         </a>

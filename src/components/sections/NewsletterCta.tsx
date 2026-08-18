@@ -25,12 +25,12 @@ export function NewsletterCta() {
       <Blob
         shape="a"
         spin={15}
-        className="pointer-events-none absolute -top-32 -left-24 w-[30rem] text-petal/40"
+        className="pointer-events-none absolute top-0 left-0 w-120 text-petal/40"
       />
       <Blob
         shape="d"
         spin={-30}
-        className="pointer-events-none absolute -right-24 -bottom-40 w-[32rem] text-lilac-200/60"
+        className="pointer-events-none absolute right-0 bottom-0 w-lg text-lilac-200/60"
       />
       <LineArt
         name="butterfly"
@@ -75,7 +75,10 @@ export function NewsletterCta() {
               className="h-14 flex-1 rounded-card border border-hairline bg-paper px-5 text-body text-ink placeholder:text-ink-faint focus:border-rose-500 focus:outline-none"
             />
             <Magnetic strength={0.2}>
-              <button type="submit" className="btn-primary group/btn h-14 w-full sm:w-auto">
+              <button
+                type="submit"
+                className="btn-primary group/btn h-14 w-full sm:w-auto"
+              >
                 <span>{status === "done" ? "You're in" : "Join"}</span>
                 <Icon
                   name={status === "done" ? "check" : "arrow-right"}
@@ -86,10 +89,7 @@ export function NewsletterCta() {
           </form>
         </Reveal>
 
-        <p
-          aria-live="polite"
-          className="mt-4 text-body-sm text-ink-faint"
-        >
+        <p aria-live="polite" className="mt-4 text-body-sm text-ink-faint">
           {status === "done"
             ? "Thanks — check your inbox for the code."
             : "No spam. Unsubscribe in one click."}
