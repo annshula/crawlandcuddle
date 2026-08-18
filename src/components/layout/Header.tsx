@@ -209,7 +209,7 @@ export function Header() {
         style={{ pointerEvents: "none" }}
         aria-hidden={!menuOpen}
       >
-        <div className="paper-grain relative flex h-full flex-col overflow-x-hidden overflow-y-auto bg-lilac-700 px-6 pt-6 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] text-paper">
+        <div className="paper-grain relative flex h-full flex-col overflow-hidden bg-lilac-700 px-6 pt-6 text-paper">
           {/* Decorative theme blobs so the panel never reads as a flat block. */}
           <div
             aria-hidden="true"
@@ -236,7 +236,10 @@ export function Header() {
             </button>
           </div>
 
-          <nav aria-label="Mobile" className="relative mt-12 flex-1">
+          <nav
+            aria-label="Mobile"
+            className="relative mt-12 min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+          >
             <ul className="flex flex-col">
               {nav.map((item) => (
                 <li key={item.href} data-mobile-link>
@@ -256,7 +259,10 @@ export function Header() {
             </ul>
           </nav>
 
-          <div data-mobile-link className="relative flex flex-col gap-4">
+          <div
+            data-mobile-link
+            className="relative flex flex-col gap-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
+          >
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-paper/15 bg-paper/5 px-4 py-3">
               <span className="flex items-center gap-3">
                 <Icon name="bag" className="text-rose-200" />
