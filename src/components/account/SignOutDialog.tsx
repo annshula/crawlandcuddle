@@ -9,6 +9,7 @@ import { WaveDivider } from "@/components/art/WaveDivider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { useScrollLock } from "@/lib/scroll-lock";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 
@@ -90,11 +91,11 @@ export function SignOutDialog({
     };
   }, [open]);
 
-  /* Lock the page and wire Escape only while the dialog is up. */
+  useScrollLock(open);
+
+  /* Wire Escape and move focus only while the dialog is up. */
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     panelRef.current?.focus();
 
     const onKey = (e: KeyboardEvent) => {
@@ -103,7 +104,6 @@ export function SignOutDialog({
     window.addEventListener("keydown", onKey);
 
     return () => {
-      document.body.style.overflow = previous;
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);

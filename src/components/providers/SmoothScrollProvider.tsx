@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { registerScrollLockTarget } from "@/lib/scroll-lock";
 
 /**
  * Drives Lenis inertial scrolling from the GSAP ticker so scroll-linked tweens
@@ -30,6 +31,9 @@ export function SmoothScrollProvider({
       wheelMultiplier: 0.9,
     });
     lenisRef.current = lenis;
+    // Overlays pause inertial scrolling through this — body overflow alone
+    // never reaches Lenis.
+    registerScrollLockTarget(lenis);
 
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -69,6 +73,7 @@ export function SmoothScrollProvider({
       gsap.ticker.remove(tick);
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
+      registerScrollLockTarget(null);
       lenisRef.current = null;
     };
   }, []);

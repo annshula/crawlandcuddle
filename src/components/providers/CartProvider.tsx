@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { product, variants } from "@/content/site";
+import { useScrollLock } from "@/lib/scroll-lock";
 
 const STORAGE_KEY = "cc.cart.v1";
 
@@ -121,12 +122,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [raw, hydrated]);
 
   /* Lock the page while the drawer is open. */
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;

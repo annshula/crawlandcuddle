@@ -14,6 +14,7 @@ import { Logo } from "@/components/ui/Logo";
 import { nav } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useScrollLock } from "@/lib/scroll-lock";
 import { cn } from "@/lib/utils";
 
 /**
@@ -94,12 +95,7 @@ export function Header() {
     };
   }, [menuOpen]);
 
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen]);
+  useScrollLock(menuOpen);
 
   // Only the Products link gets a persistent active state — the hash links
   // (Why it works, Fitting, Parents) point at sections on the home page, and
