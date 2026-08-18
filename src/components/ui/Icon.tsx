@@ -19,6 +19,7 @@ type IconName =
   | "package"
   | "map-pin"
   | "logout"
+  | "trash"
   | "chevron-down";
 
 const glyphs: Record<IconName, React.ReactNode> = {
@@ -69,6 +70,14 @@ const glyphs: Record<IconName, React.ReactNode> = {
     </>
   ),
   minus: <path d="M5 12h14" />,
+  trash: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9.5 7V5.4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V7" />
+      <path d="M6.6 7.8 7.5 20a1 1 0 0 0 1 .9h7a1 1 0 0 0 1-.9l.9-12.2" />
+      <path d="M10.5 11.2v6M13.5 11.2v6" />
+    </>
+  ),
   user: (
     <>
       <circle cx="12" cy="8" r="4" />

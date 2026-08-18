@@ -69,9 +69,9 @@ export function CheckoutSummary() {
                   type="button"
                   onClick={() => remove(line.slug)}
                   aria-label={`Remove ${line.name}`}
-                  className="text-ink-faint transition-colors hover:text-rose-600"
+                  className="shrink-0 text-ink-faint transition-colors hover:text-rose-600"
                 >
-                  <Icon name="close" className="size-4" />
+                  <Icon name="trash" className="size-4" />
                 </button>
               </div>
 
@@ -122,7 +122,7 @@ export function CheckoutSummary() {
           </div>
           <div className="mt-3 flex items-baseline justify-between border-t border-hairline pt-4">
             <dt className="eyebrow text-ink-faint">Total</dt>
-            <dd className="font-mega text-3xl font-black text-ink">
+            <dd className="font-display text-[2.1rem] leading-none tracking-[0.02em] text-ink uppercase">
               {formatPrice(subtotalCents)}
             </dd>
           </div>

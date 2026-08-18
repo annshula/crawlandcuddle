@@ -4,6 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  SignOutDialog,
+  SignOutLabel,
+} from "@/components/account/SignOutDialog";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import type { IconName } from "@/components/ui/Icon";
@@ -40,7 +44,15 @@ export function AccountMenu({
   const pathname = usePathname();
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+
+  /* The dropdown unmounts on close, so the confirmation is rendered from this
+     component's root instead — closing the menu must not kill the dialog. */
+  const askSignOut = () => {
+    setOpen(false);
+    setSignOutOpen(true);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -112,15 +124,13 @@ export function AccountMenu({
         {signedIn ? (
           <>
             {LINKS.map((link) => linkRow(link, "light"))}
-            <Link
-              href="/account/logout"
-              prefetch={false}
-              onClick={() => setOpen(false)}
+            <button
+              type="button"
+              onClick={askSignOut}
               className="flex items-center gap-2.5 rounded-xl px-2 py-3 font-label text-[0.72rem] tracking-[0.14em] text-rose-200/70 uppercase transition-colors duration-200 hover:bg-paper/10 hover:text-rose-200"
             >
-              <Icon name="logout" className="size-4 shrink-0" />
-              Sign out
-            </Link>
+              <SignOutLabel />
+            </button>
           </>
         ) : (
           <Button
@@ -132,6 +142,11 @@ export function AccountMenu({
             Sign in
           </Button>
         )}
+
+        <SignOutDialog
+          open={signOutOpen}
+          onClose={() => setSignOutOpen(false)}
+        />
       </div>
     );
   }
@@ -175,19 +190,19 @@ export function AccountMenu({
             {LINKS.map((link) => linkRow(link, "dark"))}
           </div>
           <div className="mt-1.5 border-t border-hairline pt-1.5">
-            <Link
-              href="/account/logout"
-              prefetch={false}
+            <button
+              type="button"
               role="menuitem"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-tag px-3 py-2.5 font-label text-[0.72rem] tracking-[0.14em] text-ink-soft uppercase transition-colors duration-200 hover:bg-rose-50 hover:text-rose-600"
+              onClick={askSignOut}
+              className="flex w-full items-center gap-2.5 rounded-tag px-3 py-2.5 font-label text-[0.72rem] tracking-[0.14em] text-ink-soft uppercase transition-colors duration-200 hover:bg-rose-50 hover:text-rose-600"
             >
-              <Icon name="logout" className="size-4 shrink-0" />
-              Sign out
-            </Link>
+              <SignOutLabel />
+            </button>
           </div>
         </div>
       )}
+
+      <SignOutDialog open={signOutOpen} onClose={() => setSignOutOpen(false)} />
     </div>
   );
 }

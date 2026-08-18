@@ -34,7 +34,7 @@ export function TrustStrip() {
               key={stat.label}
               className="flex flex-col items-center gap-1.5 px-3 py-7 text-center sm:gap-2 sm:py-9"
             >
-              <dd className="font-mega text-[clamp(1.8rem,5vw,3.25rem)] leading-none font-black text-rose-600">
+              <dd className="font-display text-[clamp(2rem,5.4vw,3.5rem)] leading-none tracking-[0.02em] text-rose-600 uppercase">
                 {stat.value}
               </dd>
               <dt className="eyebrow text-ink-faint">{stat.label}</dt>

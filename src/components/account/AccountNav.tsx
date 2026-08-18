@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
+import {
+  SignOutDialog,
+  SignOutLabel,
+} from "@/components/account/SignOutDialog";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +33,7 @@ const items: NavItem[] = [
  */
 export function AccountNav() {
   const pathname = usePathname();
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
@@ -58,16 +64,17 @@ export function AccountNav() {
         </ul>
 
         <div className="mt-1 border-t border-hairline pt-1 lg:mt-2 lg:pt-2">
-          <Link
-            href="/account/logout"
-            prefetch={false}
-            className="flex items-center gap-2.5 rounded-tag px-4 py-3 font-label text-[0.72rem] tracking-[0.14em] text-ink-faint uppercase transition-colors duration-300 ease-out-soft hover:bg-rose-50 hover:text-rose-600"
+          <button
+            type="button"
+            onClick={() => setSignOutOpen(true)}
+            className="flex w-full items-center gap-2.5 rounded-tag px-4 py-3 font-label text-[0.72rem] tracking-[0.14em] text-ink-faint uppercase transition-colors duration-300 ease-out-soft hover:bg-rose-50 hover:text-rose-600"
           >
-            <Icon name="logout" className="size-4 shrink-0" />
-            Sign out
-          </Link>
+            <SignOutLabel />
+          </button>
         </div>
       </div>
+
+      <SignOutDialog open={signOutOpen} onClose={() => setSignOutOpen(false)} />
     </nav>
   );
 }

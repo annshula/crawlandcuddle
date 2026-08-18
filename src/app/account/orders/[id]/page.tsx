@@ -210,7 +210,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
             </div>
             <div className="flex items-baseline justify-between border-t border-hairline pt-3.5">
               <dt className="font-display text-lg text-ink uppercase">Total</dt>
-              <dd className="font-mega text-2xl font-black text-ink">
+              <dd className="font-display text-[1.75rem] leading-none tracking-[0.02em] text-ink uppercase">
                 {order.totalPrice
                   ? formatMoney(
                       order.totalPrice.amount,

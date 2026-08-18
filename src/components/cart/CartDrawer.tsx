@@ -177,9 +177,9 @@ export function CartDrawer() {
                         type="button"
                         onClick={() => remove(line.slug)}
                         aria-label={`Remove ${line.name}`}
-                        className="text-ink-faint transition-colors hover:text-rose-600"
+                        className="shrink-0 text-ink-faint transition-colors hover:text-rose-600"
                       >
-                        <Icon name="close" className="size-4" />
+                        <Icon name="trash" className="size-4" />
                       </button>
                     </div>
 
@@ -220,7 +220,7 @@ export function CartDrawer() {
             <footer className="border-t border-hairline px-6 py-5">
               <div className="flex items-baseline justify-between">
                 <span className="eyebrow text-ink-faint">Subtotal</span>
-                <span className="font-mega text-3xl font-black text-ink">
+                <span className="font-display text-[2.1rem] leading-none tracking-[0.02em] text-ink uppercase">
                   {formatPrice(subtotalCents)}
                 </span>
               </div>
