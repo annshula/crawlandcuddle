@@ -6,6 +6,9 @@ import { notFound } from "next/navigation";
 import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
 import { BuyBox } from "@/components/product/BuyBox";
+import { PdpPrice } from "@/components/product/PdpPrice";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import { SaveBadge } from "@/components/product/SaveBadge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
 import {
@@ -66,8 +69,6 @@ export default async function ProductPage({
   const variant = getVariant(slug);
   if (!variant) notFound();
 
-  const saving = product.compareAtCents - product.priceCents;
-  const savingPct = Math.round((saving / product.compareAtCents) * 100);
   const related = variants.filter((v) => v.slug !== slug).slice(0, 4);
 
   const jsonLd = {
@@ -196,39 +197,7 @@ export default async function ProductPage({
                   sizes="(min-width: 1024px) 46vw, 92vw"
                   className="object-cover"
                 />
-                <span className="eyebrow absolute top-4 left-4 rounded-tag bg-paper/90 px-3 py-2 text-rose-600 backdrop-blur-sm">
-                  Save {savingPct}%
-                </span>
-              </div>
-
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <div className="relative aspect-square overflow-hidden rounded-card bg-blush">
-                  <Image
-                    src="/images/lifestyle/hero-baby-butterfly.png"
-                    alt="Toddler walking while wearing the butterfly head protector backpack"
-                    fill
-                    sizes="20vw"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative aspect-square overflow-hidden rounded-card bg-lilac-100">
-                  <Image
-                    src="/images/product/mesh-detail.jpg"
-                    alt="Close-up of the breathable 3D air-mesh shell"
-                    fill
-                    sizes="20vw"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative aspect-square overflow-hidden rounded-card bg-mint/30">
-                  <Image
-                    src="/images/product/green-owl.jpg"
-                    alt="The adjustable shoulder harness seen from behind"
-                    fill
-                    sizes="20vw"
-                    className="object-cover"
-                  />
-                </div>
+                <SaveBadge slug={slug} />
               </div>
             </div>
 
@@ -266,12 +235,7 @@ export default async function ProductPage({
               </div>
 
               <div className="mt-6 flex flex-wrap items-baseline gap-4">
-                <p className="font-mega text-5xl leading-none font-black text-ink">
-                  {formatPrice(product.priceCents)}
-                </p>
-                <p className="text-body text-ink-faint line-through">
-                  {formatPrice(product.compareAtCents)}
-                </p>
+                <PdpPrice slug={slug} />
                 <span className="eyebrow rounded-tag bg-rose-50 px-3 py-2 text-rose-600">
                   In stock
                 </span>
@@ -287,25 +251,12 @@ export default async function ProductPage({
               <BuyBox variant={variant} />
 
               <div className="mt-10">
-                <p className="eyebrow text-ink-faint">Other styles</p>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {variants.map((item) => (
-                    <li key={item.slug}>
-                      <Link
-                        href={variantHref(item.slug)}
-                        aria-current={item.slug === slug ? "page" : undefined}
-                        className={cn(
-                          "block rounded-btn border px-4 py-2.5 text-body-sm transition-colors duration-300",
-                          item.slug === slug
-                            ? "border-rose-600 bg-rose-600 text-paper"
-                            : "border-hairline text-ink hover:border-rose-400",
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <Link
+                  href="/products"
+                  className="link-underline font-label text-[0.72rem] tracking-[0.2em] text-rose-600 uppercase"
+                >
+                  Browse all ten styles
+                </Link>
               </div>
 
               <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
@@ -405,9 +356,7 @@ export default async function ProductPage({
                   <span className="font-headline text-base text-ink transition-colors group-hover:text-rose-600">
                     {item.name}
                   </span>
-                  <span className="text-body-sm text-ink-faint">
-                    {formatPrice(product.priceCents)}
-                  </span>
+                  <ProductPrice slug={item.slug} size="sm" />
                 </Link>
               </li>
             ))}

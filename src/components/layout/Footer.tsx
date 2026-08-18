@@ -34,7 +34,7 @@ export function Footer() {
           <div className="grid gap-14 lg:grid-cols-[1.4fr_2fr]">
             <Reveal variant="up">
               <div className="flex flex-col gap-6">
-                <Logo tone="light" />
+                <Logo tone="light" className="h-16" />
                 <p className="max-w-sm text-body text-paper/70">
                   {site.description}
                 </p>

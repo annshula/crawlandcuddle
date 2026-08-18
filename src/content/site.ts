@@ -1,8 +1,16 @@
 /**
  * Single source of truth for site copy, catalogue and structured data.
- * Product facts (styles, weight, age range, pricing) mirror the live listing:
+ * Product facts (styles, weight, age range) mirror the live listing:
  * shoptrackify.com/products/baby-head-protector-backpack
+ * Pricing is synced from the Shopify store into data/product.json by
+ * `npm run shopify:sync` and read back via @/lib/catalog.
  */
+
+import {
+  productCompareAtCents,
+  productCurrency,
+  productPriceCents,
+} from "@/lib/catalog";
 
 export const site = {
   name: "Crawl & Cuddle",
@@ -71,7 +79,7 @@ export const variants: Variant[] = [
     slug: "dream-little-butterfly",
     name: "Dream Little Butterfly",
     tagline: "The bestseller. Lilac wings, pom-pom antennae.",
-    image: "/images/product/dream-little-butterfly.jpg",
+    image: "/images/product/dream-little-butterfly.webp",
     tone: "bg-lilac-100",
     featured: true,
   },
@@ -79,7 +87,7 @@ export const variants: Variant[] = [
     slug: "pink-butterfly",
     name: "Pink Butterfly",
     tagline: "Blush body, violet wings, endlessly photogenic.",
-    image: "/images/product/pink-butterfly.jpg",
+    image: "/images/product/pink-butterfly.webp",
     tone: "bg-rose-100",
     featured: true,
   },
@@ -87,56 +95,56 @@ export const variants: Variant[] = [
     slug: "green-owl",
     name: "Green Owl",
     tagline: "Mint 3D mesh with feathered ivory wings.",
-    image: "/images/product/green-owl.jpg",
+    image: "/images/product/green-owl.webp",
     tone: "bg-mint/40",
   },
   {
     slug: "lion",
     name: "Lion",
     tagline: "Amber stripes, tiny ears, maximum courage.",
-    image: "/images/product/lion.jpg",
+    image: "/images/product/lion.webp",
     tone: "bg-butter/60",
   },
   {
     slug: "bee",
     name: "Bee",
     tagline: "Honey stripes and soft ivory wings.",
-    image: "/images/product/bee.jpg",
+    image: "/images/product/bee.webp",
     tone: "bg-butter/50",
   },
   {
     slug: "flying-pig",
     name: "Flying Pig",
     tagline: "Because they really can fly at this age.",
-    image: "/images/product/flying-pig.jpg",
+    image: "/images/product/flying-pig.webp",
     tone: "bg-rose-100",
   },
   {
     slug: "frog",
     name: "Frog",
     tagline: "Bright green, wide eyes, built to bounce.",
-    image: "/images/product/frog.jpg",
+    image: "/images/product/frog.webp",
     tone: "bg-mint/50",
   },
   {
     slug: "turtle",
     name: "Turtle",
     tagline: "A quilted shell for the slow and steady.",
-    image: "/images/product/turtle.jpg",
+    image: "/images/product/turtle.webp",
     tone: "bg-mint/40",
   },
   {
     slug: "tortoise",
     name: "Tortoise",
     tagline: "Olive shell, ivory limbs, unhurried charm.",
-    image: "/images/product/tortoise.jpg",
+    image: "/images/product/tortoise.webp",
     tone: "bg-mint/30",
   },
   {
     slug: "unicorn",
     name: "Unicorn",
     tagline: "Golden horn, pastel wings, pure magic.",
-    image: "/images/product/unicorn.jpg",
+    image: "/images/product/unicorn.webp",
     tone: "bg-lilac-100",
   },
 ];
@@ -144,10 +152,11 @@ export const variants: Variant[] = [
 /** Canonical URL for a single style's product page. */
 export const variantHref = (slug: string) => `/products/${slug}`;
 
-export const getVariant = (slug: string) => variants.find((v) => v.slug === slug);
+export const getVariant = (slug: string) =>
+  variants.find((v) => v.slug === slug);
 
 export const heroImage = {
-  src: "/images/lifestyle/hero-baby-butterfly.png",
+  src: "/images/lifestyle/hero-baby-butterfly.webp",
   alt: "Toddler walking while wearing the Dream Little Butterfly baby head protector backpack on their back",
   width: 1024,
   height: 1536,
@@ -290,13 +299,17 @@ export const reviews = [
   },
 ] as const;
 
+/**
+ * Live pricing is read from the Shopify-synced catalog (data/product.json).
+ * The `currency` / `locale` stay here as display defaults for formatting.
+ */
 export const product = {
   name: "Baby Head Protector Backpack — Toddler Anti-Fall Cushion Pillow",
   shortName: "Baby Head Protector Backpack",
   sku: "CC-BHP-001",
-  priceCents: 4500,
-  compareAtCents: 5200,
-  currency: "USD",
+  priceCents: productPriceCents,
+  compareAtCents: productCompareAtCents,
+  currency: productCurrency,
   locale: "en-US",
   includes: [
     "Head & back protector in your chosen style",
@@ -305,7 +318,7 @@ export const product = {
     "Wash bag and care card",
   ],
   rating: { value: 4.9, count: 2841 },
-} as const;
+};
 
 export const faqs = [
   {
@@ -339,7 +352,10 @@ export const footerLinks = [
     title: "Shop",
     links: [
       { label: "All ten styles", href: "/products" },
-      { label: "Dream Little Butterfly", href: "/products/dream-little-butterfly" },
+      {
+        label: "Dream Little Butterfly",
+        href: "/products/dream-little-butterfly",
+      },
       { label: "Green Owl", href: "/products/green-owl" },
       { label: "Unicorn", href: "/products/unicorn" },
     ],

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function CheckoutPage() {
   return (
-    <section className="relative -mt-[var(--nav-height)] min-h-[70vh] bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-24">
+    <section className="relative -mt-(--nav-height) min-h-[70vh] bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-24">
       <div className="container-page">
         <Breadcrumbs
           items={[

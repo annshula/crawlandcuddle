@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { useCart } from "@/components/providers/CartProvider";
+import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { product, type Variant } from "@/content/site";
-import { formatPrice } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
+import { shopifyCheckout } from "@/lib/shopify-checkout";
 
 /**
  * Quantity + add-to-cart + buy-now for one style. Buy now adds the line and
@@ -17,9 +18,11 @@ import { formatPrice } from "@/lib/utils";
  */
 export function BuyBox({ variant }: { variant: Variant }) {
   const { add } = useCart();
-  const router = useRouter();
+  const { amount: unitAmount, currencyCode } = useStylePrice(variant.slug);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
 
   const handleAdd = () => {
     add(variant.slug, qty);
@@ -27,9 +30,18 @@ export function BuyBox({ variant }: { variant: Variant }) {
     window.setTimeout(() => setAdded(false), 2200);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     add(variant.slug, qty);
-    router.push("/checkout");
+    if (buying) return;
+    setBuying(true);
+    setBuyError(null);
+    const result = await shopifyCheckout([{ slug: variant.slug, qty }]);
+    if (result.ok) {
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+    setBuyError(result.error);
+    setBuying(false);
   };
 
   return (
@@ -41,7 +53,7 @@ export function BuyBox({ variant }: { variant: Variant }) {
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             disabled={qty <= 1}
             aria-label="Decrease quantity"
-            className="grid size-12 place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:opacity-35"
+            className="grid size-12 cursor-pointer place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35"
           >
             <Icon name="minus" className="size-4" strokeWidth={2} />
           </button>
@@ -57,7 +69,7 @@ export function BuyBox({ variant }: { variant: Variant }) {
             onClick={() => setQty((q) => Math.min(20, q + 1))}
             disabled={qty >= 20}
             aria-label="Increase quantity"
-            className="grid size-12 place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:opacity-35"
+            className="grid size-12 cursor-pointer place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35"
           >
             <Icon name="plus" className="size-4" strokeWidth={2} />
           </button>
@@ -66,7 +78,7 @@ export function BuyBox({ variant }: { variant: Variant }) {
         <p className="text-body-sm text-ink-soft">
           Total{" "}
           <span className="font-headline text-ink">
-            {formatPrice(product.priceCents * qty)}
+            {formatMoney(unitAmount * qty, currencyCode)}
           </span>
         </p>
       </div>
@@ -84,11 +96,18 @@ export function BuyBox({ variant }: { variant: Variant }) {
           onClick={handleBuyNow}
           variant="outline"
           withArrow
+          disabled={buying}
           className="w-full justify-center sm:w-auto"
         >
-          Buy it now
+          {buying ? "Taking you to checkout…" : "Buy it now"}
         </Button>
       </div>
+
+      {buyError && (
+        <p className="mt-4 rounded-tag bg-rose-50 px-4 py-3 text-body-sm text-rose-700">
+          {buyError}
+        </p>
+      )}
 
       <p aria-live="polite" className="sr-only">
         {added ? `${variant.name} added to your bag` : ""}

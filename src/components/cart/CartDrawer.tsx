@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { useCart } from "@/components/providers/CartProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { product } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { shopifyCheckout } from "@/lib/shopify-checkout";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -19,6 +20,23 @@ export function CartDrawer() {
     useCart();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const scrimRef = useRef<HTMLDivElement | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleCheckout = async () => {
+    if (checkingOut) return;
+    setCheckingOut(true);
+    setCheckoutError(null);
+    const result = await shopifyCheckout(
+      lines.map((l) => ({ slug: l.slug, qty: l.qty })),
+    );
+    if (result.ok) {
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+    setCheckoutError(result.error);
+    setCheckingOut(false);
+  };
 
   useIsomorphicLayoutEffect(() => {
     const panel = panelRef.current;
@@ -171,7 +189,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => setQty(line.slug, line.qty - 1)}
                           aria-label={`Decrease quantity of ${line.name}`}
-                          className="grid size-9 place-items-center text-ink transition-colors hover:text-rose-600"
+                          className="grid size-9 cursor-pointer place-items-center text-ink transition-colors hover:text-rose-600"
                         >
                           −
                         </button>
@@ -185,7 +203,7 @@ export function CartDrawer() {
                           type="button"
                           onClick={() => setQty(line.slug, line.qty + 1)}
                           aria-label={`Increase quantity of ${line.name}`}
-                          className="grid size-9 place-items-center text-ink transition-colors hover:text-rose-600"
+                          className="grid size-9 cursor-pointer place-items-center text-ink transition-colors hover:text-rose-600"
                         >
                           +
                         </button>
@@ -211,13 +229,18 @@ export function CartDrawer() {
                   ? "Free tracked shipping included."
                   : "Shipping calculated at checkout."}
               </p>
+              {checkoutError && (
+                <p className="mt-4 rounded-tag bg-rose-50 px-4 py-3 text-body-sm text-rose-700">
+                  {checkoutError}
+                </p>
+              )}
               <Button
-                href="/checkout"
-                onClick={close}
+                onClick={handleCheckout}
+                disabled={checkingOut}
                 withArrow
                 className="mt-5 w-full"
               >
-                Checkout
+                {checkingOut ? "Taking you to checkout…" : "Checkout"}
               </Button>
               <p className="mt-3 text-center text-body-sm text-ink-faint">
                 {product.currency} · secure payment · 30-day returns

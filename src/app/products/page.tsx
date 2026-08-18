@@ -5,16 +5,12 @@ import Link from "next/link";
 import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
 import { Reveal } from "@/components/motion/Reveal";
+import { ProductPrice } from "@/components/product/ProductPrice";
+import { QuickBuy } from "@/components/product/QuickBuy";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
-import {
-  product,
-  site,
-  trustBadges,
-  variantHref,
-  variants,
-} from "@/content/site";
-import { absoluteUrl, cn, formatPrice } from "@/lib/utils";
+import { site, trustBadges, variantHref, variants } from "@/content/site";
+import { absoluteUrl, cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "All Products — Baby Head Protector Backpack, 10 Styles",
@@ -92,10 +88,10 @@ export default function ProductsPage() {
             className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
           >
             {variants.map((variant) => (
-              <li key={variant.slug} className="group">
+              <li key={variant.slug} className="group flex flex-col">
                 <Link
                   href={variantHref(variant.slug)}
-                  className="flex h-full flex-col gap-4"
+                  className="flex flex-1 flex-col gap-4"
                 >
                   <span
                     className={cn(
@@ -124,14 +120,9 @@ export default function ProductsPage() {
                     <span className="mt-1 flex-1 text-body-sm text-ink-soft">
                       {variant.tagline}
                     </span>
-                    <span className="mt-4 flex items-baseline gap-3">
-                      <span className="font-headline text-lg text-ink">
-                        {formatPrice(product.priceCents)}
-                      </span>
-                      <span className="text-body-sm text-ink-faint line-through">
-                        {formatPrice(product.compareAtCents)}
-                      </span>
-                      <span className="eyebrow ml-auto flex items-center gap-1 text-rose-600">
+                    <span className="mt-4 flex items-center justify-between gap-3">
+                      <ProductPrice slug={variant.slug} size="sm" />
+                      <span className="eyebrow flex items-center gap-1 text-rose-600">
                         View
                         <Icon
                           name="arrow-right"
@@ -141,6 +132,8 @@ export default function ProductsPage() {
                     </span>
                   </span>
                 </Link>
+
+                <QuickBuy slug={variant.slug} />
               </li>
             ))}
           </Reveal>

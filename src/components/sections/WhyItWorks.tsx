@@ -81,7 +81,7 @@ export function WhyItWorks() {
             <figure className="relative">
               <div className="relative aspect-4/5 w-full overflow-hidden rounded-panel bg-lilac-50 shadow-drift">
                 <Image
-                  src="/images/product/mesh-detail.jpg"
+                  src="/images/product/mesh-detail.webp"
                   alt="Close-up of the breathable 3D air-mesh shell on the baby head protector backpack"
                   fill
                   loading="lazy"

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Blob } from "@/components/art/Blob";
+import { CurrencySelector } from "@/components/localization/CurrencySelector";
 import { useCart } from "@/components/providers/CartProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
@@ -137,7 +138,10 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="hidden sm:block">
+              <CurrencySelector />
+            </div>
             <div className="relative hidden sm:flex sm:flex-col sm:items-center">
               <Button href="/products" className="px-7! py-3.5!">
                 Shop now
@@ -225,7 +229,7 @@ export function Header() {
           </div>
 
           <div className="relative flex items-center justify-between">
-            <Logo tone="light" />
+            <Logo tone="light" className="h-12" />
             <button
               type="button"
               onClick={() => setMenuOpen(false)}

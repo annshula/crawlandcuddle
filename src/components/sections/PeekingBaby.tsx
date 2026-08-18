@@ -36,7 +36,7 @@ const PEEK: Record<
   }
 > = {
   left: {
-    src: "/images/lifestyle/baby-peek-left.png",
+    src: "/images/lifestyle/baby-peek-left.webp",
     alt: "",
     width: 690,
     height: 1536,
@@ -49,7 +49,7 @@ const PEEK: Record<
     mask: "radial-gradient(ellipse 92% 96% at 50% 48%, black 62%, transparent 100%)",
   },
   right: {
-    src: "/images/lifestyle/baby-peek-right.png",
+    src: "/images/lifestyle/baby-peek-right.webp",
     alt: "",
     width: 502,
     height: 1535,

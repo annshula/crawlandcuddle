@@ -98,7 +98,7 @@ export function HowItWorks() {
               className="relative mx-auto aspect-square w-[min(100%,26rem)] overflow-hidden rounded-panel bg-mint/30 shadow-drift"
             >
               <Image
-                src="/images/product/green-owl.jpg"
+                src="/images/product/green-owl.webp"
                 alt="Green Owl baby head protector backpack shown from the back with its adjustable shoulder harness"
                 fill
                 loading="eager"

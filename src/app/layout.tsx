@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { CartProvider } from "@/components/providers/CartProvider";
+import { LocalizationProvider } from "@/components/providers/LocalizationProvider";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { site } from "@/content/site";
@@ -88,16 +89,18 @@ export default function RootLayout({
           Skip to content
         </a>
 
-        <CartProvider>
-          <SmoothScrollProvider>
-            <ScrollProgress />
-            <AnnouncementBar />
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            <CartDrawer />
-          </SmoothScrollProvider>
-        </CartProvider>
+        <LocalizationProvider>
+          <CartProvider>
+            <SmoothScrollProvider>
+              <ScrollProgress />
+              <AnnouncementBar />
+              <Header />
+              <main>{children}</main>
+              <Footer />
+              <CartDrawer />
+            </SmoothScrollProvider>
+          </CartProvider>
+        </LocalizationProvider>
 
         <JsonLd />
       </body>
