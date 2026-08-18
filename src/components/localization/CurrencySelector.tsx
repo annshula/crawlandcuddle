@@ -2,10 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  useLocalization,
-  type LocalizationCountry,
-} from "@/components/providers/LocalizationProvider";
+import { useLocalization } from "@/components/providers/LocalizationProvider";
 import {
   CANONICAL_COUNTRY_BY_CURRENCY,
   currencyDisplayName,

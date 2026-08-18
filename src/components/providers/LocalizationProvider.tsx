@@ -154,6 +154,8 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
     // Effective country is a dep so consumers re-run their request effect when
     // the currency changes — every visible variant re-fetches in the new
     // currency instantly (their cached id is tagged with a stale country).
+    // It is deliberately not read in the body, so the lint rule cannot see it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [flush, effectiveCountry],
   );
 
