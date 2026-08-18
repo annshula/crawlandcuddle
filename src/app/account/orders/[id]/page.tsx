@@ -231,7 +231,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
         )}
       </div>
 
-      {order.statusPageUrl && (
+      {/* {order.statusPageUrl && (
         <div className="mt-8">
           <Link
             href={order.statusPageUrl}
@@ -242,7 +242,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
             Open full order status page →
           </Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

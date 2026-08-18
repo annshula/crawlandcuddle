@@ -7,9 +7,16 @@ import {
   type ProfileState,
 } from "@/app/account/profile/actions";
 import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 const initialState: ProfileState = { ok: true };
+
+const inputClass =
+  "w-full rounded-tag border border-hairline bg-cream px-4 py-3 text-body text-ink transition-colors duration-300 ease-out-soft placeholder:text-ink-faint hover:border-rose-200 focus:border-rose-400 focus:outline-none";
+
+const labelClass =
+  "font-label text-[0.7rem] tracking-[0.14em] text-ink-soft uppercase";
 
 export function ProfileForm({
   firstName,
@@ -23,9 +30,6 @@ export function ProfileForm({
     initialState,
   );
 
-  const inputClass =
-    "w-full rounded-tag border border-hairline bg-cream px-4 py-3 text-body text-ink placeholder:text-ink-faint focus:border-rose-400 focus:outline-none";
-
   return (
     <form
       action={formAction}
@@ -38,11 +42,9 @@ export function ProfileForm({
         The name used on your orders and deliveries.
       </p>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2">
-          <span className="font-label text-[0.7rem] tracking-[0.14em] text-ink-soft uppercase">
-            First name
-          </span>
+          <span className={labelClass}>First name</span>
           <input
             type="text"
             name="firstName"
@@ -52,9 +54,7 @@ export function ProfileForm({
           />
         </label>
         <label className="flex flex-col gap-2">
-          <span className="font-label text-[0.7rem] tracking-[0.14em] text-ink-soft uppercase">
-            Last name
-          </span>
+          <span className={labelClass}>Last name</span>
           <input
             type="text"
             name="lastName"
@@ -68,15 +68,20 @@ export function ProfileForm({
       {state.message && (
         <p
           className={cn(
-            "mt-4 rounded-tag px-4 py-3 text-body-sm",
+            "mt-5 flex items-start gap-2.5 rounded-tag px-4 py-3 text-body-sm",
             state.ok ? "bg-mint/40 text-ink" : "bg-rose-50 text-rose-700",
           )}
         >
+          <Icon
+            name={state.ok ? "check" : "close"}
+            className="mt-0.5 size-4 shrink-0"
+            strokeWidth={2.2}
+          />
           {state.message}
         </p>
       )}
 
-      <div className="mt-5">
+      <div className="mt-6">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending ? "Saving…" : "Save changes"}
         </Button>

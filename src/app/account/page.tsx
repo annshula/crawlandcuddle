@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AccountHeader } from "@/components/account/AccountHeader";
+import { EmptyState } from "@/components/account/EmptyState";
+import { OrderRow } from "@/components/account/OrderRow";
+import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { getCustomer, listOrders } from "@/lib/shopify/customer-service";
 import { requireCustomer } from "@/lib/shopify/guard";
-import { formatMoney, shortDate } from "@/lib/money";
 
 export const metadata: Metadata = {
   title: "Your account — Crawl & Cuddle",
@@ -30,42 +33,46 @@ export default async function AccountOverviewPage() {
   const first = customer?.firstName ?? "there";
   const initials =
     (customer?.firstName?.[0] ?? "") + (customer?.lastName?.[0] ?? "");
+  const defaultAddress = customer?.defaultAddressId
+    ? customer.addresses.find((a) => a.id === customer.defaultAddressId)
+    : null;
 
   return (
     <div className="min-w-0">
-      <p className="eyebrow flex items-center gap-3 text-rose-600">
-        <span className="inline-block h-px w-8 bg-rose-600/40" />
-        Welcome back
-      </p>
-      <h1 className="mt-3 font-display text-heading text-ink uppercase">
-        Hi, {first}
-      </h1>
-      <p className="mt-2 max-w-lg text-body text-ink-soft">
-        Here is a quick look at your profile and most recent orders.
-      </p>
+      <AccountHeader
+        eyebrow="Welcome back"
+        title={`Hi, ${first}`}
+        script="good to see you again"
+        body="Your profile, your saved address and everything you have ordered — all in one place."
+      />
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
-        {/* Profile card */}
+      <Reveal as="div" variant="up" stagger={0.08} className="mt-10 grid gap-6 md:grid-cols-2">
+        {/* Profile */}
         <div className="rounded-panel border border-hairline bg-paper p-6 shadow-soft">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <h2 className="font-display text-heading-sm text-ink uppercase">
               Profile
             </h2>
             <Link
               href="/account/profile"
-              className="flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
+              className="group/link flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
             >
               Edit
-              <Icon name="arrow-right" className="size-3.5" />
+              <Icon
+                name="arrow-right"
+                className="size-3.5 transition-transform duration-500 ease-out-soft group-hover/link:translate-x-1"
+              />
             </Link>
           </div>
-          <div className="mt-5 flex items-center gap-4">
-            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-blush font-display text-lg text-rose-600 uppercase">
-              {initials || "—"}
+          <div className="mt-6 flex items-center gap-4">
+            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-blush font-display text-xl text-rose-600 uppercase">
+              {initials || <Icon name="user" className="size-5" />}
             </span>
             <div className="min-w-0">
-              <p className="font-headline text-ink">
-                {customer?.firstName} {customer?.lastName}
+              <p className="font-headline text-lg text-ink">
+                {[customer?.firstName, customer?.lastName]
+                  .filter(Boolean)
+                  .join(" ") || "Your name"}
               </p>
               <p className="truncate text-body-sm text-ink-soft">
                 {customer?.emailAddress ?? "No email on file"}
@@ -74,115 +81,85 @@ export default async function AccountOverviewPage() {
           </div>
         </div>
 
-        {/* Address card */}
+        {/* Default address */}
         <div className="rounded-panel border border-hairline bg-paper p-6 shadow-soft">
-          <h2 className="font-display text-heading-sm text-ink uppercase">
-            Default address
-          </h2>
-          <div className="mt-5">
-            {customer?.defaultAddressId ? (
-              (() => {
-                const address = customer.addresses.find(
-                  (a) => a.id === customer.defaultAddressId,
-                );
-                return address ? (
-                  <p className="whitespace-pre-line text-body-sm text-ink-soft">
-                    {address.formatted.join("\n")}
-                  </p>
-                ) : (
-                  <p className="text-body-sm text-ink-soft">
-                    No address saved yet.
-                  </p>
-                );
-              })()
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="font-display text-heading-sm text-ink uppercase">
+              Default address
+            </h2>
+            <Link
+              href="/account/addresses"
+              className="group/link flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
+            >
+              All
+              <Icon
+                name="arrow-right"
+                className="size-3.5 transition-transform duration-500 ease-out-soft group-hover/link:translate-x-1"
+              />
+            </Link>
+          </div>
+          <div className="mt-6 flex items-start gap-4">
+            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-lilac-100 text-lilac-600">
+              <Icon name="map-pin" className="size-5" />
+            </span>
+            {defaultAddress ? (
+              <p className="min-w-0 text-body-sm whitespace-pre-line text-ink-soft">
+                {defaultAddress.formatted.join("\n")}
+              </p>
             ) : (
               <p className="text-body-sm text-ink-soft">
-                No default address yet. Add one at checkout.
+                No default address yet. Add one at checkout and it will live
+                here.
               </p>
             )}
           </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* Orders */}
-      <div className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-heading-sm text-ink uppercase">
-            Recent orders
-          </h2>
+      <div className="mt-12">
+        <div className="flex items-end justify-between gap-6">
+          <div>
+            <h2 className="font-display text-heading-sm text-ink uppercase">
+              Recent orders
+            </h2>
+            <p
+              aria-hidden="true"
+              className="mt-1 font-script text-2xl text-rose-500"
+            >
+              on their way to you
+            </p>
+          </div>
           <Link
             href="/account/orders"
-            className="flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
+            className="link-underline shrink-0 font-label text-[0.72rem] tracking-[0.2em] text-rose-600 uppercase"
           >
             View all
-            <Icon name="arrow-right" className="size-3.5" />
           </Link>
         </div>
 
         {!orders || orders.orders.length === 0 ? (
-          <div className="mt-5 rounded-panel border border-hairline bg-paper px-6 py-12 text-center shadow-soft">
-            <span className="mx-auto grid size-14 place-items-center rounded-full bg-blush text-rose-500">
-              <Icon name="bag" className="size-6" />
-            </span>
-            <p className="mt-4 font-headline text-lg text-ink">No orders yet</p>
-            <p className="mx-auto mt-2 max-w-sm text-body-sm text-ink-soft">
-              When you place your first order it will show up here with live
-              tracking and easy returns.
-            </p>
-            <Button href="/products" withArrow className="mt-6">
-              Shop the range
-            </Button>
+          <div className="mt-6">
+            <EmptyState
+              icon="bag"
+              art="pram"
+              title="No orders yet"
+              script="the first one is the best one"
+              body="When you place your first order it will show up here with live tracking and easy returns."
+            >
+              <Button href="/products" withArrow>
+                Shop the range
+              </Button>
+            </EmptyState>
           </div>
         ) : (
-          <ul className="mt-5 flex flex-col gap-3">
+          <Reveal as="ul" variant="up" stagger={0.06} className="mt-6 flex flex-col gap-3">
             {orders.orders.map((order) => (
               <li key={order.id}>
-                <Link
-                  href={`/account/orders/${encodeURIComponent(order.id)}`}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-panel border border-hairline bg-paper px-5 py-4 shadow-soft transition-colors duration-300 hover:border-rose-300"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex -space-x-3">
-                      {order.previewImages.slice(0, 3).map((img, i) =>
-                        img ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            key={i}
-                            src={img.url}
-                            alt=""
-                            className="size-11 rounded-full border-2 border-paper bg-blush object-cover"
-                          />
-                        ) : null,
-                      )}
-                      {order.previewImages.length === 0 && (
-                        <span className="grid size-11 place-items-center rounded-full bg-blush text-ink-soft">
-                          <Icon name="bag" className="size-4" />
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-headline text-ink">{order.name}</p>
-                      <p className="text-caption text-ink-faint">
-                        {shortDate(order.processedAt)} · {order.lineItemCount}{" "}
-                        item{order.lineItemCount === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-headline text-ink">
-                      {order.totalPrice
-                        ? formatMoney(
-                            order.totalPrice.amount,
-                            order.totalPrice.currencyCode,
-                          )
-                        : ""}
-                    </span>
-                    <Icon name="arrow-right" className="size-4 text-ink-soft" />
-                  </div>
-                </Link>
+                <OrderRow order={order} />
               </li>
             ))}
-          </ul>
+          </Reveal>
         )}
       </div>
     </div>
