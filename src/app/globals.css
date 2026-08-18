@@ -198,6 +198,22 @@
     border-color: var(--color-hairline);
   }
 
+  /* Tailwind v4 dropped v3's `cursor: pointer` on buttons from Preflight, so
+     every <button> fell back to the browser's arrow while <a> kept the hand —
+     the qty steppers, add-to-bag, the cart and menu toggles all read as dead.
+     Restored here; disabled controls keep the not-allowed affordance. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;

@@ -33,9 +33,9 @@ export const site = {
   /** Markets this storefront actually ships to — used in shipping/returns copy. */
   shipsTo: ["United States", "Canada", "United Kingdom", "Australia"],
   socials: [
-    { label: "Instagram", href: "https://instagram.com/crawlandcuddle" },
-    { label: "Pinterest", href: "https://pinterest.com/crawlandcuddle" },
-    { label: "YouTube", href: "https://youtube.com/@crawlandcuddle" },
+    // { label: "Instagram", href: "https://instagram.com/crawlandcuddle" },
+    // { label: "Pinterest", href: "https://pinterest.com/crawlandcuddle" },
+    // { label: "YouTube", href: "https://youtube.com/@crawlandcuddle" },
   ],
 } as const;
 

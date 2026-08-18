@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { updateCustomer } from "@/lib/shopify/customer-service";
 import { requireCustomer } from "@/lib/shopify/guard";
 
@@ -25,6 +27,13 @@ export async function updateProfileAction(
 
   try {
     const result = await updateCustomer({ firstName, lastName });
+
+    // The pages are force-dynamic, but the client router cache still holds the
+    // RSC payload rendered before the mutation — without this the profile and
+    // the overview keep showing the pre-save name until a hard reload.
+    revalidatePath("/account/profile");
+    revalidatePath("/account");
+
     return {
       ok: true,
       message: "Your profile was updated.",

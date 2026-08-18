@@ -8,6 +8,7 @@
  */
 
 import { randomBytes } from "crypto";
+import { cache } from "react";
 
 import { graphqlRequest } from "@/lib/shopify/client";
 import {
@@ -218,20 +219,30 @@ async function refreshTokens(
   };
 }
 
-/** Returns a live session, refreshing it in place when close to expiry. */
-export async function getValidSession(): Promise<CustomerSession | null> {
-  if (!isCustomerAccountConfigured()) return null;
-  const session = await readSession();
-  if (!session) return null;
-  if (session.expiresAt - REFRESH_SKEW_MS > Date.now()) return session;
-  const refreshed = await refreshTokens(session);
-  if (!refreshed) {
-    await clearSession();
-    return null;
-  }
-  await writeSession(refreshed);
-  return refreshed;
-}
+/**
+ * Returns a live session, refreshing it in place when close to expiry.
+ *
+ * Memoised per request: the layout guard, the page guard and every
+ * `customerRequest` all ask for the session while rendering one page. Without
+ * this each of them decrypted the cookie again — and on an expiring token each
+ * would have fired its own refresh round trip to Shopify, serially, before the
+ * page could start fetching anything.
+ */
+export const getValidSession = cache(
+  async (): Promise<CustomerSession | null> => {
+    if (!isCustomerAccountConfigured()) return null;
+    const session = await readSession();
+    if (!session) return null;
+    if (session.expiresAt - REFRESH_SKEW_MS > Date.now()) return session;
+    const refreshed = await refreshTokens(session);
+    if (!refreshed) {
+      await clearSession();
+      return null;
+    }
+    await writeSession(refreshed);
+    return refreshed;
+  },
+);
 
 /* ── Customer-scoped GraphQL client ────────────────────────────────────── */
 

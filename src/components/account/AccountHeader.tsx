@@ -48,7 +48,7 @@ export function AccountHeader({
 
       <h1
         className={cn(
-          "font-script text-[clamp(2.75rem,2rem+3vw,4.5rem)] leading-[1.05] text-rose-500",
+          "font-script text-[clamp(2rem,1.5rem+2vw,3.25rem)] leading-[1.1] text-rose-500",
           eyebrow ? "mt-3" : "mt-6",
         )}
       >

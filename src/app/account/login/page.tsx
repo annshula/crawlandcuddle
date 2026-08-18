@@ -78,7 +78,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
           <span className="mx-auto mb-6 grid size-16 place-items-center rounded-full bg-blush text-rose-600">
             <Icon name="shield" className="size-7" />
           </span>
-          <h1 className="font-script text-[clamp(2.75rem,2rem+3vw,4.5rem)] leading-[1.05] text-rose-500">
+          <h1 className="font-script text-[clamp(2rem,1.5rem+2vw,3.25rem)] leading-[1.1] text-rose-500">
             Sign in
           </h1>
           <p className="mx-auto mt-1 text-body text-ink-soft">
