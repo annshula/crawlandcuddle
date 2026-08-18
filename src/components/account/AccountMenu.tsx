@@ -8,7 +8,6 @@ import {
   SignOutDialog,
   SignOutLabel,
 } from "@/components/account/SignOutDialog";
-import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import type { IconName } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
@@ -114,40 +113,24 @@ export function AccountMenu({
     </Link>
   );
 
-  /* ── Mobile drawer: vertical stack ─────────────────────────────────── */
+  /* ── Mobile drawer: one row, never a nested menu ───────────────────────
+     The drawer already carries the full nav plus the bag and the shop CTA;
+     expanding a four-item account sub-menu inside it pushed that bottom block
+     into a scroll and squashed the CTA. Account destinations live one tap
+     deeper, on /account itself. */
   if (variant === "list") {
     return (
-      <div className={cn("flex flex-col", className)}>
-        <p className="px-2 pb-1 font-label text-[0.62rem] tracking-[0.2em] text-rose-200/70 uppercase">
-          {signedIn ? "Your account" : "Account"}
-        </p>
-        {signedIn ? (
-          <>
-            {LINKS.map((link) => linkRow(link, "light"))}
-            <button
-              type="button"
-              onClick={askSignOut}
-              className="flex items-center gap-2.5 rounded-xl px-2 py-3 font-label text-[0.72rem] tracking-[0.14em] text-rose-200/70 uppercase transition-colors duration-200 hover:bg-paper/10 hover:text-rose-200"
-            >
-              <SignOutLabel />
-            </button>
-          </>
-        ) : (
-          <Button
-            href="/account/login"
-            withArrow
-            className="mt-1 justify-center"
-            onClick={() => setOpen(false)}
-          >
-            Sign in
-          </Button>
+      <Link
+        href={signedIn ? "/account" : "/account/login"}
+        onClick={() => setOpen(false)}
+        aria-label={signedIn ? "Your account" : "Sign in"}
+        className={cn(
+          "grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10",
+          className,
         )}
-
-        <SignOutDialog
-          open={signOutOpen}
-          onClose={() => setSignOutOpen(false)}
-        />
-      </div>
+      >
+        <Icon name="user" />
+      </Link>
     );
   }
 

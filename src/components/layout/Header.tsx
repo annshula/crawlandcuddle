@@ -255,12 +255,21 @@ export function Header() {
                   <Link
                     href={item.href}
                     onClick={() => setMenuOpen(false)}
-                    className="group flex items-center justify-between gap-4 border-b border-paper/15 py-5 font-display text-heading-sm uppercase transition-colors duration-300 hover:text-rose-200 active:text-rose-200"
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className={cn(
+                      "group flex items-center justify-between gap-4 border-b border-paper/15 py-5 font-display text-heading-sm uppercase transition-colors duration-300 hover:text-rose-200 active:text-rose-200",
+                      isActive(item.href) && "text-rose-200",
+                    )}
                   >
                     {item.label}
                     <Icon
                       name="arrow-right"
-                      className="size-5 -translate-x-1 text-rose-200/40 transition-all duration-300 group-hover:translate-x-0 group-hover:text-rose-200/90"
+                      className={cn(
+                        "size-5 -translate-x-1 transition-all duration-300 group-hover:translate-x-0 group-hover:text-rose-200/90",
+                        isActive(item.href)
+                          ? "translate-x-0 text-rose-200/90"
+                          : "text-rose-200/40",
+                      )}
                     />
                   </Link>
                 </li>
@@ -272,25 +281,36 @@ export function Header() {
             data-mobile-link
             className="relative flex flex-col gap-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
           >
-            <AccountMenu variant="list" />
+            {/* Account and bag reduce to two centred icon buttons — the drawer
+                already carries the full nav, so these stay quiet and let the
+                shop CTA underneath them take the weight. */}
+            <div className="flex items-center justify-center gap-3">
+              <AccountMenu variant="list" />
 
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-paper/15 bg-paper/5 px-4 py-3">
-              <span className="flex items-center gap-3">
-                <Icon name="bag" className="text-rose-200" />
-                <span className="font-label text-[0.72rem] tracking-[0.16em] uppercase">
-                  Your bag
-                </span>
-              </span>
-              <span className="font-display text-lg text-rose-200">
-                {count}
-              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  open();
+                }}
+                aria-label={`Open bag, ${count} item${count === 1 ? "" : "s"}`}
+                className="relative grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10"
+              >
+                <Icon name="bag" />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 grid min-w-5 place-items-center rounded-full bg-rose-500 px-1.5 py-0.5 font-label text-[0.6rem] leading-none text-paper">
+                    {count}
+                  </span>
+                )}
+              </button>
             </div>
+
             <Button
               href="/products"
               onClick={() => setMenuOpen(false)}
               withArrow
             >
-              Shop the range
+              Shop now
             </Button>
             <p className="font-script text-2xl text-rose-200">
               training wheels for falling over
