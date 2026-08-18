@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Blob } from "@/components/art/Blob";
+import { AccountMenu } from "@/components/account/AccountMenu";
 import { CurrencySelector } from "@/components/localization/CurrencySelector";
 import { useCart } from "@/components/providers/CartProvider";
 import { Button } from "@/components/ui/Button";
@@ -178,6 +179,10 @@ export function Header() {
               </div>
             </div>
 
+            <div className="hidden sm:block">
+              <AccountMenu />
+            </div>
+
             <button
               type="button"
               onClick={open}
@@ -267,6 +272,8 @@ export function Header() {
             data-mobile-link
             className="relative flex flex-col gap-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
           >
+            <AccountMenu variant="list" />
+
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-paper/15 bg-paper/5 px-4 py-3">
               <span className="flex items-center gap-3">
                 <Icon name="bag" className="text-rose-200" />

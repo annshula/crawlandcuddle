@@ -10,6 +10,7 @@ type NavItem = { href: string; label: string; exact?: boolean };
 const items: NavItem[] = [
   { href: "/account", label: "Overview", exact: true },
   { href: "/account/orders", label: "Orders" },
+  { href: "/account/addresses", label: "Addresses" },
   { href: "/account/profile", label: "Profile" },
 ];
 

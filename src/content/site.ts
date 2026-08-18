@@ -54,7 +54,6 @@ export const nav = [
 
 export const announcements = [
   "Free gift worth $15 in every box",
-  "Free shipping to the US, Canada, UK & Australia",
   "Ten styles · one promise",
   "Loved by 40,000+ parents",
   "Tracked delivery · easy returns",
