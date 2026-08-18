@@ -45,16 +45,21 @@ export default async function AccountOverviewPage() {
         body="Your profile, your saved address and everything you have ordered — all in one place."
       />
 
-      <Reveal as="div" variant="up" stagger={0.08} className="mt-10 grid gap-6 md:grid-cols-2">
+      <Reveal
+        as="div"
+        variant="up"
+        stagger={0.08}
+        className="mt-8 grid gap-4 sm:mt-10 sm:gap-6 md:grid-cols-2"
+      >
         {/* Profile */}
-        <div className="rounded-panel border border-hairline bg-paper p-6 shadow-soft">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-display text-heading-sm text-ink uppercase">
+        <div className="min-w-0 rounded-panel border border-hairline bg-paper p-5 shadow-soft sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+            <h2 className="min-w-0 font-display text-heading-sm text-ink uppercase">
               Profile
             </h2>
             <Link
               href="/account/profile"
-              className="group/link flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
+              className="group/link flex shrink-0 items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
             >
               Edit
               <Icon
@@ -63,17 +68,17 @@ export default async function AccountOverviewPage() {
               />
             </Link>
           </div>
-          <div className="mt-6 flex items-center gap-4">
-            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-blush font-display text-xl text-rose-600 uppercase">
+          <div className="mt-5 flex items-center gap-4 sm:mt-6">
+            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-blush font-display text-xl text-rose-600 uppercase sm:size-14">
               {initials || <Icon name="user" className="size-5" />}
             </span>
             <div className="min-w-0">
-              <p className="font-headline text-lg text-ink">
+              <p className="font-headline text-lg wrap-break-word text-ink">
                 {[customer?.firstName, customer?.lastName]
                   .filter(Boolean)
                   .join(" ") || "Your name"}
               </p>
-              <p className="truncate text-body-sm text-ink-soft">
+              <p className="text-body-sm wrap-break-word text-ink-soft">
                 {customer?.emailAddress ?? "No email on file"}
               </p>
             </div>
@@ -81,14 +86,14 @@ export default async function AccountOverviewPage() {
         </div>
 
         {/* Default address */}
-        <div className="rounded-panel border border-hairline bg-paper p-6 shadow-soft">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="font-display text-heading-sm text-ink uppercase">
+        <div className="min-w-0 rounded-panel border border-hairline bg-paper p-5 shadow-soft sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+            <h2 className="min-w-0 font-display text-heading-sm text-ink uppercase">
               Default address
             </h2>
             <Link
               href="/account/addresses"
-              className="group/link flex items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
+              className="group/link flex shrink-0 items-center gap-1 font-label text-[0.7rem] tracking-[0.14em] text-rose-600 uppercase"
             >
               All
               <Icon
@@ -97,16 +102,23 @@ export default async function AccountOverviewPage() {
               />
             </Link>
           </div>
-          <div className="mt-6 flex items-start gap-4">
-            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-lilac-100 text-lilac-600">
+          <div className="mt-5 flex items-start gap-4 sm:mt-6">
+            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-lilac-100 text-lilac-600 sm:size-14">
               <Icon name="map-pin" className="size-5" />
             </span>
             {defaultAddress ? (
-              <p className="min-w-0 text-body-sm whitespace-pre-line text-ink-soft">
-                {defaultAddress.formatted.join("\n")}
-              </p>
+              <address className="flex min-w-0 flex-col not-italic">
+                {defaultAddress.formatted.map((line, i) => (
+                  <span
+                    key={i}
+                    className="text-body-sm wrap-break-word text-ink-soft"
+                  >
+                    {line}
+                  </span>
+                ))}
+              </address>
             ) : (
-              <p className="text-body-sm text-ink-soft">
+              <p className="min-w-0 text-body-sm text-ink-soft">
                 No default address yet. Add one at checkout and it will live
                 here.
               </p>
@@ -116,9 +128,9 @@ export default async function AccountOverviewPage() {
       </Reveal>
 
       {/* Orders */}
-      <div className="mt-12">
-        <div className="flex items-end justify-between gap-6">
-          <h2 className="font-display text-heading-sm text-ink uppercase">
+      <div className="mt-10 sm:mt-12">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <h2 className="min-w-0 font-display text-heading-sm text-ink uppercase">
             Recent orders
           </h2>
           <Link
@@ -143,7 +155,12 @@ export default async function AccountOverviewPage() {
             </EmptyState>
           </div>
         ) : (
-          <Reveal as="ul" variant="up" stagger={0.06} className="mt-6 flex flex-col gap-3">
+          <Reveal
+            as="ul"
+            variant="up"
+            stagger={0.06}
+            className="mt-6 flex flex-col gap-3"
+          >
             {orders.orders.map((order) => (
               <li key={order.id}>
                 <OrderRow order={order} />

@@ -257,7 +257,7 @@ export function Header() {
                     onClick={() => setMenuOpen(false)}
                     aria-current={isActive(item.href) ? "page" : undefined}
                     className={cn(
-                      "group flex items-center justify-between gap-4 border-b border-paper/15 py-5 font-display text-heading-sm uppercase transition-colors duration-300 hover:text-rose-200 active:text-rose-200",
+                      "group flex items-center justify-between gap-4 border-b border-paper/15 py-4 font-label text-[0.9rem] tracking-[0.24em] uppercase transition-colors duration-300 hover:text-rose-200 active:text-rose-200",
                       isActive(item.href) && "text-rose-200",
                     )}
                   >
@@ -265,7 +265,7 @@ export function Header() {
                     <Icon
                       name="arrow-right"
                       className={cn(
-                        "size-5 -translate-x-1 transition-all duration-300 group-hover:translate-x-0 group-hover:text-rose-200/90",
+                        "size-4 -translate-x-1 transition-all duration-300 group-hover:translate-x-0 group-hover:text-rose-200/90",
                         isActive(item.href)
                           ? "translate-x-0 text-rose-200/90"
                           : "text-rose-200/40",

@@ -28,7 +28,8 @@ const LINKS: AccountLink[] = [
  * cart-style user icon (no label) that routes to the Shopify Customer Account
  * flow when signed out.
  *
- * `list` (mobile drawer): a vertical stack of the same destinations.
+ * `list` (mobile drawer): bare icon buttons — account, and sign-out when
+ * signed in — meant to sit in the drawer's centred icon row.
  *
  * Sign-in state is probed from `/api/account/session` on mount and whenever
  * the route changes, so it stays correct after login/logout redirects.
@@ -119,18 +120,39 @@ export function AccountMenu({
      into a scroll and squashed the CTA. Account destinations live one tap
      deeper, on /account itself. */
   if (variant === "list") {
+    const iconButton =
+      "grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10";
+
     return (
-      <Link
-        href={signedIn ? "/account" : "/account/login"}
-        onClick={() => setOpen(false)}
-        aria-label={signedIn ? "Your account" : "Sign in"}
-        className={cn(
-          "grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10",
-          className,
+      <>
+        <Link
+          href={signedIn ? "/account" : "/account/login"}
+          onClick={() => setOpen(false)}
+          aria-label={signedIn ? "Your account" : "Sign in"}
+          className={cn(iconButton, className)}
+        >
+          <Icon name="user" />
+        </Link>
+
+        {signedIn && (
+          <button
+            type="button"
+            onClick={() => setSignOutOpen(true)}
+            aria-label="Sign out"
+            className={cn(
+              iconButton,
+              "hover:border-rose-200/60 hover:text-rose-200",
+            )}
+          >
+            <Icon name="logout" />
+          </button>
         )}
-      >
-        <Icon name="user" />
-      </Link>
+
+        <SignOutDialog
+          open={signOutOpen}
+          onClose={() => setSignOutOpen(false)}
+        />
+      </>
     );
   }
 

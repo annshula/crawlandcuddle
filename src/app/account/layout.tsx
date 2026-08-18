@@ -28,7 +28,7 @@ export default async function AccountLayout({
   return (
     <section
       style={{ clipPath: "inset(-160px 0 0 0)" }}
-      className="relative -mt-(--nav-height) min-h-[70vh] bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28"
+      className="relative -mt-(--nav-height) min-h-[70vh] overflow-x-clip bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28"
     >
       <Blob
         shape="d"
@@ -46,8 +46,11 @@ export default async function AccountLayout({
       />
 
       <div className="container-page relative z-10">
-        <div className="grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
-          <aside className="lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)] lg:self-start">
+        {/* Both tracks are minmax(0,…): a grid item defaults to min-width:auto,
+            which lets a wide child (the scrolling nav rail) push the whole
+            page sideways on a phone instead of scrolling inside itself. */}
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+          <aside className="min-w-0 lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)] lg:self-start">
             <AccountNav />
           </aside>
           <div className="min-w-0">{children}</div>

@@ -26,10 +26,14 @@ const items: NavItem[] = [
 ];
 
 /**
- * Account sidebar. Styled as one white panel on the cream canvas — the same
- * card language as the rest of the site — with the rose fill marking the
- * current page exactly like the "other styles" chips on a product page.
- * On small screens it becomes a horizontal chip rail so it never eats the fold.
+ * Account nav, two shapes from one markup.
+ *
+ * Desktop (lg+): the white card of icon chips on the cream canvas, rose fill
+ * marking the current page, with sign-out under a hairline.
+ *
+ * Mobile: no card, no icons, no sign-out — just the site's tracked uppercase
+ * labels on a scrolling rule, so the nav costs one line instead of a panel.
+ * Sign-out lives in the header drawer at that width.
  */
 export function AccountNav() {
   const pathname = usePathname();
@@ -38,9 +42,11 @@ export function AccountNav() {
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
 
   return (
-    <nav aria-label="Account" className="w-full">
-      <div className="rounded-panel border border-hairline bg-paper p-2 shadow-soft lg:p-3">
-        <ul className="-mx-2 flex gap-1 overflow-x-auto px-2 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0">
+    <nav aria-label="Account" className="w-full min-w-0">
+      <div className="min-w-0 lg:rounded-panel lg:border lg:border-hairline lg:bg-paper lg:p-3 lg:shadow-soft">
+        {/* The row is wider than a phone and scrolls inside itself; min-w-0
+            here and on every ancestor keeps that from widening the page. */}
+        <ul className="scrollbar-none flex min-w-0 gap-7 overflow-x-auto border-b border-hairline lg:flex-col lg:gap-1 lg:overflow-visible lg:border-b-0">
           {items.map((item) => {
             const active = isActive(item);
             return (
@@ -49,13 +55,17 @@ export function AccountNav() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-tag px-4 py-3 font-label text-[0.72rem] tracking-[0.14em] whitespace-nowrap uppercase transition-colors duration-300 ease-out-soft",
+                    "-mb-px block border-b-2 pb-3 font-label text-[0.72rem] tracking-[0.2em] whitespace-nowrap uppercase transition-colors duration-300 ease-out-soft",
+                    "lg:mb-0 lg:flex lg:items-center lg:gap-2.5 lg:rounded-tag lg:border-b-0 lg:px-4 lg:py-3 lg:tracking-[0.14em]",
                     active
-                      ? "bg-rose-600 text-paper"
-                      : "text-ink-soft hover:bg-blush hover:text-rose-700",
+                      ? "border-rose-600 text-rose-600 lg:bg-rose-600 lg:text-paper"
+                      : "border-transparent text-ink-faint hover:text-ink lg:text-ink-soft lg:hover:bg-blush lg:hover:text-rose-700",
                   )}
                 >
-                  <Icon name={item.icon} className="size-4 shrink-0" />
+                  <Icon
+                    name={item.icon}
+                    className="hidden size-4 shrink-0 lg:block"
+                  />
                   {item.label}
                 </Link>
               </li>
@@ -63,7 +73,7 @@ export function AccountNav() {
           })}
         </ul>
 
-        <div className="mt-1 border-t border-hairline pt-1 lg:mt-2 lg:pt-2">
+        <div className="hidden lg:mt-2 lg:block lg:border-t lg:border-hairline lg:pt-2">
           <button
             type="button"
             onClick={() => setSignOutOpen(true)}
