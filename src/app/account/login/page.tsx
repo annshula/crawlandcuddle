@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Blob } from "@/components/art/Blob";
+import { LineArt } from "@/components/art/LineArt";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { isCustomerAccountConfigured } from "@/lib/shopify/config";
@@ -52,21 +54,34 @@ export default async function LoginPage({ searchParams }: PageProps) {
       : "/account";
 
   return (
-    <section className="relative -mt-(--nav-height) min-h-[70vh] bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-24">
-      <div className="container-page">
+    <section
+      style={{ clipPath: "inset(-160px 0 0 0)" }}
+      className="relative -mt-(--nav-height) min-h-[70vh] bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-24"
+    >
+      <Blob
+        shape="d"
+        spin={22}
+        className="pointer-events-none absolute -top-28 -left-40 w-120 text-rose-50"
+      />
+      <Blob
+        shape="a"
+        spin={-18}
+        className="pointer-events-none absolute -right-56 -bottom-40 w-136 text-lilac-100"
+      />
+      <LineArt
+        name="butterfly"
+        className="pointer-events-none absolute top-24 right-[6%] hidden w-16 rotate-6 text-rose-200 lg:block"
+      />
+
+      <div className="container-page relative z-10">
         <div className="mx-auto max-w-md pt-10 text-center">
           <span className="mx-auto mb-6 grid size-16 place-items-center rounded-full bg-blush text-rose-600">
             <Icon name="shield" className="size-7" />
           </span>
-          <p className="eyebrow flex items-center justify-center gap-3 text-rose-600">
-            <span className="inline-block h-px w-8 bg-rose-600/40" />
-            Your account
-            <span className="inline-block h-px w-8 bg-rose-600/40" />
-          </p>
-          <h1 className="mt-4 font-display text-heading text-ink uppercase">
+          <h1 className="font-script text-[clamp(2.75rem,2rem+3vw,4.5rem)] leading-[1.05] text-rose-500">
             Sign in
           </h1>
-          <p className="mx-auto mt-4 max-w-sm text-body text-ink-soft">
+          <p className="mx-auto mt-1 text-body text-ink-soft">
             See your orders, track deliveries and manage your profile. No
             password is stored by this site — sign-in runs through a secure,
             encrypted flow handled by our store provider.

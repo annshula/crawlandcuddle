@@ -35,7 +35,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     <div className="min-w-0">
       <AccountHeader
         title="Order history"
-        script="every wobble, delivered"
         body="Every order you have placed, with live fulfilment and delivery tracking."
         crumbs={[{ label: "Orders" }]}
       />
@@ -46,7 +45,6 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             icon="bag"
             art="pram"
             title="Nothing here yet"
-            script="soon"
             body="Your orders will appear here as soon as you place one."
           >
             <Button href="/products" withArrow>

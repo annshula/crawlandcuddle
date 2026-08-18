@@ -11,14 +11,12 @@ export function EmptyState({
   icon,
   art = "sprig",
   title,
-  script,
   body,
   children,
 }: {
   icon: IconName;
   art?: LineArtName;
   title: string;
-  script?: string;
   body: string;
   children?: ReactNode;
 }) {
@@ -31,17 +29,9 @@ export function EmptyState({
       <span className="relative mx-auto grid size-14 place-items-center rounded-full bg-blush text-rose-500">
         <Icon name={icon} className="size-6" />
       </span>
-      <p className="relative mt-5 font-display text-heading-sm text-ink uppercase">
+      <p className="relative mt-5 font-script text-4xl leading-tight text-rose-500">
         {title}
       </p>
-      {script && (
-        <p
-          aria-hidden="true"
-          className="relative mt-1 font-script text-2xl text-lilac-500"
-        >
-          {script}
-        </p>
-      )}
       <p className="relative mx-auto mt-3 max-w-sm text-body-sm text-ink-soft">
         {body}
       </p>

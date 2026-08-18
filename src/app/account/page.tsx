@@ -42,7 +42,6 @@ export default async function AccountOverviewPage() {
       <AccountHeader
         eyebrow="Welcome back"
         title={`Hi, ${first}`}
-        script="good to see you again"
         body="Your profile, your saved address and everything you have ordered — all in one place."
       />
 
@@ -119,17 +118,9 @@ export default async function AccountOverviewPage() {
       {/* Orders */}
       <div className="mt-12">
         <div className="flex items-end justify-between gap-6">
-          <div>
-            <h2 className="font-display text-heading-sm text-ink uppercase">
-              Recent orders
-            </h2>
-            <p
-              aria-hidden="true"
-              className="mt-1 font-script text-2xl text-rose-500"
-            >
-              on their way to you
-            </p>
-          </div>
+          <h2 className="font-display text-heading-sm text-ink uppercase">
+            Recent orders
+          </h2>
           <Link
             href="/account/orders"
             className="link-underline shrink-0 font-label text-[0.72rem] tracking-[0.2em] text-rose-600 uppercase"
@@ -144,7 +135,6 @@ export default async function AccountOverviewPage() {
               icon="bag"
               art="pram"
               title="No orders yet"
-              script="the first one is the best one"
               body="When you place your first order it will show up here with live tracking and easy returns."
             >
               <Button href="/products" withArrow>

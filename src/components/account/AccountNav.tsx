@@ -68,13 +68,6 @@ export function AccountNav() {
           </Link>
         </div>
       </div>
-
-      <p
-        aria-hidden="true"
-        className="mt-4 hidden pl-1 font-script text-2xl text-lilac-400 lg:block"
-      >
-        thanks for being here
-      </p>
     </nav>
   );
 }

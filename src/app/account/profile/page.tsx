@@ -22,7 +22,6 @@ export default async function ProfilePage() {
     <div className="min-w-0">
       <AccountHeader
         title="Profile"
-        script="the name on the box"
         body="How we address you on orders, deliveries and every note in between."
         crumbs={[{ label: "Profile" }]}
       />

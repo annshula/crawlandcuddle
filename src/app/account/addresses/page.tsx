@@ -27,7 +27,6 @@ export default async function AddressesPage() {
     <div className="min-w-0">
       <AccountHeader
         title="Addresses"
-        script="where the box lands"
         body="Saved delivery and billing addresses on your account."
         crumbs={[{ label: "Addresses" }]}
       />
@@ -38,7 +37,6 @@ export default async function AddressesPage() {
             icon="map-pin"
             art="cloud"
             title="No addresses yet"
-            script="add one at checkout"
             body="Your saved delivery addresses will appear here once you add one at checkout."
           >
             <Button href="/products" withArrow>
