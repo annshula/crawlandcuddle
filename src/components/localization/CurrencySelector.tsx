@@ -116,7 +116,7 @@ export function CurrencySelector({
         className={cn(
           triggerClass,
           "pointer-events-none",
-          !isDrawer && "min-w-[5.5rem] justify-center",
+          !isDrawer && "min-w-22 justify-center",
         )}
       >
         <Icon
