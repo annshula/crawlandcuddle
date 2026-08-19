@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useLocalization } from "@/components/providers/LocalizationProvider";
+import { Icon } from "@/components/ui/Icon";
 import {
   CANONICAL_COUNTRY_BY_CURRENCY,
   currencyDisplayName,
@@ -17,11 +18,19 @@ type Option = {
 };
 
 /**
- * Header currency switcher. One row per currency Shopify Markets actually
- * publishes (deduped), with a type-to-search filter. Picking a currency
- * re-fetches every price from Shopify so amounts update instantly.
+ * Currency switcher. One row per currency Shopify Markets actually publishes
+ * (deduped), with a type-to-search filter. Picking a currency re-fetches every
+ * price from Shopify so amounts update instantly.
+ *
+ * `bar` is the desktop header pill (symbol + code). `drawer` is the mobile
+ * menu's icon-only circle, sized and toned to sit beside the account and bag
+ * buttons; its panel opens upward because that row lives at the drawer's foot.
  */
-export function CurrencySelector() {
+export function CurrencySelector({
+  variant = "bar",
+}: {
+  variant?: "bar" | "drawer";
+}) {
   const { ready, countries, defaultCountry, country, setCountry } =
     useLocalization();
   const [open, setOpen] = useState(false);
@@ -91,14 +100,47 @@ export function CurrencySelector() {
     };
   }, [open]);
 
-  if (!ready || options.length <= 1) return null;
+  const isDrawer = variant === "drawer";
+  const triggerClass = isDrawer
+    ? "grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10"
+    : "flex items-center gap-2 rounded-full border border-ink/15 px-3.5 py-2.5 font-label text-[0.68rem] tracking-[0.14em] text-ink uppercase transition-colors duration-300 hover:border-rose-600 hover:text-rose-600";
 
-  const current =
-    country != null
-      ? options.find((o) => o.countryCode === country)
-      : options.find(
-          (o) => o.currencyCode === defaultCountry?.currency.isoCode,
-        );
+  /* The country list is a round trip away. Hold the control's own footprint
+     with a spinner rather than rendering nothing, so the header and the
+     drawer's icon row do not reflow when it lands. */
+  if (!ready) {
+    return (
+      <span
+        role="status"
+        aria-label="Loading currencies"
+        className={cn(
+          triggerClass,
+          "pointer-events-none",
+          !isDrawer && "min-w-[5.5rem] justify-center",
+        )}
+      >
+        <Icon
+          name="spinner"
+          strokeWidth={2}
+          className={cn(
+            "size-4 animate-spin",
+            isDrawer ? "text-paper/70" : "text-ink-faint",
+          )}
+        />
+      </span>
+    );
+  }
+
+  if (options.length <= 1) return null;
+
+  /* Match on currency, not country: the saved country may be any country in a
+     currency's market (FR), while the row for it is keyed to the canonical one
+     (DE for EUR) — comparing countries would show "Auto" for a real pick. */
+  const activeCurrency =
+    (country != null
+      ? countries.find((c) => c.isoCode === country)?.currency.isoCode
+      : defaultCountry?.currency.isoCode) ?? null;
+  const current = options.find((o) => o.currencyCode === activeCurrency);
 
   const pick = (code: string) => {
     setCountry(code);
@@ -112,20 +154,40 @@ export function CurrencySelector() {
         onClick={toggle}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label="Select currency"
+        aria-label={
+          current
+            ? `Currency: ${current.currencyCode}. Change currency`
+            : "Select currency"
+        }
         className={cn(
-          "flex items-center gap-2 rounded-full border border-ink/15 px-3.5 py-2.5 font-label text-[0.68rem] tracking-[0.14em] text-ink uppercase transition-colors duration-300 hover:border-rose-600 hover:text-rose-600",
-          open && "border-rose-600 text-rose-600",
+          triggerClass,
+          open &&
+            (isDrawer
+              ? "border-rose-200/60 bg-paper/10"
+              : "border-rose-600 text-rose-600"),
         )}
       >
-        <span aria-hidden="true" className="text-[0.9rem] leading-none">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "leading-none",
+            isDrawer ? "text-base font-semibold" : "text-[0.9rem]",
+          )}
+        >
           {current?.symbol ?? "💱"}
         </span>
-        <span>{current?.currencyCode ?? "Auto"}</span>
+        {!isDrawer && <span>{current?.currencyCode ?? "Auto"}</span>}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-panel border border-hairline bg-paper shadow-drift">
+        <div
+          className={cn(
+            "absolute z-50 overflow-hidden rounded-panel border border-hairline bg-paper shadow-drift",
+            isDrawer
+              ? "bottom-full left-1/2 mb-2 w-[min(20rem,calc(100vw-3rem))] -translate-x-1/2"
+              : "top-full right-0 mt-2 w-80",
+          )}
+        >
           {/* Auto row */}
           <div className="p-1.5 pb-0">
             <button
@@ -185,7 +247,9 @@ export function CurrencySelector() {
                 <button
                   type="button"
                   role="option"
-                  aria-selected={country === option.countryCode}
+                  aria-selected={
+                    country != null && option.currencyCode === activeCurrency
+                  }
                   onClick={() => pick(option.countryCode)}
                   className="flex w-full items-center justify-between gap-3 rounded-tag px-3 py-2.5 text-left transition-colors duration-200 hover:bg-blush"
                 >

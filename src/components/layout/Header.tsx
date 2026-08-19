@@ -224,7 +224,7 @@ export function Header() {
           </div>
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-28 -left-24 w-80 text-lilac-900/40 animate-drift"
+            className="pointer-events-none absolute -bottom-28 -left-24 w-80 animate-drift text-lilac-600/40"
           >
             <Blob shape="e" spin={-20} />
           </div>
@@ -277,10 +277,12 @@ export function Header() {
             data-mobile-link
             className="relative flex flex-col gap-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
           >
-            {/* Account and bag reduce to two centred icon buttons — the drawer
-                already carries the full nav, so these stay quiet and let the
-                shop CTA underneath them take the weight. */}
+            {/* Currency, account and bag reduce to centred icon buttons — the
+                drawer already carries the full nav, so these stay quiet and let
+                the shop CTA underneath them take the weight. */}
             <div className="flex items-center justify-center gap-3">
+              <CurrencySelector variant="drawer" />
+
               <AccountMenu variant="list" />
 
               <button

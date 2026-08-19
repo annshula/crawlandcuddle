@@ -7,21 +7,22 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const VARIANT_ID_RE = /^gid:\/\/shopify\/ProductVariant\/\d+$/;
+const COUNTRY_CODE_RE = /^[A-Z]{2}$/;
 
 /**
  * POST /api/localization/prices
  *
  * Given a batch of variant IDs, returns each one's price as Shopify itself
- * reports it for the visitor's effective country (their explicit choice, or
- * the edge-detected country). No conversion happens in this app. Before either
- * is available, pages keep showing the base-currency price and never call this.
+ * reports it for the country the request asks for, falling back to the
+ * visitor's effective country (their saved choice, or the edge-detected one).
+ * No conversion happens in this app.
+ *
+ * The country travels in the body because the client is the source of truth
+ * for what the shopper is currently looking at: the cookie write that follows
+ * a currency switch is a separate request, so reading only the cookie here
+ * would race it and answer the very next batch in the previous currency.
  */
 export async function POST(request: Request) {
-  const country = await resolveEffectiveCountry();
-  if (!country) {
-    return NextResponse.json({ prices: {} });
-  }
-
   let body: unknown;
   try {
     body = await request.json();
@@ -43,6 +44,15 @@ export async function POST(request: Request) {
       { error: "Invalid variant ids." },
       { status: 400 },
     );
+  }
+
+  const requested = (body as { country?: unknown })?.country;
+  const country =
+    typeof requested === "string" && COUNTRY_CODE_RE.test(requested)
+      ? requested
+      : await resolveEffectiveCountry();
+  if (!country) {
+    return NextResponse.json({ prices: {} });
   }
 
   try {

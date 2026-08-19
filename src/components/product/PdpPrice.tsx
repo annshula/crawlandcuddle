@@ -9,7 +9,24 @@ import { formatMoney } from "@/lib/money";
  * synced base price. Updates instantly when the currency changes.
  */
 export function PdpPrice({ slug }: { slug: string }) {
-  const { amount, currencyCode, compareAtAmount } = useStylePrice(slug);
+  const { amount, currencyCode, compareAtAmount, pending } =
+    useStylePrice(slug);
+
+  if (pending) {
+    return (
+      <div aria-label="Loading price" className="flex flex-col gap-3">
+        <span
+          aria-hidden="true"
+          className="inline-block h-12 w-52 animate-pulse rounded-tag bg-hairline"
+        />
+        <span
+          aria-hidden="true"
+          className="inline-block h-4 w-28 animate-pulse rounded-pill bg-hairline/60"
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       <p className="font-headline text-5xl leading-none font-bold tracking-tight text-ink">

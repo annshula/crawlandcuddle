@@ -14,6 +14,8 @@ type PriceProps = {
   compareAt?: number | null;
   currencyCode?: string;
   size?: "sm" | "md" | "lg";
+  /** Hold a placeholder instead of showing an amount in the wrong currency. */
+  pending?: boolean;
   className?: string;
 };
 
@@ -21,6 +23,14 @@ const sizeClasses: Record<NonNullable<PriceProps["size"]>, string> = {
   sm: "text-sm",
   md: "text-lg",
   lg: "text-2xl",
+};
+
+/* Roughly the width a formatted amount occupies at each size, so the swap in
+   does not shift the layout around it. */
+const skeletonClasses: Record<NonNullable<PriceProps["size"]>, string> = {
+  sm: "h-4 w-20",
+  md: "h-5 w-24",
+  lg: "h-7 w-32",
 };
 
 /**
@@ -34,10 +44,28 @@ export function Price({
   compareAt,
   currencyCode = "USD",
   size = "md",
+  pending = false,
   className,
 }: PriceProps) {
   const percent = discountPercent(amount, compareAt);
   const showCompare = compareAt != null && compareAt > amount;
+
+  if (pending) {
+    return (
+      <span
+        aria-label="Loading price"
+        className={cn("inline-flex items-baseline gap-x-2.5", className)}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "inline-block animate-pulse rounded-pill bg-hairline",
+            skeletonClasses[size],
+          )}
+        />
+      </span>
+    );
+  }
 
   return (
     <span

@@ -4,16 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useCart } from "@/components/providers/CartProvider";
+import { useLocalizedCart } from "@/components/providers/LocalizationProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { cn, formatPrice } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
+import { cn } from "@/lib/utils";
 
 /**
  * Order review. Payment is intentionally not wired: swap the submit handler for
  * your provider's session call (Razorpay / Stripe) when keys are available.
  */
 export function CheckoutSummary() {
-  const { lines, subtotalCents, setQty, remove } = useCart();
+  const { lines, setQty, remove } = useCart();
+  const {
+    currencyCode,
+    unitAmountFor,
+    lineTotalFor,
+    subtotal,
+    pending: pricePending,
+  } = useLocalizedCart(lines);
 
   if (lines.length === 0) {
     return (
@@ -62,7 +71,17 @@ export function CheckoutSummary() {
                     {line.name}
                   </Link>
                   <p className="mt-1 text-body-sm text-ink-faint">
-                    {formatPrice(line.unitPriceCents)} each
+                    {pricePending ? (
+                      <span
+                        aria-hidden="true"
+                        className="inline-block h-3 w-24 animate-pulse rounded-pill bg-hairline align-middle"
+                      />
+                    ) : (
+                      <>
+                        {formatMoney(unitAmountFor(line.slug), currencyCode)}{" "}
+                        each
+                      </>
+                    )}
                   </p>
                 </div>
                 <button
@@ -98,7 +117,14 @@ export function CheckoutSummary() {
                   </button>
                 </span>
                 <span className="font-headline text-lg text-ink">
-                  {formatPrice(line.lineTotalCents)}
+                  {pricePending ? (
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-5 w-20 animate-pulse rounded-pill bg-hairline align-middle"
+                    />
+                  ) : (
+                    formatMoney(lineTotalFor(line.slug, line.qty), currencyCode)
+                  )}
                 </span>
               </div>
             </div>
@@ -114,7 +140,16 @@ export function CheckoutSummary() {
         <dl className="mt-6 flex flex-col gap-3 text-body-sm">
           <div className="flex justify-between">
             <dt className="text-ink-soft">Subtotal</dt>
-            <dd className="text-ink">{formatPrice(subtotalCents)}</dd>
+            <dd className="text-ink">
+              {pricePending ? (
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-4 w-20 animate-pulse rounded-pill bg-hairline align-middle"
+                />
+              ) : (
+                formatMoney(subtotal, currencyCode)
+              )}
+            </dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-ink-soft">Shipping</dt>
@@ -123,7 +158,14 @@ export function CheckoutSummary() {
           <div className="mt-3 flex items-baseline justify-between border-t border-hairline pt-4">
             <dt className="eyebrow text-ink-faint">Total</dt>
             <dd className="font-display text-[2.1rem] leading-none tracking-[0.02em] text-ink uppercase">
-              {formatPrice(subtotalCents)}
+              {pricePending ? (
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-7 w-28 animate-pulse rounded-pill bg-hairline align-middle"
+                />
+              ) : (
+                formatMoney(subtotal, currencyCode)
+              )}
             </dd>
           </div>
         </dl>
@@ -141,18 +183,20 @@ export function CheckoutSummary() {
         </Button>
 
         <ul className="mt-6 flex flex-col gap-2.5 text-body-sm text-ink-soft">
-          {["Free tracked delivery", "30-day easy returns", "Secure checkout"].map(
-            (item) => (
-              <li key={item} className="flex items-center gap-2.5">
-                <Icon
-                  name="check"
-                  className="size-4 text-rose-600"
-                  strokeWidth={2.2}
-                />
-                {item}
-              </li>
-            ),
-          )}
+          {[
+            "Free tracked delivery",
+            "30-day easy returns",
+            "Secure checkout",
+          ].map((item) => (
+            <li key={item} className="flex items-center gap-2.5">
+              <Icon
+                name="check"
+                className="size-4 text-rose-600"
+                strokeWidth={2.2}
+              />
+              {item}
+            </li>
+          ))}
         </ul>
       </aside>
     </div>

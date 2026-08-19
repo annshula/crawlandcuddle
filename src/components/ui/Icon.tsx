@@ -20,7 +20,8 @@ type IconName =
   | "map-pin"
   | "logout"
   | "trash"
-  | "chevron-down";
+  | "chevron-down"
+  | "spinner";
 
 const glyphs: Record<IconName, React.ReactNode> = {
   "arrow-right": <path d="M4 12h16m0 0-6-6m6 6-6 6" />,
@@ -105,6 +106,8 @@ const glyphs: Record<IconName, React.ReactNode> = {
     </>
   ),
   "chevron-down": <path d="m6 9 6 6 6-6" />,
+  // Three-quarter arc — pair with `animate-spin` for a busy indicator.
+  spinner: <path d="M12 3a9 9 0 1 0 9 9" />,
 };
 
 interface IconProps {

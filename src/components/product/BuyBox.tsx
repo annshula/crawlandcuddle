@@ -18,7 +18,11 @@ import { shopifyCheckout } from "@/lib/shopify-checkout";
  */
 export function BuyBox({ variant }: { variant: Variant }) {
   const { add } = useCart();
-  const { amount: unitAmount, currencyCode } = useStylePrice(variant.slug);
+  const {
+    amount: unitAmount,
+    currencyCode,
+    pending: pricePending,
+  } = useStylePrice(variant.slug);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [buying, setBuying] = useState(false);
@@ -78,7 +82,14 @@ export function BuyBox({ variant }: { variant: Variant }) {
         <p className="text-body-sm text-ink-soft">
           Total{" "}
           <span className="font-headline text-ink">
-            {formatMoney(unitAmount * qty, currencyCode)}
+            {pricePending ? (
+              <span
+                aria-hidden="true"
+                className="inline-block h-4 w-20 animate-pulse rounded-pill bg-hairline align-middle"
+              />
+            ) : (
+              formatMoney(unitAmount * qty, currencyCode)
+            )}
           </span>
         </p>
       </div>

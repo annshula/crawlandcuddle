@@ -5,19 +5,27 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 
 import { useCart } from "@/components/providers/CartProvider";
+import { useLocalizedCart } from "@/components/providers/LocalizationProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { product } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { shopifyCheckout } from "@/lib/shopify-checkout";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
-import { cn, formatPrice } from "@/lib/utils";
+import { formatMoney } from "@/lib/money";
+import { cn } from "@/lib/utils";
 
 const FREE_SHIPPING_OVER = 0; // Shipping is free on every order.
 
 export function CartDrawer() {
   const { lines, count, subtotalCents, isOpen, close, setQty, remove } =
     useCart();
+  const {
+    currencyCode,
+    lineTotalFor,
+    subtotal,
+    pending: pricePending,
+  } = useLocalizedCart(lines);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const scrimRef = useRef<HTMLDivElement | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -209,7 +217,17 @@ export function CartDrawer() {
                         </button>
                       </span>
                       <span className="font-headline text-base text-ink">
-                        {formatPrice(line.lineTotalCents)}
+                        {pricePending ? (
+                          <span
+                            aria-hidden="true"
+                            className="inline-block h-4 w-16 animate-pulse rounded-pill bg-hairline align-middle"
+                          />
+                        ) : (
+                          formatMoney(
+                            lineTotalFor(line.slug, line.qty),
+                            currencyCode,
+                          )
+                        )}
                       </span>
                     </div>
                   </div>
@@ -221,7 +239,14 @@ export function CartDrawer() {
               <div className="flex items-baseline justify-between">
                 <span className="eyebrow text-ink-faint">Subtotal</span>
                 <span className="font-display text-[2.1rem] leading-none tracking-[0.02em] text-ink uppercase">
-                  {formatPrice(subtotalCents)}
+                  {pricePending ? (
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-7 w-28 animate-pulse rounded-pill bg-hairline align-middle"
+                    />
+                  ) : (
+                    formatMoney(subtotal, currencyCode)
+                  )}
                 </span>
               </div>
               <p className="mt-2 text-body-sm text-ink-soft">

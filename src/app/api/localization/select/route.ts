@@ -28,6 +28,15 @@ export async function POST(request: NextRequest) {
   }
 
   const code = (body as { countryCode?: unknown })?.countryCode;
+
+  // "AUTO" is checked before the ISO shape test — it is four characters, so a
+  // 2-letter guard placed first would reject it and silently leave the old
+  // country cookie in place while the UI showed "Auto".
+  if (code === "AUTO") {
+    await clearSelectedCountry();
+    return NextResponse.json({ ok: true });
+  }
+
   if (typeof code !== "string" || !/^[A-Z]{2}$/.test(code)) {
     return NextResponse.json(
       { ok: false, error: "Invalid country code." },
@@ -35,11 +44,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (code === "AUTO") {
-    await clearSelectedCountry();
-  } else {
-    await writeSelectedCountry(code);
-  }
+  await writeSelectedCountry(code);
 
   return NextResponse.json({ ok: true });
 }

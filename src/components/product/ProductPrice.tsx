@@ -19,13 +19,15 @@ export function ProductPrice({
   size = "md",
   className,
 }: ProductPriceProps) {
-  const { amount, currencyCode, compareAtAmount } = useStylePrice(slug);
+  const { amount, currencyCode, compareAtAmount, pending } =
+    useStylePrice(slug);
   return (
     <Price
       amount={amount}
       compareAt={compareAtAmount}
       currencyCode={currencyCode}
       size={size}
+      pending={pending}
       className={className}
     />
   );
