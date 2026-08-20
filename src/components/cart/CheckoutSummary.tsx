@@ -2,17 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useLocalizedCart } from "@/components/providers/LocalizationProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { formatMoney } from "@/lib/money";
+import { shopifyCheckout } from "@/lib/shopify-checkout";
 import { cn } from "@/lib/utils";
 
 /**
- * Order review. Payment is intentionally not wired: swap the submit handler for
- * your provider's session call (Razorpay / Stripe) when keys are available.
+ * Order review on /checkout. "Pay now" hands off to the same Shopify-hosted
+ * checkout the cart drawer uses — one server-built Storefront cart, one
+ * redirect — so the two entry points cannot drift apart.
  */
 export function CheckoutSummary() {
   const { lines, setQty, remove } = useCart();
@@ -23,6 +26,23 @@ export function CheckoutSummary() {
     subtotal,
     pending: pricePending,
   } = useLocalizedCart(lines);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const handleCheckout = async () => {
+    if (checkingOut) return;
+    setCheckingOut(true);
+    setCheckoutError(null);
+    const result = await shopifyCheckout(
+      lines.map((l) => ({ slug: l.slug, qty: l.qty })),
+    );
+    if (result.ok) {
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+    setCheckoutError(result.error);
+    setCheckingOut(false);
+  };
 
   if (lines.length === 0) {
     return (
@@ -170,16 +190,19 @@ export function CheckoutSummary() {
           </div>
         </dl>
 
+        {checkoutError && (
+          <p className="mt-6 rounded-tag bg-rose-50 px-4 py-3 text-body-sm text-rose-700">
+            {checkoutError}
+          </p>
+        )}
+
         <Button
-          onClick={() =>
-            window.alert(
-              "Payment is not connected yet. Wire this button to your payment provider's checkout session.",
-            )
-          }
+          onClick={handleCheckout}
+          disabled={checkingOut}
           withArrow
           className="mt-7 w-full justify-center"
         >
-          Pay now
+          {checkingOut ? "Taking you to checkout…" : "Pay now"}
         </Button>
 
         <ul className="mt-6 flex flex-col gap-2.5 text-body-sm text-ink-soft">
