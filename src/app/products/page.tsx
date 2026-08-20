@@ -40,7 +40,7 @@ export default function ProductsPage() {
     <>
       <section
         style={{ clipPath: "inset(-160px 0 0 0)" }}
-        className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+3.5rem)] pb-14"
+        className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+clamp(0.75rem,2.2vh,2.5rem))] pb-[clamp(4rem,9.5vh,6rem)]"
       >
         <Blob
           shape="c"
@@ -57,32 +57,83 @@ export default function ProductsPage() {
             items={[{ label: "Home", href: "/" }, { label: "Products" }]}
           />
 
-          <h1 className="mt-6 max-w-3xl font-display text-heading uppercase">
-            Ten styles of the baby head protector backpack
-          </h1>
-          <p className="mt-5 max-w-2xl text-body text-ink-soft">
-            Every style carries the same impact-absorbing ring, breathable 3D
-            air-mesh shell and adjustable harness. Choose the one your little
-            explorer will ask for by name.
-          </p>
+          {/* Copy and the hero product shot. On a phone the photo leads —
+              the same order as the home hero — with the copy following;
+              from lg the copy takes the left column and the shot sits right. */}
+          <div className="mt-6 grid items-center gap-8 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
+            <div className="order-2 min-w-0 lg:order-1">
+              <h1 className="max-w-3xl font-display text-heading uppercase">
+                Ten styles of the baby head protector backpack
+              </h1>
+              <p className="mt-5 max-w-2xl text-body text-ink-soft">
+                Every style carries the same impact-absorbing ring, breathable
+                3D air-mesh shell and adjustable harness. Choose the one your
+                little explorer will ask for by name.
+              </p>
 
-          <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
-            {trustBadges.map((badge) => (
-              <li
-                key={badge.label}
-                className="flex items-center gap-2 text-body-sm text-ink-soft"
-              >
-                <Icon
-                  name="check"
-                  className="size-4 text-rose-600"
-                  strokeWidth={2.2}
+              <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+                {trustBadges.map((badge) => (
+                  <li
+                    key={badge.label}
+                    className="flex items-center gap-2 text-body-sm text-ink-soft"
+                  >
+                    <Icon
+                      name="check"
+                      className="size-4 text-rose-600"
+                      strokeWidth={2.2}
+                    />
+                    {badge.label}
+                  </li>
+                ))}
+              </ul>
+
+              <PromiseStrip className="mt-9 max-w-2xl" />
+            </div>
+
+            {/* --- Hero product visual -----------------------------------
+                 The same treatment as the home hero photo: an uncropped
+                 portrait figure that fits the screen (never taller than
+                 74vh) with organic blobs as the backdrop and line art around.
+                 The photo's own backdrop has been cut out, so the product
+                 floats on the halo instead of sitting in a box. */}
+            <div className="relative order-1 min-w-0 lg:order-2">
+              <div className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] sm:w-[min(100%,25rem)] lg:h-[min(74vh,36rem)] lg:w-auto lg:max-w-full">
+                <Blob
+                  shape="b"
+                  className="absolute inset-[-18%] h-[136%] w-[136%] text-blush"
                 />
-                {badge.label}
-              </li>
-            ))}
-          </ul>
+                <Blob
+                  shape="e"
+                  spin={-20}
+                  className="absolute inset-[6%] h-[88%] w-[88%] text-lilac-100/70"
+                />
 
-          <PromiseStrip className="mt-9 max-w-2xl" />
+                <div className="relative h-full w-full animate-float-slow">
+                  <Image
+                    src="/images/product/pink-pig.webp"
+                    alt="Baby head protector backpack in the Flying Pig design, on a soft plain background"
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 26rem, (min-width: 640px) 24rem, 80vw"
+                    className="object-contain object-center"
+                  />
+                </div>
+
+                <LineArt
+                  name="star"
+                  className="absolute -bottom-2 left-0 w-10 text-rose-400/70 animate-wobble"
+                />
+                <LineArt
+                  name="heart"
+                  className="absolute top-6 -left-6 w-8 text-lilac-400/60 animate-float"
+                />
+                <LineArt
+                  name="butterfly"
+                  className="absolute right-0 -bottom-6 w-14 rotate-12 text-mint/80"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

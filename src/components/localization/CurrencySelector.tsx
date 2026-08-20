@@ -121,7 +121,7 @@ export function CurrencySelector({
 
   const triggerClass = isDrawer
     ? "grid size-12 place-items-center rounded-full border border-paper/25 text-paper transition-colors duration-300 hover:bg-paper/10"
-    : "flex items-center gap-2 rounded-full border border-ink/15 px-3.5 py-2.5 font-label text-[0.68rem] tracking-[0.14em] text-ink uppercase transition-colors duration-300 hover:border-rose-600 hover:text-rose-600";
+    : "flex items-center gap-2 rounded-full border border-ink/15 px-3.5 py-2 font-label text-[0.68rem] tracking-[0.14em] text-ink uppercase transition-colors duration-300 hover:border-rose-600 hover:text-rose-600";
 
   /* The country list is a round trip away. Hold the control's own footprint
      with a spinner rather than rendering nothing, so the header and the
