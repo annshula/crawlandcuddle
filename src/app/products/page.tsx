@@ -20,8 +20,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: absoluteUrl("/products"),
+    siteName: site.name,
     title: "All Products — Baby Head Protector Backpack, 10 Styles",
     description: site.shortDescription,
+    locale: "en_US",
+    images: [{ ...site.ogImage }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "All Products — Baby Head Protector Backpack, 10 Styles",
+    description: site.shortDescription,
+    images: [{ ...site.ogImage }],
   },
 };
 

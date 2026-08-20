@@ -46,6 +46,18 @@ export const site = {
   },
   /** Markets this storefront actually ships to — used in shipping/returns copy. */
   shipsTo: ["United States", "Canada", "United Kingdom", "Australia"],
+  /**
+   * Default social share card. Every route falls back to this unless it has a
+   * more specific image (product pages use the variant shot). Dimensions match
+   * the file on disk so crawlers size the card without downloading it first.
+   */
+  ogImage: {
+    url: "/images/social/og-default.jpg",
+    width: 1731,
+    height: 909,
+    alt: "Crawl & Cuddle baby head protector backpack",
+    type: "image/jpeg",
+  },
   socials,
 } as const;
 

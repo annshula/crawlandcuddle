@@ -47,15 +47,25 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url: absoluteUrl(variantHref(slug)),
+      siteName: site.name,
       title: `${title} — ${site.name}`,
       description,
-      images: [{ url: variant.image, width: 800, height: 800, alt: title }],
+      locale: "en_US",
+      // Variant shot first (it is what the shopper is looking at); the branded
+      // card is the fallback for platforms that reject the square crop.
+      images: [
+        { url: variant.image, width: 800, height: 800, alt: title },
+        { ...site.ogImage },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [variant.image],
+      images: [
+        { url: variant.image, width: 800, height: 800, alt: title },
+        { ...site.ogImage },
+      ],
     },
   };
 }

@@ -47,11 +47,13 @@ export const metadata: Metadata = {
     title: "Baby Head Protector Backpack — Ten Styles, One Promise",
     description: site.shortDescription,
     locale: "en_US",
+    images: [{ ...site.ogImage }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Baby Head Protector Backpack — Ten Styles, One Promise",
     description: site.shortDescription,
+    images: [{ ...site.ogImage }],
   },
   robots: {
     index: true,
