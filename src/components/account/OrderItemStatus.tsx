@@ -254,10 +254,10 @@ export function OrderItemStatus({
           data-lenis-prevent
         >
           <h3 className="font-display text-heading-sm text-ink uppercase">
-            History
+            Tracking
           </h3>
           <p className="mt-1.5 font-script text-2xl text-lilac-500">
-            every step we can actually see
+            from our door to your floor
           </p>
 
           <VerticalJourney nodes={journey} />
