@@ -407,7 +407,9 @@ export const CUSTOMER_ORDERS_QUERY = /* GraphQL */ `
             amount
             currencyCode
           }
-          lineItems(first: 4) {
+          # 100, not 4: on a shared store a mixed order's own line items can sit
+          # anywhere in the list, and a 4-item preview window would miss them.
+          lineItems(first: 100) {
             nodes {
               id
               title
@@ -415,6 +417,8 @@ export const CUSTOMER_ORDERS_QUERY = /* GraphQL */ `
                 url
                 altText
               }
+              variantId
+              productId
             }
           }
         }
@@ -486,6 +490,8 @@ export const CUSTOMER_ORDER_QUERY = /* GraphQL */ `
           variantTitle
           quantity
           sku
+          variantId
+          productId
           image {
             url
             altText

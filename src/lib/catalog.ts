@@ -77,3 +77,26 @@ export function getVariantForStyle(slug: string): SyncedVariant {
   });
   return match ?? defaultVariant();
 }
+
+/* ── Brand identity on a shared store ──────────────────────────────────── */
+
+/** The single product this storefront sells — how we tell our line items apart from other brands sharing the Shopify store. */
+export const crawlCuddleProductId = syncedProduct.id;
+
+/** Every variant of that product; anything else on the shared store belongs to another brand. */
+const crawlCuddleVariantIds = new Set(
+  syncedProduct.variants.map((variant) => variant.id),
+);
+
+/**
+ * Whether an order line item belongs to Crawl & Cuddle. Matches the product id
+ * first (any variant of our product counts, including a design added after the
+ * last `npm run shopify:sync`), falling back to the exact variant id set.
+ */
+export function belongsToCrawlCuddle(input: {
+  variantId?: string | null;
+  productId?: string | null;
+}): boolean {
+  if (input.productId && input.productId === crawlCuddleProductId) return true;
+  return Boolean(input.variantId && crawlCuddleVariantIds.has(input.variantId));
+}

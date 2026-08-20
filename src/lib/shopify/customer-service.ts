@@ -1,8 +1,12 @@
 /**
  * Typed read layer over the Customer Account API. Every call goes through
  * `customerRequest`, which injects the signed-in customer's own access token.
+ *
+ * The store is shared with other brands, so both order reads filter line items
+ * down to this storefront's own product — see {@link belongsToCrawlCuddle}.
  */
 
+import { belongsToCrawlCuddle } from "@/lib/catalog";
 import { customerRequest } from "@/lib/shopify/customer-account";
 import {
   CUSTOMER_ORDERS_QUERY,
@@ -107,57 +111,116 @@ export async function updateCustomer(input: {
   const error = data.customerUpdate?.userErrors?.[0]?.message;
   if (error) throw new CustomerServiceError(error);
   const customer = data.customerUpdate?.customer;
-  if (!customer) throw new CustomerServiceError("We could not save your details.");
+  if (!customer)
+    throw new CustomerServiceError("We could not save your details.");
   return { firstName: customer.firstName, lastName: customer.lastName };
 }
 
 /* ── Orders ────────────────────────────────────────────────────────────── */
 
+type RawLineItemIdentity = {
+  variantId?: string | null;
+  productId?: string | null;
+};
+
+/** True when a line item is this storefront's own product, not another brand sharing the store. */
+function isOwnItem(item: RawLineItemIdentity | null | undefined): boolean {
+  return belongsToCrawlCuddle({
+    variantId: item?.variantId ?? null,
+    productId: item?.productId ?? null,
+  });
+}
+
+/** Cap on Shopify order pages scanned to fill one page with own-brand orders. */
+const MAX_ORDERS_PAGES = 50;
+
 export async function listOrders(options: {
   first?: number;
   after?: string | null;
-}): Promise<{ orders: OrderSummary[]; hasNextPage: boolean; endCursor: string | null }> {
-  const first = options.first ?? 10;
-  const after = options.after ?? null;
-  const data = await customerRequest<{
-    customer: {
-      orders: {
-        pageInfo: { hasNextPage: boolean; endCursor: string | null };
-        nodes: Array<{
-          id: string;
-          number: number;
-          name: string;
-          processedAt: string;
-          financialStatus: string | null;
-          fulfillments: { nodes: Array<{ status: string | null }> } | null;
-          totalPrice: { amount: string; currencyCode: string } | null;
-          lineItems: { nodes: Array<{ id: string; title: string; image: { url: string; altText: string | null } | null }> };
-        }>;
-      };
-    } | null;
-  }>({ query: CUSTOMER_ORDERS_QUERY, variables: { first, after } });
+}): Promise<{
+  orders: OrderSummary[];
+  hasNextPage: boolean;
+  endCursor: string | null;
+}> {
+  const requested = options.first ?? 10;
+  const collected: OrderSummary[] = [];
+  let cursor = options.after ?? null;
+  let hasNextPage = false;
+  let endCursor: string | null = null;
 
-  const orders = data.customer?.orders;
-  if (!orders) throw new CustomerServiceError("We could not load your orders.");
+  /* The store is shared with other brands, so we page through Shopify's order
+     list and keep only the orders that actually contain our own product, then
+     keep paging until this page is full or there is nothing left to scan. */
+  for (
+    let page = 0;
+    page < MAX_ORDERS_PAGES && collected.length < requested;
+    page++
+  ) {
+    const data = await customerRequest<{
+      customer: {
+        orders: {
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+          nodes: Array<{
+            id: string;
+            number: number;
+            name: string;
+            processedAt: string;
+            financialStatus: string | null;
+            fulfillments: { nodes: Array<{ status: string | null }> } | null;
+            totalPrice: { amount: string; currencyCode: string } | null;
+            lineItems: {
+              nodes: Array<{
+                image: { url: string; altText: string | null } | null;
+                variantId: string | null;
+                productId: string | null;
+              }>;
+            };
+          }>;
+        };
+      } | null;
+    }>({
+      query: CUSTOMER_ORDERS_QUERY,
+      variables: { first: requested, after: cursor },
+    });
+
+    const orders = data.customer?.orders;
+    if (!orders) break;
+
+    hasNextPage = orders.pageInfo.hasNextPage;
+    endCursor = orders.pageInfo.endCursor;
+
+    for (const node of orders.nodes) {
+      const ownItems = node.lineItems.nodes.filter((li) => isOwnItem(li));
+      if (ownItems.length === 0) continue;
+      collected.push({
+        id: node.id,
+        number: node.number,
+        name: node.name,
+        processedAt: node.processedAt,
+        financialStatus: node.financialStatus,
+        fulfillmentStatus: node.fulfillments?.nodes?.[0]?.status ?? null,
+        totalPrice: node.totalPrice
+          ? {
+              amount: node.totalPrice.amount,
+              currencyCode: node.totalPrice.currencyCode,
+            }
+          : null,
+        lineItemCount: ownItems.length,
+        previewImages: ownItems.map((li) =>
+          li.image ? { url: li.image.url, altText: li.image.altText } : null,
+        ),
+      });
+      if (collected.length >= requested) break;
+    }
+
+    cursor = orders.pageInfo.endCursor;
+    if (!hasNextPage || !cursor) break;
+  }
 
   return {
-    orders: orders.nodes.map((node) => ({
-      id: node.id,
-      number: node.number,
-      name: node.name,
-      processedAt: node.processedAt,
-      financialStatus: node.financialStatus,
-      fulfillmentStatus: node.fulfillments?.nodes?.[0]?.status ?? null,
-      totalPrice: node.totalPrice
-        ? { amount: node.totalPrice.amount, currencyCode: node.totalPrice.currencyCode }
-        : null,
-      lineItemCount: node.lineItems.nodes.length,
-      previewImages: node.lineItems.nodes.map((li) =>
-        li.image ? { url: li.image.url, altText: li.image.altText } : null,
-      ),
-    })),
-    hasNextPage: orders.pageInfo.hasNextPage,
-    endCursor: orders.pageInfo.endCursor,
+    orders: collected.slice(0, requested),
+    hasNextPage,
+    endCursor,
   };
 }
 
@@ -187,6 +250,8 @@ export async function getOrder(orderId: string): Promise<Order | null> {
           variantTitle: string | null;
           quantity: number;
           sku: string | null;
+          variantId: string | null;
+          productId: string | null;
           image: { url: string; altText: string | null } | null;
           price: { amount: string; currencyCode: string } | null;
           totalPrice: { amount: string; currencyCode: string } | null;
@@ -198,8 +263,14 @@ export async function getOrder(orderId: string): Promise<Order | null> {
           status: string | null;
           createdAt: string | null;
           estimatedDeliveryAt: string | null;
-          trackingInformation: Array<{ number: string | null; company: string | null; url: string | null }> | null;
-          events: { nodes: Array<{ status: string | null; happenedAt: string | null }> } | null;
+          trackingInformation: Array<{
+            number: string | null;
+            company: string | null;
+            url: string | null;
+          }> | null;
+          events: {
+            nodes: Array<{ status: string | null; happenedAt: string | null }>;
+          } | null;
           fulfillmentLineItems: {
             nodes: Array<{ lineItem: { id: string }; quantity: number }>;
           };
@@ -210,6 +281,33 @@ export async function getOrder(orderId: string): Promise<Order | null> {
 
   const order = data.order;
   if (!order) return null;
+
+  /* The shared store means an order can carry other brands' products. Keep
+     only our own line items, and treat an order with nothing of ours as not
+     found — the page has nothing to show. */
+  const lineItems = order.lineItems.nodes
+    .filter((li) => isOwnItem(li))
+    .map((li) => ({
+      id: li.id,
+      title: li.title,
+      variantTitle: li.variantTitle,
+      quantity: li.quantity,
+      sku: li.sku,
+      variantId: li.variantId ?? null,
+      productId: li.productId ?? null,
+      image: li.image ? { url: li.image.url, altText: li.image.altText } : null,
+      price: li.price
+        ? { amount: li.price.amount, currencyCode: li.price.currencyCode }
+        : null,
+      totalPrice: li.totalPrice
+        ? {
+            amount: li.totalPrice.amount,
+            currencyCode: li.totalPrice.currencyCode,
+          }
+        : null,
+    }));
+
+  if (lineItems.length === 0) return null;
 
   return {
     id: order.id,
@@ -222,34 +320,42 @@ export async function getOrder(orderId: string): Promise<Order | null> {
     email: order.email,
     phone: order.phone,
     totalPrice: order.totalPrice
-      ? { amount: order.totalPrice.amount, currencyCode: order.totalPrice.currencyCode }
+      ? {
+          amount: order.totalPrice.amount,
+          currencyCode: order.totalPrice.currencyCode,
+        }
       : null,
     subtotal: order.subtotal
-      ? { amount: order.subtotal.amount, currencyCode: order.subtotal.currencyCode }
+      ? {
+          amount: order.subtotal.amount,
+          currencyCode: order.subtotal.currencyCode,
+        }
       : null,
     totalShipping: order.totalShipping
-      ? { amount: order.totalShipping.amount, currencyCode: order.totalShipping.currencyCode }
+      ? {
+          amount: order.totalShipping.amount,
+          currencyCode: order.totalShipping.currencyCode,
+        }
       : null,
     totalTax: order.totalTax
-      ? { amount: order.totalTax.amount, currencyCode: order.totalTax.currencyCode }
+      ? {
+          amount: order.totalTax.amount,
+          currencyCode: order.totalTax.currencyCode,
+        }
       : null,
     totalRefunded: order.totalRefunded
-      ? { amount: order.totalRefunded.amount, currencyCode: order.totalRefunded.currencyCode }
+      ? {
+          amount: order.totalRefunded.amount,
+          currencyCode: order.totalRefunded.currencyCode,
+        }
       : null,
-    shippingAddress: order.shippingAddress ? mapAddress(order.shippingAddress) : null,
-    billingAddress: order.billingAddress ? mapAddress(order.billingAddress) : null,
-    lineItems: order.lineItems.nodes.map((li) => ({
-      id: li.id,
-      title: li.title,
-      variantTitle: li.variantTitle,
-      quantity: li.quantity,
-      sku: li.sku,
-      image: li.image ? { url: li.image.url, altText: li.image.altText } : null,
-      price: li.price ? { amount: li.price.amount, currencyCode: li.price.currencyCode } : null,
-      totalPrice: li.totalPrice
-        ? { amount: li.totalPrice.amount, currencyCode: li.totalPrice.currencyCode }
-        : null,
-    })),
+    shippingAddress: order.shippingAddress
+      ? mapAddress(order.shippingAddress)
+      : null,
+    billingAddress: order.billingAddress
+      ? mapAddress(order.billingAddress)
+      : null,
+    lineItems,
     fulfillments: order.fulfillments.nodes.map((f) => ({
       id: f.id,
       status: f.status,
@@ -349,13 +455,15 @@ function toReturnSummary(
     .map((r) => {
       const lineItemReasons: Record<string, ReturnReason> = {};
       for (const node of r.returnLineItems.nodes) {
-        if (node.lineItem?.id) lineItemReasons[node.lineItem.id] = node.returnReason;
+        if (node.lineItem?.id)
+          lineItemReasons[node.lineItem.id] = node.returnReason;
       }
       const tracking =
         (r.reverseDeliveries?.nodes ?? [])
           .map((delivery) => delivery.deliverable?.tracking)
-          .find((t): t is NonNullable<typeof t> => Boolean(t?.trackingNumber)) ??
-        null;
+          .find((t): t is NonNullable<typeof t> =>
+            Boolean(t?.trackingNumber),
+          ) ?? null;
 
       return {
         id: r.id,

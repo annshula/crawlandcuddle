@@ -79,6 +79,10 @@ export type OrderLineItem = {
   variantTitle: string | null;
   quantity: number;
   sku: string | null;
+  /** Shopify id of the bought variant — null if Shopify no longer has it. */
+  variantId: string | null;
+  /** Shopify id of the product the variant belongs to. */
+  productId: string | null;
   image: { url: string; altText: string | null } | null;
   price: Money | null;
   totalPrice: Money | null;
@@ -89,7 +93,11 @@ export type OrderFulfillment = {
   status: string | null;
   createdAt: string | null;
   estimatedDeliveryAt: string | null;
-  trackingInformation: Array<{ number: string | null; company: string | null; url: string | null }>;
+  trackingInformation: Array<{
+    number: string | null;
+    company: string | null;
+    url: string | null;
+  }>;
   events: Array<{ status: string | null; happenedAt: string | null }>;
   lineItemIds: string[];
 };

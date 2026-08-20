@@ -40,7 +40,7 @@ export default async function AddressesPage() {
             title="No addresses yet"
             body="Your saved delivery addresses will appear here once you add one at checkout."
           >
-            <Button href="/products" withArrow>
+            <Button href="/products" withArrow className="w-full sm:w-auto">
               Browse the range
             </Button>
           </EmptyState>

@@ -47,14 +47,19 @@ export default async function OrdersPage({ searchParams }: PageProps) {
             title="Nothing here yet"
             body="Your orders will appear here as soon as you place one."
           >
-            <Button href="/products" withArrow>
+            <Button href="/products" withArrow className="w-full sm:w-auto">
               Browse the range
             </Button>
           </EmptyState>
         </div>
       ) : (
         <>
-          <Reveal as="ul" variant="up" stagger={0.06} className="mt-10 flex flex-col gap-3">
+          <Reveal
+            as="ul"
+            variant="up"
+            stagger={0.06}
+            className="mt-10 flex flex-col gap-3"
+          >
             {orders.map((order) => (
               <li key={order.id}>
                 <OrderRow order={order} />

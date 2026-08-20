@@ -149,7 +149,7 @@ export default async function AccountOverviewPage() {
               title="No orders yet"
               body="When you place your first order it will show up here with live tracking and easy returns."
             >
-              <Button href="/products" withArrow>
+              <Button href="/products" withArrow className="w-full sm:w-auto">
                 Shop the range
               </Button>
             </EmptyState>
