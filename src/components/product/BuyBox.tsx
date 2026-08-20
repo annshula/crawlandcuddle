@@ -18,7 +18,7 @@ import { shopifyCheckout } from "@/lib/shopify-checkout";
  * keep browsing.
  */
 export function BuyBox({ variant }: { variant: Variant }) {
-  const { add } = useCart();
+  const { add, clear } = useCart();
   const {
     amount: unitAmount,
     currencyCode,
@@ -42,6 +42,8 @@ export function BuyBox({ variant }: { variant: Variant }) {
     setBuyError(null);
     const result = await shopifyCheckout([{ slug: variant.slug, qty }]);
     if (result.ok) {
+      // The bag is now committed to Shopify's checkout — empty the local cart.
+      clear();
       window.location.href = result.checkoutUrl;
       return;
     }

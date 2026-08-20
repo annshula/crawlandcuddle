@@ -10,7 +10,7 @@ import { shopifyCheckout } from "@/lib/shopify-checkout";
  * compact purchase row that never takes focus away from the card.
  */
 export function QuickBuy({ slug }: { slug: string }) {
-  const { add } = useCart();
+  const { add, clear } = useCart();
   const [qty, setQty] = useState(1);
   const [buying, setBuying] = useState(false);
 
@@ -21,6 +21,8 @@ export function QuickBuy({ slug }: { slug: string }) {
     setBuying(true);
     const result = await shopifyCheckout([{ slug, qty }]);
     if (result.ok) {
+      // The bag is now committed to Shopify's checkout — empty the local cart.
+      clear();
       window.location.href = result.checkoutUrl;
       return;
     }

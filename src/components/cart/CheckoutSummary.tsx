@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
  * redirect — so the two entry points cannot drift apart.
  */
 export function CheckoutSummary() {
-  const { lines, setQty, remove } = useCart();
+  const { lines, setQty, remove, clear } = useCart();
   const {
     currencyCode,
     unitAmountFor,
@@ -37,6 +37,8 @@ export function CheckoutSummary() {
       lines.map((l) => ({ slug: l.slug, qty: l.qty })),
     );
     if (result.ok) {
+      // The bag is now committed to Shopify's checkout — empty the local cart.
+      clear();
       window.location.href = result.checkoutUrl;
       return;
     }

@@ -177,7 +177,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       add,
       setQty: (slug, qty) => dispatch({ type: "setQty", slug, qty }),
       remove: (slug) => dispatch({ type: "remove", slug }),
-      clear: () => dispatch({ type: "clear" }),
+      clear: () => {
+        dispatch({ type: "clear" });
+        // Also empty storage synchronously: checkout redirects immediately, so
+        // React's persistence effect may not flush before the navigation.
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          // Quota/private-mode errors must never break checkout.
+        }
+      },
     }),
     [lines, isOpen, add],
   );
