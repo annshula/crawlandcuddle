@@ -46,18 +46,32 @@ const CLARITY_SRC = CLARITY_ENABLED
   ? " https://www.clarity.ms https://*.clarity.ms"
   : "";
 
+/**
+ * Meta Pixel origins, allowed only when a pixel id is configured — the tag
+ * script is served from connect.facebook.net and both the beacon and the
+ * <noscript> fallback image hit facebook.com. With no id the app never loads
+ * the pixel, so the CSP stays as tight as it was.
+ */
+const META_PIXEL_ENABLED = Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+const META_SCRIPT_SRC = META_PIXEL_ENABLED
+  ? " https://connect.facebook.net"
+  : "";
+const META_PIXEL_SRC = META_PIXEL_ENABLED
+  ? " https://www.facebook.com https://connect.facebook.net"
+  : "";
+
 const CSP = [
   `default-src 'self'`,
   // See module doc for why 'unsafe-inline' is here (Next's inline RSC payload).
-  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}`,
+  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}`,
   // Components set dynamic inline styles (GSAP, scroll progress, blobs), so
   // style attributes/`<style>` need 'unsafe-inline' — styles cannot execute
   // script, so this is low risk.
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}`,
+  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${META_PIXEL_SRC}`,
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
-  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}`,
+  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,
   `form-action 'self'`,
