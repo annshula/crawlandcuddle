@@ -74,32 +74,46 @@ async function sendMetaPurchase(
 
   const value = Number(order.current_total_price ?? order.total_price ?? 0);
 
-  await fetch(`https://graph.facebook.com/${version}/${pixelId}/events`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      data: [
-        {
-          event_name: "Purchase",
-          event_time: Math.floor(Date.now() / 1000),
-          event_id: `purchase-${order.id}`,
-          action_source: "website",
-          user_data: {
-            client_ip_address: ip ?? undefined,
-            client_user_agent: userAgent ?? undefined,
-          },
-          custom_data: {
-            currency: order.currency ?? "USD",
-            value,
-            content_ids: items.map((i) => String(i.variant_id ?? i.id)),
-            content_type: "product",
-            num_items: items.reduce((n, i) => n + (i.quantity ?? 1), 0),
-            order_id: String(order.id),
-          },
-        },
-      ],
-    }),
-  });
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/${version}/${pixelId}/events`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: [
+            {
+              event_name: "Purchase",
+              event_time: Math.floor(Date.now() / 1000),
+              event_id: `purchase-${order.id}`,
+              action_source: "website",
+              user_data: {
+                client_ip_address: ip ?? undefined,
+                client_user_agent: userAgent ?? undefined,
+              },
+              custom_data: {
+                currency: order.currency ?? "USD",
+                value,
+                content_ids: items.map((i) => String(i.variant_id ?? i.id)),
+                content_type: "product",
+                num_items: items.reduce((n, i) => n + (i.quantity ?? 1), 0),
+                order_id: String(order.id),
+              },
+            },
+          ],
+        }),
+      },
+    );
+    const text = await response.text();
+    console.log(
+      `[webhook] Meta CAPI status ${response.status} for order ${order.id}: ${text.slice(0, 500)}`,
+    );
+  } catch (error) {
+    console.error(
+      `[webhook] Meta CAPI request failed for order ${order.id}:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
 }
 
 /** GA4 Measurement Protocol `purchase` event. No-op without an API secret. */
@@ -116,31 +130,42 @@ async function sendGa4Purchase(order: ShopifyOrder): Promise<void> {
   }));
   if (items.length === 0) return;
 
-  await fetch(
-    `https://www.google-analytics.com/mp/collect?api_secret=${encodeURIComponent(apiSecret)}&measurement_id=${encodeURIComponent(measurementId)}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        /* One stable server-side client per order, so the purchase is not
-           counted as its own brand-new "user". */
-        client_id: `order-${order.id}.crawlandcuddle`,
-        events: [
-          {
-            name: "purchase",
-            params: {
-              currency: order.currency ?? "USD",
-              value: Number(
-                order.current_total_price ?? order.total_price ?? 0,
-              ),
-              transaction_id: String(order.id),
-              items,
+  try {
+    const response = await fetch(
+      `https://www.google-analytics.com/mp/collect?api_secret=${encodeURIComponent(apiSecret)}&measurement_id=${encodeURIComponent(measurementId)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          /* One stable server-side client per order, so the purchase is not
+             counted as its own brand-new "user". */
+          client_id: `order-${order.id}.crawlandcuddle`,
+          events: [
+            {
+              name: "purchase",
+              params: {
+                currency: order.currency ?? "USD",
+                value: Number(
+                  order.current_total_price ?? order.total_price ?? 0,
+                ),
+                transaction_id: String(order.id),
+                items,
+              },
             },
-          },
-        ],
-      }),
-    },
-  );
+          ],
+        }),
+      },
+    );
+    const text = await response.text();
+    console.log(
+      `[webhook] GA4 MP status ${response.status} for order ${order.id}: ${text.slice(0, 500)}`,
+    );
+  } catch (error) {
+    console.error(
+      `[webhook] GA4 MP request failed for order ${order.id}:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
