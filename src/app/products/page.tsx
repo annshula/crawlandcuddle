@@ -60,7 +60,7 @@ export default function ProductsPage() {
           {/* Copy and the hero product shot. On a phone the photo leads —
               the same order as the home hero — with the copy following;
               from lg the copy takes the left column and the shot sits right. */}
-          <div className="mt-6 grid items-center gap-8 lg:mt-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
+          <div className="mt-6 grid items-center gap-8 lg:mt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
             <div className="order-2 min-w-0 lg:order-1">
               <h1 className="max-w-3xl font-display text-heading uppercase">
                 Ten styles of the baby head protector backpack
@@ -97,7 +97,7 @@ export default function ProductsPage() {
                  The photo's own backdrop has been cut out, so the product
                  floats on the halo instead of sitting in a box. */}
             <div className="relative order-1 min-w-0 lg:order-2">
-              <div className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] sm:w-[min(100%,25rem)] lg:h-[min(74vh,36rem)] lg:w-auto lg:max-w-full">
+              <div className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] sm:w-[min(100%,25rem)] lg:h-[min(68vh,35rem)] lg:w-auto lg:max-w-full">
                 <Blob
                   shape="b"
                   className="absolute inset-[-18%] h-[136%] w-[136%] text-blush"
