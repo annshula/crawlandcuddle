@@ -530,3 +530,104 @@ export const CUSTOMER_ORDER_QUERY = /* GraphQL */ `
     }
   }
 `;
+
+/**
+ * Return status for one order, attributed to the exact line items each return
+ * actually covers (via `returnLineItems.lineItem.id`) — never a blanket status
+ * smeared across every product in the order. The Customer Account API's return
+ * schema is a smaller shape than Admin's: there is no `requestApprovedAt`, no
+ * `fulfillmentLineItem` and no order-level `returnStatus` here.
+ */
+export const CUSTOMER_ORDER_RETURN_STATUS_QUERY = /* GraphQL */ `
+  query CustomerOrderReturnStatus($id: ID!) {
+    order(id: $id) {
+      returns(first: 10) {
+        nodes {
+          id
+          status
+          createdAt
+          closedAt
+          updatedAt
+          returnLineItems(first: 50) {
+            nodes {
+              lineItem {
+                id
+              }
+              returnReason
+            }
+          }
+          reverseDeliveries(first: 5) {
+            nodes {
+              deliverable {
+                ... on ReverseDeliveryShippingDeliverable {
+                  tracking {
+                    trackingNumber
+                    trackingUrl
+                    carrierName
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * The same read without `reverseDeliveries`. Return tracking is the one part of
+ * the shape above that is not fully pinned down, and a single unknown field
+ * fails the whole document — which would silently switch return filtering off
+ * and offer the shopper items they have already sent back. This runs as the
+ * fallback so knowing *that* an item is being returned never depends on being
+ * able to read its tracking number.
+ */
+export const CUSTOMER_ORDER_RETURN_STATUS_FALLBACK_QUERY = /* GraphQL */ `
+  query CustomerOrderReturnStatusBasic($id: ID!) {
+    order(id: $id) {
+      returns(first: 10) {
+        nodes {
+          id
+          status
+          createdAt
+          closedAt
+          updatedAt
+          returnLineItems(first: 50) {
+            nodes {
+              lineItem {
+                id
+              }
+              returnReason
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Submits a return request. `RequestedLineItemInput` is
+ * `{ lineItemId: ID!, quantity: Int!, returnReason: ReturnReason!,
+ * customerNote: String }`.
+ */
+export const ORDER_REQUEST_RETURN_MUTATION = /* GraphQL */ `
+  mutation OrderRequestReturn(
+    $orderId: ID!
+    $requestedLineItems: [RequestedLineItemInput!]!
+  ) {
+    orderRequestReturn(
+      orderId: $orderId
+      requestedLineItems: $requestedLineItems
+    ) {
+      return {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;

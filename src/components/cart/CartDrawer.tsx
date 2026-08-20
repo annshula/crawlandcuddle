@@ -251,8 +251,8 @@ export function CartDrawer() {
               </div>
               <p className="mt-2 text-body-sm text-ink-soft">
                 {subtotalCents > FREE_SHIPPING_OVER
-                  ? "Free tracked shipping included."
-                  : "Shipping calculated at checkout."}
+                  ? "Free tracked shipping · arrives in 3–7 days."
+                  : "Shipping calculated at checkout · arrives in 3–7 days."}
               </p>
               {checkoutError && (
                 <p className="mt-4 rounded-tag bg-rose-50 px-4 py-3 text-body-sm text-rose-700">

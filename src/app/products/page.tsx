@@ -6,6 +6,7 @@ import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
 import { Reveal } from "@/components/motion/Reveal";
 import { ProductPrice } from "@/components/product/ProductPrice";
+import { PromiseStrip } from "@/components/product/PromiseStrip";
 import { QuickBuy } from "@/components/product/QuickBuy";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
@@ -80,6 +81,8 @@ export default function ProductsPage() {
               </li>
             ))}
           </ul>
+
+          <PromiseStrip className="mt-9 max-w-2xl" />
         </div>
       </section>
 

@@ -21,6 +21,10 @@ type IconName =
   | "logout"
   | "trash"
   | "chevron-down"
+  | "truck"
+  | "refresh"
+  | "clock"
+  | "alert"
   | "spinner";
 
 const glyphs: Record<IconName, React.ReactNode> = {
@@ -106,6 +110,32 @@ const glyphs: Record<IconName, React.ReactNode> = {
     </>
   ),
   "chevron-down": <path d="m6 9 6 6 6-6" />,
+  truck: (
+    <>
+      <path d="M3 7.5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1V16H3z" />
+      <path d="M14 10.5h3.4a1 1 0 0 1 .8.4l2.4 3.2a1 1 0 0 1 .2.6V16h-6.8z" />
+      <circle cx="7" cy="17.5" r="1.9" />
+      <circle cx="17" cy="17.5" r="1.9" />
+    </>
+  ),
+  refresh: (
+    <>
+      <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+      <path d="M20.5 4v4.2h-4.2" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.2V12l3.2 2" />
+    </>
+  ),
+  alert: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.8v5M12 16.1h.01" />
+    </>
+  ),
   // Three-quarter arc — pair with `animate-spin` for a busy indicator.
   spinner: <path d="M12 3a9 9 0 1 0 9 9" />,
 };

@@ -174,6 +174,39 @@
   }
 }
 
+/* Tracking rail: the completed run draws itself in on load, and the live
+   segment keeps a slow diagonal flow so "in transit" reads as motion rather
+   than as another static bar. Both are neutralised by the reduced-motion
+   block at the end of this file. */
+@keyframes rail-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rail-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 1.5rem 0;
+  }
+}
+
+/* Bottom sheet: rises from the foot of the screen with its scrim fading in
+   behind it. Neutralised by the reduced-motion block at the end of this file. */
+@keyframes sheet-rise {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @keyframes drift {
   0%,
   100% {
@@ -416,6 +449,35 @@
     background-color: var(--color-surface-card);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-drift);
+  }
+
+  /* Segment of the tracking rail that has already happened. */
+  .rail-done {
+    transform-origin: left center;
+    animation: rail-draw 0.9s var(--ease-out-soft) both;
+  }
+
+  /* The segment currently in motion — a soft repeating stripe that keeps
+     travelling toward the next milestone. */
+  .rail-live {
+    background-image: repeating-linear-gradient(
+      115deg,
+      var(--color-lilac-400) 0 0.35rem,
+      var(--color-lilac-200) 0.35rem 0.75rem
+    );
+    background-size: 1.5rem 100%;
+    transform-origin: left center;
+    animation:
+      rail-draw 0.9s var(--ease-out-soft) both,
+      rail-flow 0.9s linear infinite;
+  }
+
+  .sheet-rise {
+    animation: sheet-rise 0.42s var(--ease-out-soft) both;
+  }
+
+  .sheet-scrim {
+    animation: fade-in 0.32s var(--ease-out-soft) both;
   }
 
   .link-underline {

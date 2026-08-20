@@ -76,9 +76,10 @@ export const nav = [
 
 export const announcements = [
   "Free gift worth $15 in every box",
+  "Free tracked delivery · 3–7 days",
+  "30-day easy returns",
   "Ten styles · one promise",
   "Loved by 40,000+ parents",
-  "Tracked delivery · easy returns",
 ] as const;
 
 /* ------------------------------------------------------------------ *
@@ -203,6 +204,26 @@ export const trustBadges = [
   { label: "Soft & lightweight", detail: "Just 190 grams" },
   { label: "Breathable comfort", detail: "3D air-mesh shell" },
   { label: "Free gift inside", detail: "Worth $15" },
+] as const;
+
+/**
+ * The two promises that settle a hesitating cart: how fast it arrives and how
+ * easily it goes back. Surfaced wherever someone is deciding — the
+ * announcement marquee, the buy box, the products page and the cart drawer —
+ * because a returns policy nobody sees does not reassure anybody.
+ */
+export const promises = [
+  {
+    label: "Free tracked delivery",
+    detail: "Arrives in 3–7 working days, tracked the whole way.",
+    short: "Free tracked delivery · 3–7 days",
+  },
+  {
+    label: "30-day returns",
+    detail:
+      "Changed your mind? Start a return from your account within 30 days.",
+    short: "30-day easy returns",
+  },
 ] as const;
 
 export const pillars = [

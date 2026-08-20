@@ -234,15 +234,42 @@ export const getValidSession = cache(
     const session = await readSession();
     if (!session) return null;
     if (session.expiresAt - REFRESH_SKEW_MS > Date.now()) return session;
+
     const refreshed = await refreshTokens(session);
     if (!refreshed) {
-      await clearSession();
+      await persist(clearSession);
       return null;
     }
-    await writeSession(refreshed);
+    await persist(() => writeSession(refreshed));
     return refreshed;
   },
 );
+
+/**
+ * Saves the session if the current context is allowed to set cookies.
+ *
+ * A token can fall due mid-render, and Next only permits `cookies().set()` in
+ * a Server Action, Route Handler or middleware — so a refresh triggered by a
+ * page render would otherwise throw and take the whole page down with it. The
+ * refresh itself already succeeded at that point: the new tokens are live and
+ * this render uses them. Only writing them back is deferred, to the next
+ * request that runs somewhere allowed to write.
+ *
+ * The cost of that deferral is one extra refresh round trip per read-only
+ * render, which Shopify permits — losing the page does not.
+ */
+async function persist(write: () => Promise<void>): Promise<void> {
+  try {
+    await write();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("can only be modified in a Server Action")) {
+      // Expected on a read-only render — see above.
+      return;
+    }
+    throw error;
+  }
+}
 
 /* ── Customer-scoped GraphQL client ────────────────────────────────────── */
 

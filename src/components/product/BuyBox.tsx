@@ -6,6 +6,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
+import { PromiseStrip } from "@/components/product/PromiseStrip";
 import { Icon } from "@/components/ui/Icon";
 import { product, type Variant } from "@/content/site";
 import { formatMoney } from "@/lib/money";
@@ -123,6 +124,8 @@ export function BuyBox({ variant }: { variant: Variant }) {
       <p aria-live="polite" className="sr-only">
         {added ? `${variant.name} added to your bag` : ""}
       </p>
+
+      <PromiseStrip className="mt-7 border-t border-hairline pt-6" />
 
       <ul className="mt-7 flex flex-col gap-2.5">
         {product.includes.map((item) => (

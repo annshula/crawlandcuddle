@@ -114,3 +114,72 @@ export type Order = {
   lineItems: OrderLineItem[];
   fulfillments: OrderFulfillment[];
 };
+
+/* ── Returns ───────────────────────────────────────────────────────────── */
+
+/**
+ * The Customer Account API's `ReturnReason` enum. `UNKNOWN` is a real value
+ * Shopify can report back, but never something a shopper picks themselves.
+ */
+export type ReturnReason =
+  | "SIZE_TOO_SMALL"
+  | "SIZE_TOO_LARGE"
+  | "UNWANTED"
+  | "NOT_AS_DESCRIBED"
+  | "WRONG_ITEM"
+  | "DEFECTIVE"
+  | "STYLE"
+  | "COLOR"
+  | "OTHER"
+  | "UNKNOWN";
+
+export type ReturnLineItemInput = {
+  lineItemId: string;
+  quantity: number;
+  reason: ReturnReason;
+};
+
+/**
+ * The Customer Account API's `Return.status` enum. There is no order-level
+ * aggregate here — each Return carries its own status, which is exactly why
+ * the UI attributes status per product rather than per order.
+ */
+export type OrderReturnStatus =
+  | "REQUESTED"
+  | "OPEN"
+  | "CLOSED"
+  | "CANCELED"
+  | "DECLINED";
+
+/** One real Shopify Return: its status, its dates, and the items it covers. */
+export type OrderReturnDetail = {
+  id: string;
+  status: OrderReturnStatus;
+  lineItemIds: string[];
+  /** The reason the shopper gave, per line item. */
+  lineItemReasons: Record<string, ReturnReason>;
+  requestedAt: string;
+  closedAt: string | null;
+  /**
+   * Last real change to this return — used as the date for a final status
+   * when Shopify never set `closedAt` (declined returns often have none).
+   */
+  updatedAt: string;
+  tracking: {
+    number: string | null;
+    url: string | null;
+    carrierName: string | null;
+  } | null;
+};
+
+export type OrderReturnSummary = {
+  /** One entry per real Return on the order, never a merged summary. */
+  returns: OrderReturnDetail[];
+  /**
+   * Active returns Shopify reported but that could not be tied to specific
+   * line items (Shopify resolved them as `UnverifiedReturnLineItem`, which
+   * carries no `lineItem`). We know the order has something on its way back;
+   * we just cannot say which item — so no new return may be filed against it.
+   */
+  unattributedActive: number;
+};
