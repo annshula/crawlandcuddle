@@ -58,14 +58,29 @@ const ack = () => NextResponse.json({ received: true });
 
 /** Constant-time check of Shopify's X-Shopify-Hmac-Sha256 header. */
 function isVerified(rawBody: string, signature: string | null): boolean {
-  if (!signature) return false;
+  if (!signature) {
+    console.error(
+      "[webhook:shopify-order-paid] 401: missing x-shopify-hmac-sha256 header",
+    );
+    return false;
+  }
   const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
-  if (!secret) return false;
+  if (!secret) {
+    console.error(
+      "[webhook:shopify-order-paid] 401: SHOPIFY_WEBHOOK_SECRET is not set on this environment",
+    );
+    return false;
+  }
   const expected = createHmac("sha256", secret).update(rawBody).digest();
   const provided = Buffer.from(signature, "base64");
-  return (
-    expected.length === provided.length && timingSafeEqual(expected, provided)
-  );
+  const match =
+    expected.length === provided.length && timingSafeEqual(expected, provided);
+  if (!match) {
+    console.error(
+      "[webhook:shopify-order-paid] 401: HMAC mismatch — the secret registered in Shopify does not match SHOPIFY_WEBHOOK_SECRET",
+    );
+  }
+  return match;
 }
 
 /** Meta Conversions API `Purchase` event. No-op without a pixel + access token. */
