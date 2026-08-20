@@ -160,10 +160,21 @@ export function OrderItemStatus({
         )}
       />
 
+      {/* A phone's affordance. Absolutely positioned so it costs the text
+          nothing but the 16px of padding that keeps it clear — as a flex
+          sibling the arrow was taking 30px of a ~300px line. A chevron rather
+          than an arrow: on a row that opens something, it is the glyph people
+          already read as "there is more here". */}
+      <Icon
+        name="chevron-right"
+        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink-faint sm:hidden"
+        strokeWidth={2}
+      />
+
       <span className="flex min-h-18 items-center gap-3.5 py-3.5 pr-2 pl-2 sm:pl-6">
         {thumb("size-14 rounded-card sm:size-12")}
 
-        <span className="min-w-0 flex-1">
+        <span className="min-w-0 flex-1 pr-4 sm:pr-0">
           <span className="line-clamp-2 block font-headline text-body-sm leading-snug text-ink sm:line-clamp-1">
             {item.title}
           </span>

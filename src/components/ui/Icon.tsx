@@ -21,6 +21,7 @@ type IconName =
   | "logout"
   | "trash"
   | "chevron-down"
+  | "chevron-right"
   | "truck"
   | "refresh"
   | "clock"
@@ -110,6 +111,7 @@ const glyphs: Record<IconName, React.ReactNode> = {
     </>
   ),
   "chevron-down": <path d="m6 9 6 6 6-6" />,
+  "chevron-right": <path d="m9 6 6 6-6 6" />,
   truck: (
     <>
       <path d="M3 7.5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1V16H3z" />
