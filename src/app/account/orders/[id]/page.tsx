@@ -245,7 +245,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
         )}
       </Reveal>
 
-      {order.statusPageUrl && (
+      {/* {order.statusPageUrl && (
         <div className="mt-10 border-t border-hairline pt-6">
           <Link
             href={order.statusPageUrl}
@@ -260,7 +260,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
             />
           </Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
