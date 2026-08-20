@@ -89,7 +89,49 @@ export function CartDrawer() {
     return () => {
       tl.kill();
     };
-  }, [isOpen, lines.length]);
+    /* `lines` is deliberately not a dependency. Keying this on `lines.length`
+       replayed the whole entrance timeline on every add and remove — the panel
+       snapped to xPercent:100 and slid back in, which read as the drawer
+       closing and reopening. Rows that arrive while the drawer is already open
+       are animated on their own below, without touching the panel. */
+  }, [isOpen]);
+
+  /* Fade in only the rows that are genuinely new. Anything already on screen
+     — including the neighbours of a row that was just removed — is left
+     exactly where it is. */
+  const seenSlugs = useRef<string[] | null>(null);
+  const wasOpen = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const panel = panelRef.current;
+    const slugs = lines.map((line) => line.slug);
+    const previous = seenSlugs.current;
+    const openBefore = wasOpen.current;
+    seenSlugs.current = slugs;
+    wasOpen.current = isOpen;
+
+    /* Only rows that appear in an already-open drawer. On the run where the
+       drawer itself opens, the entrance timeline above is already staggering
+       every row — animating the new one here too would have both tweens
+       driving the same properties at once. */
+    if (!panel || previous === null || !isOpen || !openBefore) return;
+
+    const added = slugs.filter((slug) => !previous.includes(slug));
+    if (added.length === 0 || prefersReducedMotion()) return;
+
+    const rows = added
+      .map((slug) => panel.querySelector(`[data-cart-item="${slug}"]`))
+      .filter((row): row is Element => row !== null);
+    if (rows.length === 0) return;
+
+    const tween = gsap.fromTo(
+      rows,
+      { x: 24, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.5, stagger: 0.05, ease: "power3.out" },
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [lines, isOpen]);
 
   return (
     <div
@@ -152,7 +194,7 @@ export function CartDrawer() {
               {lines.map((line) => (
                 <li
                   key={line.slug}
-                  data-cart-item
+                  data-cart-item={line.slug}
                   className="flex gap-4 border-b border-hairline py-5 first:pt-0 last:border-b-0"
                 >
                   <Link
