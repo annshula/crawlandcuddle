@@ -65,18 +65,33 @@ const META_PIXEL_SRC = META_PIXEL_ENABLED
   : "";
 const META_FRAME_SRC = META_PIXEL_ENABLED ? META_FB : "";
 
+/**
+ * Google Analytics 4 origins, allowed only when a measurement id is
+ * configured. The gtag.js loader is served from googletagmanager.com; event
+ * payloads are sent (usually as sendBeacon GETs) to www.google-analytics.com
+ * and regional *.google-analytics.com hosts, so `connect-src` and `img-src`
+ * have to name them. gtag does not open iframes, so `frame-src` needs no
+ * GA entry. With no id the app never loads gtag, so the CSP stays as tight
+ * as it was.
+ */
+const GA_ENABLED = Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
+const GA_SCRIPT_SRC = GA_ENABLED ? " https://www.googletagmanager.com" : "";
+const GA_COLLECT_SRC = GA_ENABLED
+  ? " https://www.google-analytics.com https://*.google-analytics.com"
+  : "";
+
 const CSP = [
   `default-src 'self'`,
   // See module doc for why 'unsafe-inline' is here (Next's inline RSC payload).
-  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}`,
+  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}${GA_SCRIPT_SRC}`,
   // Components set dynamic inline styles (GSAP, scroll progress, blobs), so
   // style attributes/`<style>` need 'unsafe-inline' — styles cannot execute
   // script, so this is low risk.
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${META_PIXEL_SRC}`,
+  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
-  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}`,
+  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
   `frame-src 'self'${META_FRAME_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,

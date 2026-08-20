@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
@@ -111,6 +112,7 @@ export default function RootLayout({
 
         <JsonLd />
         <ClarityAnalytics />
+        <GoogleAnalytics />
         <MetaPixel />
       </body>
     </html>
