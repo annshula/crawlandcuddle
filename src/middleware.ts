@@ -47,18 +47,23 @@ const CLARITY_SRC = CLARITY_ENABLED
   : "";
 
 /**
- * Meta Pixel origins, allowed only when a pixel id is configured — the tag
- * script is served from connect.facebook.net and both the beacon and the
- * <noscript> fallback image hit facebook.com. With no id the app never loads
- * the pixel, so the CSP stays as tight as it was.
+ * Meta Pixel origins, allowed only when a pixel id is configured. The tag
+ * script is served from connect.facebook.net, but the pixel does not send
+ * events with fetch() — it POSTs a hidden <form> to facebook.com/tr/ and
+ * opens an iframe on facebook.com, so `form-action` and `frame-src` have to
+ * name the host too. (Without `frame-src` the iframe falls back to
+ * `default-src 'self'` and is blocked.) With no id the app never loads the
+ * pixel, so the CSP stays as tight as it was.
  */
 const META_PIXEL_ENABLED = Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID);
+const META_FB = " https://www.facebook.com";
 const META_SCRIPT_SRC = META_PIXEL_ENABLED
   ? " https://connect.facebook.net"
   : "";
 const META_PIXEL_SRC = META_PIXEL_ENABLED
-  ? " https://www.facebook.com https://connect.facebook.net"
+  ? `${META_FB} https://connect.facebook.net`
   : "";
+const META_FRAME_SRC = META_PIXEL_ENABLED ? META_FB : "";
 
 const CSP = [
   `default-src 'self'`,
@@ -72,9 +77,10 @@ const CSP = [
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
   `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}`,
+  `frame-src 'self'${META_FRAME_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,
-  `form-action 'self'`,
+  `form-action 'self'${META_FRAME_SRC}`,
   `frame-ancestors 'self'`,
   ...(IS_DEV ? [] : [`upgrade-insecure-requests`]),
 ].join("; ");
