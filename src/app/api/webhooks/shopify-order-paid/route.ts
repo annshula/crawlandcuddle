@@ -1,8 +1,10 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-
 import { NextRequest, NextResponse } from "next/server";
 
 import { syncedProduct } from "@/lib/catalog";
+import {
+  isDuplicateWebhook,
+  verifyWebhookSignature,
+} from "@/services/webhooks/verify";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -56,33 +58,6 @@ function isOurLineItem(line: ShopifyLineItem): boolean {
 
 const ack = () => NextResponse.json({ received: true });
 
-/** Constant-time check of Shopify's X-Shopify-Hmac-Sha256 header. */
-function isVerified(rawBody: string, signature: string | null): boolean {
-  if (!signature) {
-    console.error(
-      "[webhook:shopify-order-paid] 401: missing x-shopify-hmac-sha256 header",
-    );
-    return false;
-  }
-  const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
-  if (!secret) {
-    console.error(
-      "[webhook:shopify-order-paid] 401: SHOPIFY_WEBHOOK_SECRET is not set on this environment",
-    );
-    return false;
-  }
-  const expected = createHmac("sha256", secret).update(rawBody).digest();
-  const provided = Buffer.from(signature, "base64");
-  const match =
-    expected.length === provided.length && timingSafeEqual(expected, provided);
-  if (!match) {
-    console.error(
-      "[webhook:shopify-order-paid] 401: HMAC mismatch — the secret registered in Shopify does not match SHOPIFY_WEBHOOK_SECRET",
-    );
-  }
-  return match;
-}
-
 /** Meta Conversions API `Purchase` event. No-op without a pixel + access token. */
 async function sendMetaPurchase(
   order: ShopifyOrder,
@@ -123,9 +98,6 @@ async function sendMetaPurchase(
           },
         },
       ],
-      ...(process.env.META_TEST_EVENT_CODE
-        ? { test_event_code: process.env.META_TEST_EVENT_CODE }
-        : {}),
     }),
   });
 }
@@ -174,8 +146,19 @@ async function sendGa4Purchase(order: ShopifyOrder): Promise<void> {
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
 
-  if (!isVerified(rawBody, request.headers.get("x-shopify-hmac-sha256"))) {
+  if (
+    !verifyWebhookSignature(
+      rawBody,
+      request.headers.get("x-shopify-hmac-sha256"),
+    )
+  ) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  // Shopify retries and can re-deliver the same event; dedupe on the webhook
+  // id so a purchase is never counted twice in Meta / GA4.
+  if (isDuplicateWebhook(request.headers.get("x-shopify-webhook-id"))) {
+    return ack();
   }
 
   let order: ShopifyOrder;

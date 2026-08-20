@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "shopify:sync": "tsx scripts/sync-product.ts"
+    "shopify:sync": "tsx scripts/sync-product.ts",
+    "shopify:register-webhooks": "tsx scripts/register-webhooks.ts",
+    "shopify:test-webhook": "tsx scripts/test-webhook.ts"
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.2",
