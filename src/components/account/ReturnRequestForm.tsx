@@ -113,7 +113,11 @@ export function ReturnRequestForm({
               key={item.id}
               className="rounded-panel border border-hairline bg-paper p-5 shadow-soft sm:p-6"
             >
-              <div className="flex gap-4">
+              {/* Thumbnail and details on the first row; the quantity stepper
+                  takes a row of its own on a phone, where a 64px thumb, a long
+                  title and a ~112px stepper would otherwise be squeezed into
+                  ~280px, then slides back beside the title once there is room. */}
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-5 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
                 {item.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -127,13 +131,14 @@ export function ReturnRequestForm({
                   </span>
                 )}
 
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <p className="font-headline text-ink">{item.title}</p>
-                  {item.variantTitle && item.variantTitle !== "Default Title" && (
-                    <p className="text-caption text-ink-faint">
-                      {item.variantTitle}
-                    </p>
-                  )}
+                  {item.variantTitle &&
+                    item.variantTitle !== "Default Title" && (
+                      <p className="text-caption text-ink-faint">
+                        {item.variantTitle}
+                      </p>
+                    )}
                   {item.price && (
                     <p className="mt-1 text-body-sm text-ink-soft">
                       {formatMoney(item.price.amount, item.price.currencyCode)}{" "}
@@ -142,17 +147,24 @@ export function ReturnRequestForm({
                   )}
                 </div>
 
-                <QuantityStepper
-                  value={quantity}
-                  max={item.quantity}
-                  title={item.title}
-                  onChange={(next) => update(item.id, { quantity: next })}
-                />
+                <div className="col-start-2 flex items-center justify-end gap-3 sm:col-start-3">
+                  <span className="font-label text-[0.7rem] tracking-[0.14em] text-ink-soft uppercase sm:hidden">
+                    Returning
+                  </span>
+                  <QuantityStepper
+                    value={quantity}
+                    max={item.quantity}
+                    title={item.title}
+                    onChange={(next) => update(item.id, { quantity: next })}
+                  />
+                </div>
               </div>
 
               {quantity > 0 && (
                 <label className="mt-5 flex max-w-sm flex-col gap-2">
-                  <span className={labelClass}>Why are you sending it back?</span>
+                  <span className={labelClass}>
+                    Why are you sending it back?
+                  </span>
                   <div className="relative">
                     <select
                       value={selection?.reason ?? ""}
