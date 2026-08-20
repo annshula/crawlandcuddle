@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
+import { ProductViewTracker } from "@/components/analytics/ProductViewTracker";
 import { BuyBox } from "@/components/product/BuyBox";
 import { PdpPrice } from "@/components/product/PdpPrice";
 import { ProductPrice } from "@/components/product/ProductPrice";
@@ -258,6 +259,7 @@ export default async function ProductPage({
                 first crawl to confident walking.
               </p>
 
+              <ProductViewTracker slug={slug} name={variant.name} />
               <BuyBox variant={variant} />
 
               <div className="mt-10">

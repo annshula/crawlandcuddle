@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { product, variants } from "@/content/site";
+import { trackAddToCart } from "@/lib/analytics";
 import { useScrollLock } from "@/lib/scroll-lock";
 
 const STORAGE_KEY = "cc.cart.v1";
@@ -154,6 +155,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback((slug: string, qty = 1) => {
     dispatch({ type: "add", slug, qty });
+    const variant = variants.find((v) => v.slug === slug);
+    if (variant) {
+      trackAddToCart(
+        { slug, name: variant.name, quantity: qty },
+        product.priceCents,
+        product.currency,
+      );
+    }
     setOpen(true);
   }, []);
 
