@@ -207,6 +207,51 @@
   }
 }
 
+/* Item status surface. On a phone it rises from the foot of the screen; from
+   md up it settles in as a centred dialog. Both are neutralised by the
+   reduced-motion block at the end of this file. */
+@keyframes dialog-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* The vertical timeline: its spine draws downward, each milestone slides in
+   behind it, and a live leg keeps flowing toward the next stop. */
+@keyframes spine-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes spine-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 1.5rem;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translate3d(-10px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes drift {
   0%,
   100% {
@@ -478,6 +523,40 @@
 
   .sheet-scrim {
     animation: fade-in 0.32s var(--ease-out-soft) both;
+  }
+
+  /* One panel, two shapes: sheet on a phone, dialog from md up. */
+  .status-panel {
+    animation: sheet-rise 0.42s var(--ease-out-soft) both;
+  }
+
+  @media (min-width: 768px) {
+    .status-panel {
+      animation: dialog-settle 0.36s var(--ease-out-soft) both;
+    }
+  }
+
+  /* Spine between two milestones on the vertical timeline. */
+  .spine-done {
+    transform-origin: top center;
+    animation: spine-draw 0.55s var(--ease-out-soft) both;
+  }
+
+  .spine-live {
+    background-image: repeating-linear-gradient(
+      160deg,
+      var(--color-lilac-400) 0 0.35rem,
+      var(--color-lilac-200) 0.35rem 0.75rem
+    );
+    background-size: 100% 1.5rem;
+    transform-origin: top center;
+    animation:
+      spine-draw 0.55s var(--ease-out-soft) both,
+      spine-flow 0.9s linear infinite;
+  }
+
+  .step-in {
+    animation: step-in 0.45s var(--ease-out-soft) both;
   }
 
   .link-underline {

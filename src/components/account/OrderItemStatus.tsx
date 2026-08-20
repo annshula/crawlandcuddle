@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { JourneyRail } from "@/components/account/JourneyRail";
+import { ItemStatusPanel } from "@/components/account/ItemStatusPanel";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import {
   fulfillmentStatus,
@@ -8,6 +8,8 @@ import {
   returnForLineItem,
   returnReasonLabel,
   returnStatus,
+  type JourneyNode,
+  type JourneyState,
   type ShipmentGroup,
   type StatusTone,
 } from "@/lib/account/order-status";
@@ -20,36 +22,22 @@ import type {
 import { cn } from "@/lib/utils";
 
 /** Card accents, keyed to the same tones the status badges already use. */
-const accents: Record<
-  StatusTone,
-  { edge: string; chip: string; text: string }
-> = {
+const accents: Record<StatusTone, { edge: string; chip: string }> = {
   neutral: {
     edge: "from-hairline to-hairline",
     chip: "bg-ink/5 text-ink-soft",
-    text: "text-ink-soft",
   },
   rose: {
     edge: "from-rose-400 to-rose-600",
     chip: "bg-rose-100 text-rose-600",
-    text: "text-rose-700",
   },
   lilac: {
     edge: "from-lilac-300 to-lilac-500",
     chip: "bg-lilac-200 text-lilac-700",
-    text: "text-lilac-700",
   },
-  mint: {
-    edge: "from-mint to-mint",
-    chip: "bg-mint/60 text-ink",
-    text: "text-ink",
-  },
-  butter: {
-    edge: "from-butter to-butter",
-    chip: "bg-butter/80 text-ink",
-    text: "text-ink",
-  },
-  ink: { edge: "from-ink to-ink", chip: "bg-ink text-paper", text: "text-ink" },
+  mint: { edge: "from-mint to-mint", chip: "bg-mint/60 text-ink" },
+  butter: { edge: "from-butter to-butter", chip: "bg-butter/80 text-ink" },
+  ink: { edge: "from-ink to-ink", chip: "bg-ink text-paper" },
 };
 
 function glyphFor(isReturning: boolean, status: string | null): IconName {
@@ -70,13 +58,13 @@ function glyphFor(isReturning: boolean, status: string | null): IconName {
 }
 
 /**
- * One compact card per item rather than one stepper per order. An order-wide
- * stepper drags every item to "Delivered" the moment one box lands — exactly
- * the lie a shopper notices while the other box is still in transit.
+ * One item in an order: a compact row carrying where it has got to, opening
+ * its full history on a surface of its own — a bottom sheet on a phone, a
+ * two-column dialog from md up.
  *
- * Two rows only: what it is with its live status, then the road it travels.
- * The rail draws itself in on load and keeps the live leg moving, so a glance
- * tells you whether anything is still happening.
+ * The card deliberately answers only "where is it now?". A four-milestone
+ * timeline crammed into a 300px row answered that worse than a single line of
+ * text does, and buried everything else on the card while doing it.
  */
 export function OrderItemStatus({
   item,
@@ -91,13 +79,6 @@ export function OrderItemStatus({
 }) {
   const detail = returnForLineItem(item.id, returns);
   const journey = itemJourney(group, order, detail);
-  /* Carrier deep links are parked until the tracking numbers Shopify returns
-     are trustworthy enough to send a shopper to. Flip to `true` to bring the
-     row back; everything it needs is still wired up below. */
-  const SHOW_CARRIER_LINKS = false;
-  const trackingLinks = SHOW_CARRIER_LINKS
-    ? (group.fulfillment?.trackingInformation ?? []).filter((info) => info.url)
-    : [];
 
   const tone: StatusTone = detail
     ? returnStatus(detail.status).tone
@@ -115,12 +96,62 @@ export function OrderItemStatus({
 
   const description = detail ? returnStatus(detail.status).description : "";
   const reason = detail?.lineItemReasons[item.id] ?? null;
-  const hasFootnotes = Boolean(
-    description || reason || detail?.tracking?.number,
+  const price = item.totalPrice
+    ? formatMoney(item.totalPrice.amount, item.totalPrice.currencyCode)
+    : "";
+
+  const status = (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-pill px-2 py-1 font-label text-[0.62rem] tracking-[0.12em] uppercase",
+        accent.chip,
+      )}
+    >
+      <Icon
+        name={glyphFor(detail !== null, group.fulfillment?.status ?? null)}
+        className="size-3"
+        strokeWidth={2.4}
+      />
+      {marker?.label}
+    </span>
   );
 
-  return (
-    <li className="group relative overflow-hidden rounded-panel border border-hairline bg-paper py-3.5 pr-4 pl-5 shadow-soft transition-shadow duration-500 ease-out-soft hover:shadow-drift sm:pr-5 sm:pl-6">
+  const thumb = (size: string) =>
+    item.image ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={item.image.url}
+        alt={item.image.altText ?? ""}
+        className={cn("shrink-0 bg-blush object-cover", size)}
+      />
+    ) : (
+      <span
+        className={cn(
+          "grid shrink-0 place-items-center bg-blush text-rose-500",
+          size,
+        )}
+      >
+        <Icon name="bag" className="size-5" />
+      </span>
+    );
+
+  /* ── The card face ─────────────────────────────────────────────────── */
+  /* A phone gets the native two-line list row: a big thumbnail, the name over
+     as many lines as it needs, then one quiet line of everything else. The
+     four-column desktop arrangement put the title, the pill, a price column
+     and an arrow into ~300px, where the name was clipped to two words and the
+     pill wrapped under its own date. Price rejoins as its own column only once
+     there is room for it. */
+  const meta = [
+    price,
+    `Qty ${item.quantity}`,
+    marker?.at ? shortDate(marker.at) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const face = (
+    <>
       <span
         aria-hidden="true"
         className={cn(
@@ -129,124 +160,258 @@ export function OrderItemStatus({
         )}
       />
 
-      {/* Phone first: the thumbnail stays small, the name is allowed to wrap
-          rather than truncate (a clipped product name is useless on a 360px
-          screen), and price sits with it instead of fighting for a third
-          column. The separate price column only appears once there is room. */}
-      <div className="flex items-start gap-3 sm:items-center sm:gap-3.5">
-        {item.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.image.url}
-            alt={item.image.altText ?? ""}
-            className="size-11 shrink-0 rounded-card bg-blush object-cover sm:size-12"
-          />
-        ) : (
-          <span className="grid size-11 shrink-0 place-items-center rounded-card bg-blush text-rose-500 sm:size-12">
-            <Icon name="bag" className="size-5" />
-          </span>
-        )}
+      <span className="flex min-h-18 items-center gap-3.5 py-3.5 pr-2 pl-2 sm:pl-6">
+        {thumb("size-14 rounded-card sm:size-12")}
 
-        <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 font-headline text-body-sm text-ink sm:truncate">
+        <span className="min-w-0 flex-1">
+          <span className="line-clamp-2 block font-headline text-body-sm leading-snug text-ink sm:line-clamp-1">
             {item.title}
-          </p>
-          <p className="mt-0.5 text-[0.68rem] text-ink-faint sm:hidden">
-            {item.totalPrice
-              ? `${formatMoney(item.totalPrice.amount, item.totalPrice.currencyCode)} · `
-              : ""}
+          </span>
+
+          <span className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+            {status}
+            {marker?.at && (
+              <span className="hidden text-[0.68rem] text-ink-faint sm:inline">
+                {shortDate(marker.at)}
+              </span>
+            )}
+          </span>
+
+          {/* Phone only: price, quantity and date folded into one line rather
+              than competing for columns of their own. */}
+          <span className="mt-1.5 block text-[0.7rem] text-ink-faint sm:hidden">
+            {meta}
+          </span>
+        </span>
+
+        <span className="hidden shrink-0 text-right sm:block">
+          <span className="block font-headline text-body-sm text-ink">
+            {price}
+          </span>
+          <span className="block text-[0.68rem] text-ink-faint">
             ×{item.quantity}
-          </p>
+          </span>
+        </span>
+
+        {/* Hidden on a phone. It cost 30px of a ~300px line — the arrow plus
+            its gap — to say what the whole row already says: the card is the
+            tap target, and the press state confirms it. There is no hover on a
+            phone for it to reward either. From sm up it returns as the same
+            affordance the orders list uses. */}
+        <Icon
+          name="arrow-right"
+          className="hidden size-4 shrink-0 text-ink-faint transition-transform duration-500 ease-out-soft group-hover:translate-x-1 group-hover:text-rose-600 sm:block"
+        />
+      </span>
+    </>
+  );
+
+  return (
+    <ItemStatusPanel face={face} label={item.title}>
+      <div className="flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[minmax(0,17rem)_minmax(0,1fr)]">
+        {/* On a phone this is the sheet's header; from md up it becomes the
+            dialog's left column — a quiet cream card the timeline reads
+            against. */}
+        <div className="shrink-0 border-hairline px-5 pt-4 pb-5 md:border-r md:bg-cream md:px-7 md:py-8">
+          <div className="flex items-start gap-4 md:flex-col md:gap-5">
+            {thumb(
+              "size-14 rounded-card md:size-auto md:aspect-square md:w-full md:rounded-panel",
+            )}
+            <div className="min-w-0">
+              <p className="font-headline text-ink md:text-lg">{item.title}</p>
+              {item.variantTitle && item.variantTitle !== "Default Title" && (
+                <p className="text-caption text-ink-faint">
+                  {item.variantTitle}
+                </p>
+              )}
+              <p className="mt-2 text-body-sm text-ink-soft">
+                {price ? `${price} · ` : ""}Qty {item.quantity}
+              </p>
+              {item.sku && (
+                <p className="mt-1 text-caption text-ink-faint">{item.sku}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 md:mt-6">{status}</div>
         </div>
 
-        <div className="hidden shrink-0 text-right sm:block">
-          <p className="font-headline text-body-sm text-ink">
-            {item.totalPrice
-              ? formatMoney(
-                  item.totalPrice.amount,
-                  item.totalPrice.currencyCode,
-                )
-              : ""}
+        {/* The timeline is the only part that scrolls, so the product stays
+            put while a long history moves under it. */}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto px-5 pt-6 pb-7 md:px-8 md:py-8"
+          data-lenis-prevent
+        >
+          <h3 className="font-display text-heading-sm text-ink uppercase">
+            History
+          </h3>
+          <p className="mt-1.5 font-script text-2xl text-lilac-500">
+            every step we can actually see
           </p>
-          <p className="text-[0.68rem] text-ink-faint">×{item.quantity}</p>
+
+          <VerticalJourney nodes={journey} />
+
+          {(description || reason || detail?.tracking?.number) && (
+            <dl className="mt-7 space-y-4 border-t border-hairline pt-5 text-body-sm">
+              {description && (
+                <div>
+                  <dd className="text-ink-soft">{description}</dd>
+                </div>
+              )}
+              {reason && (
+                <div>
+                  <dt className="eyebrow text-ink-faint">Reason</dt>
+                  <dd className="mt-1.5 text-ink">
+                    {returnReasonLabel(reason)}
+                  </dd>
+                </div>
+              )}
+              {detail?.tracking?.number && (
+                <div>
+                  <dt className="eyebrow text-ink-faint">Return tracking</dt>
+                  <dd className="mt-1.5">
+                    {detail.tracking.url ? (
+                      <Link
+                        href={detail.tracking.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-underline text-ink"
+                      >
+                        {detail.tracking.number}
+                      </Link>
+                    ) : (
+                      <span className="text-ink">{detail.tracking.number}</span>
+                    )}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          )}
         </div>
       </div>
+    </ItemStatusPanel>
+  );
+}
 
-      {/* Its own line at every width — wedged beside a truncating title it was
-          the first thing to wrap badly on a phone. */}
-      <p className="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-pill px-2 py-1 font-label text-[0.62rem] tracking-[0.12em] uppercase",
-            accent.chip,
-          )}
-        >
-          <Icon
-            name={glyphFor(detail !== null, group.fulfillment?.status ?? null)}
-            className="size-3"
-            strokeWidth={2.4}
-          />
-          {marker?.label}
-        </span>
-        {marker?.at && (
-          <span className="text-[0.68rem] text-ink-faint">
-            {shortDate(marker.at)}
-          </span>
-        )}
-      </p>
+/* ── Vertical timeline ─────────────────────────────────────────────────── */
 
-      <JourneyRail nodes={journey} />
+const labelColor: Record<JourneyState, string> = {
+  done: "text-ink",
+  current: "text-lilac-700",
+  failed: "text-rose-700",
+  pending: "text-ink-faint",
+};
 
-      {/* Stacked on a phone — these read as separate facts, and side by side
-          in 300px they collapse into one run-on line. */}
-      {(hasFootnotes || (!detail && trackingLinks.length > 0)) && (
-        <div className="mt-3 flex flex-col gap-1 border-t border-hairline pt-2.5 text-[0.72rem] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
-          {description && <span className="text-ink-soft">{description}</span>}
-          {reason && (
-            <span className="text-ink-faint">
-              Reason:{" "}
-              <span className="text-ink">{returnReasonLabel(reason)}</span>
-            </span>
-          )}
-          {detail?.tracking?.number && (
-            <span className="text-ink-faint">
-              Return tracking:{" "}
-              {detail.tracking.url ? (
-                <Link
-                  href={detail.tracking.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-underline text-ink"
-                >
-                  {detail.tracking.number}
-                </Link>
-              ) : (
-                <span className="text-ink">{detail.tracking.number}</span>
-              )}
-            </span>
-          )}
-
-          {!detail &&
-            trackingLinks.map((info) => (
-              <Link
-                key={info.url ?? info.number ?? "tracking"}
-                href={info.url ?? "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                /* -my-1.5 keeps the row's height while giving the tap target
-                   the extra 12px a thumb needs. */
-                className="group/link -my-1.5 inline-flex items-center gap-1.5 self-start py-1.5 font-label tracking-[0.12em] text-rose-600 uppercase"
+/**
+ * Milestones oldest to newest down a single spine. Vertical is what a status
+ * history actually wants: every label gets a full line, every date sits beside
+ * it, and a fifth milestone costs one row instead of breaking the layout — all
+ * the things the horizontal rail had to fight for inside a card.
+ *
+ * The spine draws downward and each row slides in behind it, staggered so the
+ * sequence reads in the order it happened.
+ */
+function VerticalJourney({ nodes }: { nodes: JourneyNode[] }) {
+  return (
+    <ol className="mt-6">
+      {nodes.map((node, i) => {
+        const isLast = i === nodes.length - 1;
+        return (
+          <li
+            key={node.id}
+            className="step-in relative flex gap-4 pb-6 last:pb-0"
+            style={{ animationDelay: `${0.06 * i + 0.1}s` }}
+          >
+            {/* Spine down to the next milestone, running behind this row's
+                dot so the line meets it rather than stopping short. */}
+            {!isLast && (
+              <span
+                aria-hidden="true"
+                className="absolute top-5 bottom-0 left-1.75 w-0.5 overflow-hidden rounded-pill bg-hairline"
               >
-                <Icon name="truck" className="size-3.5" />
-                Track with {info.company || "the carrier"}
-                <Icon
-                  name="arrow-right"
-                  className="size-3 transition-transform duration-500 ease-out-soft group-hover/link:translate-x-1"
-                />
-              </Link>
-            ))}
-        </div>
-      )}
-    </li>
+                <Spine state={nodes[i + 1]?.state} index={i} />
+              </span>
+            )}
+
+            <span className="relative z-10 mt-0.5">
+              <Dot state={node.state} />
+            </span>
+
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  "font-headline text-body-sm",
+                  labelColor[node.state],
+                )}
+              >
+                {node.label}
+              </p>
+              {node.at && (
+                <p className="mt-0.5 text-caption text-ink-faint">
+                  {shortDate(node.at)}
+                </p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** The leg between two milestones: filled once reached, flowing while live. */
+function Spine({
+  state,
+  index,
+}: {
+  state: JourneyState | undefined;
+  index: number;
+}) {
+  const delay = { animationDelay: `${0.06 * index + 0.2}s` };
+
+  if (state === "done") {
+    return <span className="spine-done block h-full bg-mint" style={delay} />;
+  }
+  if (state === "failed") {
+    return (
+      <span className="spine-done block h-full bg-rose-400" style={delay} />
+    );
+  }
+  if (state === "current") {
+    return <span className="spine-live block h-3/5" style={delay} />;
+  }
+  return null;
+}
+
+function Dot({ state }: { state: JourneyState }) {
+  if (state === "current") {
+    return (
+      <span className="relative grid size-4 place-items-center rounded-full bg-lilac-400 ring-[3px] ring-lilac-100">
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 animate-ping rounded-full bg-lilac-400 opacity-40 motion-reduce:hidden"
+        />
+        <span className="relative size-1.5 rounded-full bg-paper" />
+      </span>
+    );
+  }
+  if (state === "failed") {
+    return (
+      <span className="grid size-4 place-items-center rounded-full bg-rose-500 text-paper ring-[3px] ring-rose-100">
+        <Icon name="close" className="size-2.5" strokeWidth={3} />
+      </span>
+    );
+  }
+  if (state === "pending") {
+    return (
+      <span className="grid size-4 place-items-center rounded-full border border-dashed border-ink-faint/50 bg-paper">
+        <span className="size-1 rounded-full bg-hairline" />
+      </span>
+    );
+  }
+  return (
+    <span className="grid size-4 place-items-center rounded-full bg-mint text-ink ring-[3px] ring-mint/25">
+      <Icon name="check" className="size-2.5" strokeWidth={3} />
+    </span>
   );
 }
