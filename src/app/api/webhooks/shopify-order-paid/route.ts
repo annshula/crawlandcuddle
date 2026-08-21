@@ -64,9 +64,9 @@ async function sendMetaPurchase(
   ip: string | null,
   userAgent: string | null,
 ): Promise<void> {
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-  const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
-  const version = process.env.META_GRAPH_API_VERSION || "v21.0";
+  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
+  const accessToken = process.env.META_CAPI_ACCESS_TOKEN?.trim();
+  const version = process.env.META_GRAPH_API_VERSION?.trim() || "v21.0";
   if (!pixelId || !accessToken) return;
 
   const items = (order.line_items ?? []).filter(isOurLineItem);
@@ -81,6 +81,7 @@ async function sendMetaPurchase(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          access_token: accessToken,
           data: [
             {
               event_name: "Purchase",
