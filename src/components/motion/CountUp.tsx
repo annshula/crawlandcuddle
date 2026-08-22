@@ -50,7 +50,7 @@ export function CountUp({
           },
         });
       },
-      "0px 0px -10% 0px",
+      0.9,
     );
 
     return () => {

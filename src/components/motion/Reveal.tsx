@@ -3,7 +3,7 @@
 import { useRef, type ElementType, type ReactNode } from "react";
 
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import { REVEAL_MARGIN, observeOnce } from "@/lib/in-view";
+import { REVEAL_AT, observeOnce } from "@/lib/in-view";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +28,8 @@ interface RevealProps {
   duration?: number;
   /** Stagger the element's direct children instead of the element itself. */
   stagger?: number;
-  /** How far up the viewport the element must travel before it plays, as a
-      percentage of viewport height. 85 matches the old "top 85%" trigger. */
+  /** How far up the viewport the element's top must travel before it plays,
+      as a percentage of viewport height. Defaults to 85 ("top 85%"). */
   startPercent?: number;
 }
 
@@ -82,9 +82,7 @@ export function Reveal({
           ease: "power3.out",
         });
       },
-      startPercent === undefined
-        ? REVEAL_MARGIN
-        : `0px 0px -${100 - startPercent}% 0px`,
+      startPercent === undefined ? REVEAL_AT : startPercent / 100,
     );
 
     return () => {

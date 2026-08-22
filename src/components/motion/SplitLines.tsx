@@ -72,7 +72,7 @@ export function SplitLines({
       };
     }
 
-    const cancel = observeOnce(el, play, "0px 0px -12% 0px");
+    const cancel = observeOnce(el, play, 0.88);
 
     return () => {
       cancel();
