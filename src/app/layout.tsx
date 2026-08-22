@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { GTM } from "@/components/analytics/GTM";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
@@ -90,6 +91,11 @@ export default function RootLayout({
           (e.g. cz-shortcut-listen) onto <body>; without this the client DOM
           would not match the server HTML and React logs a hydration error. */}
       <body className="antialiased" suppressHydrationWarning>
+        {/* Google Tag Manager — the loader is injected into <head> by
+            next/script (beforeInteractive); this component renders the
+            required <noscript> iframe immediately after <body> opens. */}
+        <GTM />
+
         {/* The hero and reveal resting states are CSS, and GSAP is what clears
             them — with scripting off nothing ever would, so restore them. */}
         <noscript>

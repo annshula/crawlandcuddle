@@ -102,19 +102,32 @@ const META_EVENT_SRC = META_PIXEL_ENABLED
   ? " https://*.run.app https://*.on.aws"
   : "";
 
+/**
+ * Google Tag Manager origins. GTM is a permanent install (container
+ * GTM-W96TWWW9; see components/analytics/GTM.tsx), so unlike the opt-in
+ * integrations above these entries are unconditional. The loader runs from
+ * googletagmanager.com (script-src), and the required <noscript> fallback is
+ * an <iframe> on that same host, so frame-src has to name it too. The
+ * container typically serves a GA4 tag, which beacons to google-analytics.com
+ * (fetch/sendBeacon → connect-src, <img> fallback → img-src).
+ */
+const GTM_SRC = " https://www.googletagmanager.com";
+const GTM_COLLECT_SRC =
+  " https://www.google-analytics.com https://*.google-analytics.com";
+
 const CSP = [
   `default-src 'self'`,
   // See module doc for why 'unsafe-inline' is here (Next's inline RSC payload).
-  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}${GA_SCRIPT_SRC}`,
+  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}${GA_SCRIPT_SRC}${GTM_SRC}`,
   // Components set dynamic inline styles (GSAP, scroll progress, blobs), so
   // style attributes/`<style>` need 'unsafe-inline' — styles cannot execute
   // script, so this is low risk.
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${CLARITY_IMG_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
+  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${CLARITY_IMG_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}`,
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
-  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${META_EVENT_SRC}${GA_COLLECT_SRC}`,
-  `frame-src 'self'${META_FRAME_SRC}`,
+  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${META_EVENT_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}`,
+  `frame-src 'self'${META_FRAME_SRC}${GTM_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,
   `form-action 'self'${META_FRAME_SRC}`,
