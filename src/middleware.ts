@@ -47,6 +47,14 @@ const CLARITY_SRC = CLARITY_ENABLED
   : "";
 
 /**
+ * Microsoft Clarity also fires a sync/telemetry beacon as an <img> from
+ * c.bing.com (Clarity rides on Microsoft's Bing infrastructure). It's a
+ * plain image load, so it needs `img-src` but not `script-src` or
+ * `connect-src`. Gated the same way as the rest of Clarity.
+ */
+const CLARITY_IMG_SRC = CLARITY_ENABLED ? " https://c.bing.com" : "";
+
+/**
  * Meta Pixel origins, allowed only when a pixel id is configured. The tag
  * script is served from connect.facebook.net, but the pixel does not send
  * events with fetch() — it POSTs a hidden <form> to facebook.com/tr/ and
@@ -80,6 +88,20 @@ const GA_COLLECT_SRC = GA_ENABLED
   ? " https://www.google-analytics.com https://*.google-analytics.com"
   : "";
 
+/**
+ * Meta Pixel event-collection hosts, allowed only when a pixel id is
+ * configured. Besides the /tr/ form post, the pixel also sends events with
+ * fetch()/sendBeacon() to Meta's Conversions API (CAPI) collection
+ * infrastructure. Those hosts are dynamic, hashed subdomains on Google Cloud
+ * Run and AWS (e.g. <hash>.us-central1.run.app, <hash>.ecs.us-west-2.on.aws)
+ * and Meta rotates them per deployment, so only the wildcard parent domains
+ * can be named in `connect-src`. With no id the app never loads the pixel,
+ * so the CSP stays as tight as it was.
+ */
+const META_EVENT_SRC = META_PIXEL_ENABLED
+  ? " https://*.run.app https://*.on.aws"
+  : "";
+
 const CSP = [
   `default-src 'self'`,
   // See module doc for why 'unsafe-inline' is here (Next's inline RSC payload).
@@ -88,10 +110,10 @@ const CSP = [
   // style attributes/`<style>` need 'unsafe-inline' — styles cannot execute
   // script, so this is low risk.
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
+  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${CLARITY_IMG_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
-  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}`,
+  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${META_EVENT_SRC}${GA_COLLECT_SRC}`,
   `frame-src 'self'${META_FRAME_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,
