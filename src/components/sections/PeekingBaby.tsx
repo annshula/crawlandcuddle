@@ -5,6 +5,7 @@ import { useRef } from "react";
 
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useNearViewport } from "@/hooks/useNearViewport";
 import { cn } from "@/lib/utils";
 
 export type PeekSide = "left" | "right";
@@ -105,13 +106,15 @@ export function PeekingBaby({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const figureRef = useRef<HTMLDivElement | null>(null);
   const config = PEEK[side];
+  /* Scrub trigger built as the range approaches the fold — see Parallax. */
+  const near = useNearViewport(wrapRef);
 
   useIsomorphicLayoutEffect(() => {
     const wrap = wrapRef.current;
     const figure = figureRef.current;
     // The sticky containing block / scroll range is the wrapper's parent.
     const range = wrap?.parentElement ?? null;
-    if (!wrap || !figure || !range) return;
+    if (!wrap || !figure || !range || !near) return;
 
     // Off-screen is -100%/+100%; the peak pushes the hand a little PAST the
     // screen edge (handInset + overhang) so the baby grips the edge naturally
@@ -208,7 +211,7 @@ export function PeekingBaby({
     }, wrap);
 
     return () => ctx.revert();
-  }, [side, config.handInset, config.overhang, hide]);
+  }, [near, side, config.handInset, config.overhang, hide]);
 
   return (
     <div

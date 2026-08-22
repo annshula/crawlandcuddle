@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from "react";
 
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useNearViewport } from "@/hooks/useNearViewport";
 import { cn } from "@/lib/utils";
 
 interface ParallaxProps {
@@ -25,10 +26,14 @@ export function Parallax({
   disabledBelow = 768,
 }: ParallaxProps) {
   const ref = useRef<HTMLDivElement | null>(null);
+  /* Scrubbed triggers must exist before the element scrolls in, but not a
+     moment sooner — building them on mount put a layout read per Parallax
+     into the load window. */
+  const near = useNearViewport(ref);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
-    if (!el || prefersReducedMotion()) return;
+    if (!el || !near || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
@@ -50,7 +55,7 @@ export function Parallax({
     }, el);
 
     return () => ctx.revert();
-  }, [speed, rotate, scaleTo, disabledBelow]);
+  }, [near, speed, rotate, scaleTo, disabledBelow]);
 
   return (
     <div ref={ref} className={cn("will-change-transform", className)}>

@@ -89,7 +89,7 @@ export function NewsletterCta() {
           </form>
         </Reveal>
 
-        <p aria-live="polite" className="mt-4 text-body-sm text-ink-faint">
+        <p aria-live="polite" className="mt-4 text-body-sm text-ink-soft">
           {status === "done"
             ? "Thanks — check your inbox for the code."
             : "No spam. Unsubscribe in one click."}

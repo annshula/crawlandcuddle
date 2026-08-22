@@ -10,6 +10,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { milestones } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useNearViewport } from "@/hooks/useNearViewport";
 
 const cardArt: LineArtName[] = [
   "teddy",
@@ -36,11 +37,14 @@ const cardArt: LineArtName[] = [
 export function Milestones() {
   const root = useRef<HTMLElement | null>(null);
   const railRef = useRef<HTMLUListElement | null>(null);
+  /* The horizontal rail is a scrubbed, pinned trigger — expensive to build and
+     far below the fold, so it waits until the section is close. */
+  const near = useNearViewport(root);
 
   useIsomorphicLayoutEffect(() => {
     const el = root.current;
     const rail = railRef.current;
-    if (!el || !rail || prefersReducedMotion()) return;
+    if (!el || !rail || !near || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const mm = gsap.matchMedia();
@@ -70,7 +74,7 @@ export function Milestones() {
     }, el);
 
     return () => ctx.revert();
-  }, []);
+  }, [near]);
 
   return (
     <>

@@ -165,7 +165,7 @@ export function Header() {
                     strokeDasharray="2 3"
                   />
                 </svg>
-                <div className="origin-top animate-wobble rotate-2 rounded-tag bg-rose-500 px-3.5 py-1.5 text-center text-paper shadow-lift">
+                <div className="origin-top animate-wobble rotate-2 rounded-tag bg-rose-600 px-3.5 py-1.5 text-center text-paper shadow-lift">
                   <p className="font-label text-[0.58rem] leading-snug tracking-[0.14em] uppercase">
                     Free gift
                     <br />
@@ -212,7 +212,9 @@ export function Header() {
         ref={panelRef}
         className="fixed inset-0 z-50 opacity-0 lg:hidden"
         style={{ pointerEvents: "none" }}
-        aria-hidden={!menuOpen}
+        /* See SignOutDialog: inert (not aria-hidden) keeps the closed panel out
+           of the tab order as well as out of the accessibility tree. */
+        inert={!menuOpen}
       >
         <div className="paper-grain relative flex h-full flex-col overflow-hidden bg-lilac-700 px-6 pt-6 text-paper">
           {/* Decorative theme blobs so the panel never reads as a flat block. */}

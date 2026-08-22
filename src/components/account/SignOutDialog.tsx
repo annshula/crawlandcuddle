@@ -128,7 +128,11 @@ export function SignOutDialog({
   const overlay = (
     <div
       className={cn("fixed inset-0 z-90", !open && "pointer-events-none")}
-      aria-hidden={!open}
+      /* `inert`, not `aria-hidden`: aria-hidden alone leaves the buttons in the
+         tab order while the dialog is closed (axe: "aria-hidden elements
+         contain focusable descendents"). inert removes them from focus, from
+         the a11y tree and from hit-testing in one attribute. */
+      inert={!open}
     >
       <div
         ref={scrimRef}

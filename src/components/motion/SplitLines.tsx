@@ -3,6 +3,7 @@
 import { useRef, type ReactNode } from "react";
 
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { observeOnce } from "@/lib/in-view";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 
@@ -42,22 +43,37 @@ export function SplitLines({
       return;
     }
 
-    const ctx = gsap.context(() => {
-      gsap.set(inner, { yPercent: 115, opacity: 0 });
-      gsap.to(inner, {
+    gsap.set(inner, { yPercent: 115, opacity: 0 });
+
+    let tween: gsap.core.Tween | null = null;
+    const play = () => {
+      tween = gsap.to(inner, {
         yPercent: 0,
         opacity: 1,
         duration: 1.25,
         delay,
         stagger,
         ease: "expo.out",
-        ...(immediate
-          ? {}
-          : { scrollTrigger: { trigger: el, start: "top 88%", once: true } }),
       });
-    }, el);
+    };
 
-    return () => ctx.revert();
+    /* Plays once, so an observer replaces what used to be a ScrollTrigger —
+       see Reveal. The hero passes `immediate` and never waits at all. */
+    if (immediate) {
+      play();
+      return () => {
+        tween?.kill();
+        gsap.set(inner, { clearProps: "all" });
+      };
+    }
+
+    const cancel = observeOnce(el, play, "0px 0px -12% 0px");
+
+    return () => {
+      cancel();
+      tween?.kill();
+      gsap.set(inner, { clearProps: "all" });
+    };
   }, [delay, stagger, immediate]);
 
   return (

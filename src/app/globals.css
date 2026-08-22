@@ -10,14 +10,15 @@
 @theme {
   /* --- Brand: Rose (signature) --------------------------------------------
      Replaces Pa'lais "Deep Indigo" as the single saturated brand voice.
-     500 = decorative / large type. 600 = AA-safe on white (buttons, links). */
+     500 = decorative / large type. 600 = AA-safe on every light surface in
+     the palette (white, cream, blush, lilac-100) — buttons, links, eyebrows. */
   --color-rose-50: #fff1f5;
   --color-rose-100: #ffe0e9;
   --color-rose-200: #fbc2d4;
   --color-rose-300: #f79dbb;
   --color-rose-400: #f0729d;
   --color-rose-500: #e4487d;
-  --color-rose-600: #ce2f68;
+  --color-rose-600: #b8285c;
   --color-rose-700: #a82454;
 
   /* --- Brand: Lilac (wing purple) ---------------------------------------- */

@@ -9,6 +9,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { howItWorks } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useNearViewport } from "@/hooks/useNearViewport";
 
 /**
  * Sticky product column with a scroll-linked progress rail. The illustration
@@ -16,10 +17,13 @@ import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
  */
 export function HowItWorks() {
   const root = useRef<HTMLElement | null>(null);
+  /* Scrubbed triggers are built as the section approaches the fold, not on
+     mount: each one forces a layout read, and this section is well below it. */
+  const near = useNearViewport(root);
 
   useIsomorphicLayoutEffect(() => {
     const el = root.current;
-    if (!el || prefersReducedMotion()) return;
+    if (!el || !near || prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
       const steps = gsap.utils.toArray<HTMLElement>("[data-step]");
@@ -67,7 +71,7 @@ export function HowItWorks() {
     }, el);
 
     return () => ctx.revert();
-  }, []);
+  }, [near]);
 
   return (
     <section
@@ -127,7 +131,7 @@ export function HowItWorks() {
                 />
                 <p className="eyebrow text-rose-600">{step.step}</p>
                 <h3 className="mt-4 font-display text-heading-sm text-ink uppercase">
-                  <span className="mr-3 text-rose-200">0{i + 1}</span>
+                  <span className="mr-3 text-rose-500">0{i + 1}</span>
                   {step.title}
                 </h3>
                 <p className="mt-4 max-w-md text-body text-ink-soft">

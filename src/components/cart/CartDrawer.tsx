@@ -136,7 +136,9 @@ export function CartDrawer() {
   return (
     <div
       className={cn("fixed inset-0 z-80", !isOpen && "pointer-events-none")}
-      aria-hidden={!isOpen}
+      /* See SignOutDialog: inert (not aria-hidden) keeps the closed drawer out
+         of the tab order as well as out of the accessibility tree. */
+      inert={!isOpen}
     >
       <div
         ref={scrimRef}

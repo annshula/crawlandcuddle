@@ -3,6 +3,7 @@
 import { useRef } from "react";
 
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { observeOnce } from "@/lib/in-view";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { cn } from "@/lib/utils";
 
@@ -30,23 +31,33 @@ export function CountUp({
     const el = ref.current;
     if (!el || prefersReducedMotion()) return;
 
-    const ctx = gsap.context(() => {
-      const counter = { n: 0 };
-      gsap.to(counter, {
-        n: value,
-        duration,
-        ease: "power2.out",
-        scrollTrigger: { trigger: el, start: "top 90%", once: true },
-        onUpdate: () => {
-          el.textContent = `${prefix}${counter.n.toFixed(decimals)}${suffix}`;
-        },
-        onComplete: () => {
-          el.textContent = formatted;
-        },
-      });
-    }, el);
+    let tween: gsap.core.Tween | null = null;
 
-    return () => ctx.revert();
+    /* Counts once — an observer, not a ScrollTrigger. See Reveal. */
+    const cancel = observeOnce(
+      el,
+      () => {
+        const counter = { n: 0 };
+        tween = gsap.to(counter, {
+          n: value,
+          duration,
+          ease: "power2.out",
+          onUpdate: () => {
+            el.textContent = `${prefix}${counter.n.toFixed(decimals)}${suffix}`;
+          },
+          onComplete: () => {
+            el.textContent = formatted;
+          },
+        });
+      },
+      "0px 0px -10% 0px",
+    );
+
+    return () => {
+      cancel();
+      tween?.kill();
+      el.textContent = formatted;
+    };
   }, [value, decimals, prefix, suffix, duration, formatted]);
 
   return (

@@ -1,9 +1,10 @@
 "use client";
 
-import Lenis from "lenis";
+import type Lenis from "lenis";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+import { onIdle } from "@/lib/defer";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { registerScrollLockTarget } from "@/lib/scroll-lock";
 
@@ -11,6 +12,11 @@ import { registerScrollLockTarget } from "@/lib/scroll-lock";
  * Drives Lenis inertial scrolling from the GSAP ticker so scroll-linked tweens
  * and the scrollbar position never drift apart (two rAF loops is the classic
  * cause of jittery pinned sections).
+ *
+ * Lenis is imported and started only once the page is idle: inertial scrolling
+ * is a refinement of a page that already scrolls natively, so neither its chunk
+ * nor its rAF loop belongs in the load window. Until it boots the browser does
+ * the scrolling, and anchor links fall back to native behaviour.
  */
 export function SmoothScrollProvider({
   children,
@@ -23,56 +29,68 @@ export function SmoothScrollProvider({
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      touchMultiplier: 1.6,
-      wheelMultiplier: 0.9,
+    let lenis: Lenis | null = null;
+    let tick: ((time: number) => void) | null = null;
+    let onAnchorClick: ((event: MouseEvent) => void) | null = null;
+
+    const cancelIdle = onIdle(() => {
+      void import("lenis").then(({ default: Lenis }) => {
+        lenis = new Lenis({
+          duration: 1.1,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          touchMultiplier: 1.6,
+          wheelMultiplier: 0.9,
+        });
+        lenisRef.current = lenis;
+        // Overlays pause inertial scrolling through this — body overflow alone
+        // never reaches Lenis.
+        registerScrollLockTarget(lenis);
+
+        lenis.on("scroll", ScrollTrigger.update);
+
+        tick = (time: number) => lenis?.raf(time * 1000);
+        gsap.ticker.add(tick);
+        gsap.ticker.lagSmoothing(0);
+
+        /**
+         * In-page anchors must go through Lenis or native smooth scrolling
+         * fights the inertial loop. Handles both "#why" and the cross-route
+         * "/#why" form the header uses — the latter only when we are already
+         * on that page.
+         */
+        onAnchorClick = (event: MouseEvent) => {
+          if (event.defaultPrevented || event.metaKey || event.ctrlKey) return;
+
+          const anchor = (
+            event.target as HTMLElement | null
+          )?.closest<HTMLAnchorElement>("a[href*='#']");
+          if (!anchor) return;
+
+          const url = new URL(anchor.href, window.location.origin);
+          // Only hijack hashes that resolve to a target on the page we are on.
+          if (url.pathname !== window.location.pathname || !url.hash) return;
+
+          const target = document.getElementById(url.hash.slice(1));
+          if (!target) return;
+
+          event.preventDefault();
+          lenis?.scrollTo(target, { offset: -96, duration: 1.3 });
+          history.replaceState(null, "", url.hash);
+        };
+
+        document.addEventListener("click", onAnchorClick);
+      });
     });
-    lenisRef.current = lenis;
-    // Overlays pause inertial scrolling through this — body overflow alone
-    // never reaches Lenis.
-    registerScrollLockTarget(lenis);
-
-    lenis.on("scroll", ScrollTrigger.update);
-
-    const tick = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
-
-    /**
-     * In-page anchors must go through Lenis or native smooth scrolling fights
-     * the inertial loop. Handles both "#why" and the cross-route "/#why" form
-     * the header uses — the latter only when we are already on that page.
-     */
-    const onAnchorClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.metaKey || event.ctrlKey) return;
-
-      const anchor = (
-        event.target as HTMLElement | null
-      )?.closest<HTMLAnchorElement>("a[href*='#']");
-      if (!anchor) return;
-
-      const url = new URL(anchor.href, window.location.origin);
-      // Only hijack hashes that resolve to a target on the page we are on.
-      if (url.pathname !== window.location.pathname || !url.hash) return;
-
-      const target = document.getElementById(url.hash.slice(1));
-      if (!target) return;
-
-      event.preventDefault();
-      lenis.scrollTo(target, { offset: -96, duration: 1.3 });
-      history.replaceState(null, "", url.hash);
-    };
-
-    document.addEventListener("click", onAnchorClick);
 
     return () => {
-      document.removeEventListener("click", onAnchorClick);
-      gsap.ticker.remove(tick);
-      gsap.ticker.lagSmoothing(500, 33);
-      lenis.destroy();
+      cancelIdle();
+      if (onAnchorClick) document.removeEventListener("click", onAnchorClick);
+      if (tick) {
+        gsap.ticker.remove(tick);
+        gsap.ticker.lagSmoothing(500, 33);
+      }
+      lenis?.destroy();
       registerScrollLockTarget(null);
       lenisRef.current = null;
     };
