@@ -105,7 +105,6 @@ export function HowItWorks() {
                 src="/images/product/green-owl.webp"
                 alt="Green Owl baby head protector backpack shown from the back with its adjustable shoulder harness"
                 fill
-                loading="eager"
                 sizes="(min-width: 1024px) 42vw, 90vw"
                 className="object-cover"
               />

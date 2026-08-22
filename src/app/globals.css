@@ -635,6 +635,42 @@
 }
 
 /* ==========================================================================
+   Hero fold — opening-animation resting state
+   --------------------------------------------------------------------------
+   These start states used to be `opacity-0` classes in the markup, which cost
+   two things: the LCP image was served painted-transparent and could not count
+   as painted until hydration finished and GSAP ran (a ~2.3s "element render
+   delay"), and visitors on reduced motion — where GSAP bails out entirely and
+   never clears the class — saw a permanently blank hero.
+
+   So: the states live here, behind `no-preference`, and the product column
+   (which holds the LCP image) offsets by transform alone. LCP ignores
+   transforms but waits on opacity, so the photograph is opaque in the very
+   first frame and merely slides into place afterwards.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-hero="eyebrow"],
+  [data-hero="script"],
+  [data-hero="body"],
+  [data-hero="blob"],
+  [data-hero="cta"] > * {
+    opacity: 0;
+  }
+
+  [data-hero="product"] {
+    transform: translateY(56px) scale(0.92);
+  }
+
+  /* Masked line reveals (SplitLines) — same reasoning: held here rather than
+     set by JS after hydration, so the headline never flashes in and back out. */
+  [data-line-inner] {
+    opacity: 0;
+    transform: translateY(115%);
+  }
+}
+
+/* ==========================================================================
    Accessibility
    ========================================================================== */
 
@@ -649,7 +685,10 @@
   }
 
   .reveal-hidden,
-  [data-reveal] {
+  [data-reveal],
+  [data-hero],
+  [data-hero="cta"] > *,
+  [data-line-inner] {
     opacity: 1 !important;
     transform: none !important;
   }

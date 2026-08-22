@@ -26,6 +26,12 @@ export function Logo({
       <img
         src={tone === "light" ? "/logo-white.svg" : "/logo.svg"}
         alt="Crawl & Cuddle"
+        /* React hoists a preload for every eager <img> in the SSR shell. The
+           light logo only ever appears on dark surfaces — the footer and the
+           mobile menu — so leaving it eager put a preload ahead of the hero
+           photograph for an image nobody sees on the first screen. */
+        loading={tone === "light" ? "lazy" : "eager"}
+        decoding="async"
         width={900}
         height={tone === "light" ? 433 : 425}
         className={cn("h-[clamp(2.5rem,6vw,3rem)] w-auto", className)}

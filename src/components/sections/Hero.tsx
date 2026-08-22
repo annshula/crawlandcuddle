@@ -59,10 +59,16 @@ export function Hero() {
           { y: 0, opacity: 1, duration: 0.8, stagger: 0.09 },
           1.1,
         )
+        /* Transform only — never opacity. This column holds the LCP image, and
+           Largest Contentful Paint does not count an element that is painted
+           transparent, so animating its opacity would push LCP out to whenever
+           hydration happened to finish. Its offset resting state is CSS (see
+           globals.css, "Hero fold"), so the image is opaque from the first
+           paint and only slides into place. */
         .fromTo(
           "[data-hero='product']",
-          { y: 56, scale: 0.92, opacity: 0 },
-          { y: 0, scale: 1, opacity: 1, duration: 1.5 },
+          { y: 56, scale: 0.92 },
+          { y: 0, scale: 1, duration: 1.5 },
           0.25,
         )
         .fromTo(
@@ -135,7 +141,7 @@ export function Hero() {
           <div className="relative order-2 lg:order-1">
             <p
               data-hero="eyebrow"
-              className="eyebrow flex items-center gap-3 text-rose-600 opacity-0"
+              className="eyebrow flex items-center gap-3 text-rose-600"
             >
               <span className="inline-block h-px w-8 bg-rose-600/40" />
               {hero.eyebrow}
@@ -175,14 +181,14 @@ export function Hero() {
 
             <p
               data-hero="script"
-              className="mt-[clamp(0.75rem,1.8vh,1.25rem)] font-script text-2xl text-lilac-500 opacity-0 md:text-3xl"
+              className="mt-[clamp(0.75rem,1.8vh,1.25rem)] font-script text-2xl text-lilac-500 md:text-3xl"
             >
               {hero.script}
             </p>
 
             <p
               data-hero="body"
-              className="mt-[clamp(0.75rem,1.8vh,1.25rem)] max-w-lg text-body text-ink-soft opacity-0"
+              className="mt-[clamp(0.75rem,1.8vh,1.25rem)] max-w-lg text-body text-ink-soft"
             >
               {hero.body}
             </p>
@@ -206,7 +212,7 @@ export function Hero() {
           <div className="relative order-1 lg:order-2">
             <div
               data-hero="product"
-              className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] opacity-0 sm:w-[min(100%,25rem)] lg:h-[min(74vh,36rem)] lg:w-auto lg:max-w-full"
+              className="relative mx-auto aspect-3/4 w-[min(100%,21rem)] sm:w-[min(100%,25rem)] lg:h-[min(74vh,36rem)] lg:w-auto lg:max-w-full"
             >
               {/* Organic halo fills the space the photo's own background used
                   to occupy — the halo IS the background now. */}

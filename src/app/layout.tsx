@@ -90,6 +90,12 @@ export default function RootLayout({
           (e.g. cz-shortcut-listen) onto <body>; without this the client DOM
           would not match the server HTML and React logs a hydration error. */}
       <body className="antialiased" suppressHydrationWarning>
+        {/* The hero and reveal resting states are CSS, and GSAP is what clears
+            them — with scripting off nothing ever would, so restore them. */}
+        <noscript>
+          <style>{`[data-hero],[data-hero="cta"]>*,[data-line-inner],[data-reveal],.reveal-hidden{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+
         <a
           href="#top"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-70 focus:rounded-btn focus:bg-rose-600 focus:px-5 focus:py-3 focus:text-paper"

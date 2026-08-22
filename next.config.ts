@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["gsap"],
+    /* Ships the route's CSS inside the HTML instead of as two render-blocking
+       <link> requests. The whole stylesheet is ~18 KiB transferred — less than
+       the round trips cost on a slow connection, and it takes CSS off the
+       critical path entirely. `style-src 'unsafe-inline'` is already granted in
+       middleware.ts, so no CSP change is needed. */
+    inlineCss: true,
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
