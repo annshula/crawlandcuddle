@@ -240,6 +240,7 @@ export function Hero() {
                   alt={heroImage.alt}
                   fill
                   priority
+                  fetchPriority="high"
                   sizes="(min-width: 1024px) 26rem, (min-width: 640px) 24rem, 80vw"
                   className="object-contain object-center"
                 />

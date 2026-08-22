@@ -114,6 +114,7 @@ export default function ProductsPage() {
                     alt="Baby head protector backpack in the Flying Pig design, on a soft plain background"
                     fill
                     priority
+                    fetchPriority="high"
                     sizes="(min-width: 1024px) 26rem, (min-width: 640px) 24rem, 80vw"
                     className="object-contain object-center"
                   />

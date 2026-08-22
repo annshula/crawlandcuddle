@@ -205,6 +205,7 @@ export default async function ProductPage({
                   alt={`${variant.name} baby head protector backpack shown from the back with wings and adjustable harness`}
                   fill
                   priority
+                  fetchPriority="high"
                   sizes="(min-width: 1024px) 46vw, 92vw"
                   className="object-cover"
                 />
