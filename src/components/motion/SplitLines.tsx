@@ -39,16 +39,21 @@ export function SplitLines({
     if (!inner.length) return;
 
     if (prefersReducedMotion()) {
-      gsap.set(inner, { yPercent: 0, opacity: 1 });
+      gsap.set(inner, { yPercent: 0, y: 0, opacity: 1 });
       return;
     }
 
-    gsap.set(inner, { yPercent: 115, opacity: 0 });
+    /* `y: 0` is not redundant. The resting `translateY(115%)` comes from CSS
+       (globals.css, "Hero fold"), and GSAP records an existing percentage
+       transform into its px-based `y` — animating `yPercent` alone then leaves
+       that px offset behind and the lines stay hidden under their mask. */
+    gsap.set(inner, { yPercent: 115, y: 0, opacity: 0 });
 
     let tween: gsap.core.Tween | null = null;
     const play = () => {
       tween = gsap.to(inner, {
         yPercent: 0,
+        y: 0,
         opacity: 1,
         duration: 1.25,
         delay,
