@@ -9,7 +9,7 @@ declare global {
   interface Window {
     ttq?: {
       page: (...args: unknown[]) => void;
-      [key: string]: unknown;
+      track: (...args: unknown[]) => void;
     };
   }
 }

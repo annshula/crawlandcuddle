@@ -2,19 +2,24 @@
 
 /**
  * Client-side analytics helpers — one call fires the matching event to every
- * configured provider (Meta Pixel via `fbq`, Google Analytics 4 via `gtag`).
+ * configured provider (Meta Pixel via `fbq`, Google Analytics 4 via `gtag`,
+ * TikTok Pixel via `ttq`).
  *
- * No provider is ever required: the snippets in MetaPixel / GoogleAnalytics
- * only install `window.fbq` / `window.gtag` when their env var is set, so the
- * optional calls below are silent no-ops on local runs and previews without
- * the ids. Event names are the standard Meta Pixel and GA4 enhanced-ecommerce
- * vocabulary so both platforms line up on the same funnel.
+ * No provider is ever required: the snippets in MetaPixel / GoogleAnalytics /
+ * TikTokPixel only install `window.fbq` / `window.gtag` / `window.ttq` when
+ * their env var is set, so the optional calls below are silent no-ops on
+ * local runs and previews without the ids. Event names are each platform's
+ * own standard ecommerce vocabulary so all three line up on the same funnel.
  */
 
 declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
+    ttq?: {
+      page: (...args: unknown[]) => void;
+      track: (...args: unknown[]) => void;
+    };
   }
 }
 
@@ -38,6 +43,11 @@ function fbq(event: string, data?: Record<string, unknown>) {
 function gtag(event: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   window.gtag?.("event", event, params);
+}
+
+function ttq(event: string, data?: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  window.ttq?.track(event, data);
 }
 
 /** GA4 enhanced-ecommerce item array. */
@@ -90,6 +100,14 @@ export function trackAddToCart(
     value,
     items: toGtagItems([item], priceCents),
   });
+  ttq("AddToCart", {
+    content_type: "product",
+    content_id: item.slug,
+    content_name: item.name,
+    quantity: item.quantity ?? 1,
+    currency,
+    value,
+  });
 }
 
 /** Checkout started — Meta `InitiateCheckout`, GA4 `begin_checkout`. */
@@ -112,5 +130,15 @@ export function trackInitiateCheckout(
     currency,
     value,
     items: toGtagItems(items, priceCents),
+  });
+  ttq("InitiateCheckout", {
+    content_type: "product",
+    contents: items.map((item) => ({
+      content_id: item.slug,
+      content_name: item.name,
+      quantity: item.quantity ?? 1,
+    })),
+    currency,
+    value,
   });
 }

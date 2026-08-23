@@ -18,6 +18,7 @@ export const runtime = "nodejs";
  * server-side conversion endpoints that need a real conversion signal:
  *   • Meta Conversions API (`Purchase`) — the browser pixel cannot see this
  *   • Google Analytics 4 Measurement Protocol (`purchase`)
+ *   • TikTok Events API (`Purchase`)
  *
  * Both providers are optional: a missing env config is skipped silently and
  * the webhook still acks Shopify with 200 so it does not retry.
@@ -169,6 +170,71 @@ async function sendGa4Purchase(order: ShopifyOrder): Promise<void> {
   }
 }
 
+/** TikTok Events API `Purchase` event. No-op without a pixel + access token. */
+async function sendTikTokPurchase(
+  order: ShopifyOrder,
+  ip: string | null,
+  userAgent: string | null,
+): Promise<void> {
+  const pixelId = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim();
+  const accessToken = process.env.TIKTOK_ACCESS_TOKEN?.trim();
+  if (!pixelId || !accessToken) return;
+
+  const items = (order.line_items ?? []).filter(isOurLineItem);
+  if (items.length === 0) return;
+
+  const value = Number(order.current_total_price ?? order.total_price ?? 0);
+
+  try {
+    const response = await fetch(
+      "https://business-api.tiktok.com/open_api/v1.3/event/track/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Token": accessToken,
+        },
+        body: JSON.stringify({
+          event_source: "web",
+          event_source_id: pixelId,
+          data: [
+            {
+              event: "Purchase",
+              event_time: Math.floor(Date.now() / 1000),
+              event_id: `purchase-${order.id}`,
+              user: {
+                ip: ip ?? undefined,
+                user_agent: userAgent ?? undefined,
+              },
+              properties: {
+                contents: items.map((i) => ({
+                  content_id: String(i.variant_id ?? i.id),
+                  content_type: "product",
+                  content_name: i.title,
+                  quantity: i.quantity ?? 1,
+                  price: Number(i.price ?? 0),
+                })),
+                content_type: "product",
+                currency: order.currency ?? "USD",
+                value,
+              },
+            },
+          ],
+        }),
+      },
+    );
+    const text = await response.text();
+    console.log(
+      `[webhook] TikTok Events API status ${response.status} for order ${order.id}: ${text.slice(0, 500)}`,
+    );
+  } catch (error) {
+    console.error(
+      `[webhook] TikTok Events API request failed for order ${order.id}:`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
 
@@ -202,6 +268,7 @@ export async function POST(request: NextRequest) {
   await Promise.allSettled([
     sendMetaPurchase(order, ip, userAgent),
     sendGa4Purchase(order),
+    sendTikTokPurchase(order, ip, userAgent),
   ]);
 
   return ack();
