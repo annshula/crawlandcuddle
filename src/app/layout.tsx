@@ -4,6 +4,7 @@ import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { GTM } from "@/components/analytics/GTM";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { TikTokPixel } from "@/components/analytics/TikTokPixel";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Footer } from "@/components/layout/Footer";
@@ -126,6 +127,7 @@ export default function RootLayout({
         <ClarityAnalytics />
         <GoogleAnalytics />
         <MetaPixel />
+        <TikTokPixel />
       </body>
     </html>
   );

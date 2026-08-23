@@ -103,6 +103,18 @@ const META_EVENT_SRC = META_PIXEL_ENABLED
   : "";
 
 /**
+ * TikTok Pixel origins, allowed only when a pixel id is configured. The tag
+ * script and its event beacons are both served from analytics.tiktok.com, so
+ * `script-src`, `connect-src`, and `img-src` (the <noscript> fallback beacon)
+ * all need the one host. With no id the app never loads the pixel, so the
+ * CSP stays as tight as it was.
+ */
+const TIKTOK_PIXEL_ENABLED = Boolean(process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID);
+const TIKTOK_SRC = TIKTOK_PIXEL_ENABLED
+  ? " https://analytics.tiktok.com"
+  : "";
+
+/**
  * Google Tag Manager origins. GTM is a permanent install (container
  * GTM-W96TWWW9; see components/analytics/GTM.tsx), so unlike the opt-in
  * integrations above these entries are unconditional. The loader runs from
@@ -118,15 +130,15 @@ const GTM_COLLECT_SRC =
 const CSP = [
   `default-src 'self'`,
   // See module doc for why 'unsafe-inline' is here (Next's inline RSC payload).
-  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}${GA_SCRIPT_SRC}${GTM_SRC}`,
+  `script-src 'self' 'unsafe-inline'${IS_DEV ? ` 'unsafe-eval'` : ""}${CLARITY_SRC}${META_SCRIPT_SRC}${GA_SCRIPT_SRC}${GTM_SRC}${TIKTOK_SRC}`,
   // Components set dynamic inline styles (GSAP, scroll progress, blobs), so
   // style attributes/`<style>` need 'unsafe-inline' — styles cannot execute
   // script, so this is low risk.
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${CLARITY_IMG_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}`,
+  `img-src 'self' data: blob: https://cdn.shopify.com https://*.myshopify.com${CLARITY_SRC}${CLARITY_IMG_SRC}${META_PIXEL_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}${TIKTOK_SRC}`,
   `media-src 'self' https://cdn.shopify.com https://*.myshopify.com`,
   `font-src 'self' data:`,
-  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${META_EVENT_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}`,
+  `connect-src 'self'${IS_DEV ? " ws://localhost:* wss://localhost:*" : ""}${CLARITY_SRC}${META_PIXEL_SRC}${META_EVENT_SRC}${GA_COLLECT_SRC}${GTM_COLLECT_SRC}${TIKTOK_SRC}`,
   `frame-src 'self'${META_FRAME_SRC}${GTM_SRC}`,
   `object-src 'none'`,
   `base-uri 'self'`,
