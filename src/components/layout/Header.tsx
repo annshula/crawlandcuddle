@@ -139,6 +139,24 @@ export function Header() {
             <div className="hidden sm:block">
               <CurrencySelector />
             </div>
+            <div className="hidden sm:block">
+              <AccountMenu />
+            </div>
+
+            <button
+              type="button"
+              onClick={open}
+              aria-label={`Open bag, ${count} item${count === 1 ? "" : "s"}`}
+              className="relative grid size-11 place-items-center rounded-full border border-ink/15 text-ink transition-colors duration-300 hover:border-rose-600 hover:text-rose-600"
+            >
+              <Icon name="bag" />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 grid min-w-5 place-items-center rounded-full bg-rose-600 px-1.5 py-0.5 font-label text-[0.6rem] leading-none text-paper">
+                  {count}
+                </span>
+              )}
+            </button>
+
             <div className="relative hidden sm:flex sm:flex-col sm:items-center">
               <Button href="/products" className="px-7! py-3.5!">
                 Shop now
@@ -174,24 +192,6 @@ export function Header() {
                 </div>
               </div>
             </div>
-
-            <div className="hidden sm:block">
-              <AccountMenu />
-            </div>
-
-            <button
-              type="button"
-              onClick={open}
-              aria-label={`Open bag, ${count} item${count === 1 ? "" : "s"}`}
-              className="relative grid size-11 place-items-center rounded-full border border-ink/15 text-ink transition-colors duration-300 hover:border-rose-600 hover:text-rose-600"
-            >
-              <Icon name="bag" />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 grid min-w-5 place-items-center rounded-full bg-rose-600 px-1.5 py-0.5 font-label text-[0.6rem] leading-none text-paper">
-                  {count}
-                </span>
-              )}
-            </button>
 
             <button
               type="button"
