@@ -68,8 +68,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-01-08",
     readingMinutes: 7,
     author: authorDefault,
-    image: "/images/lifestyle/baby-back.webp",
-    imageAlt: "Baby wearing a soft head protector cushion while learning to crawl on a padded floor",
+    image: "/images/product/turtle.webp",
+    imageAlt:
+      "The Turtle baby head protector backpack, a quilted shell design that cushions backward falls",
     keywords: [
       "baby head bump when to worry",
       "baby hit head symptoms",
@@ -141,8 +142,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-01-12",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Toddler standing and holding onto furniture while wearing an anti-fall head and back cushion",
+    image: "/images/product/tortoise.webp",
+    imageAlt:
+      "The Tortoise baby head protector backpack with an olive shell and ivory limbs",
     keywords: [
       "toddler falls backward",
       "baby tips over backward",
@@ -208,8 +210,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-01-15",
     readingMinutes: 9,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "Baby peeking out from behind furniture in a baby-proofed living room",
+    image: "/images/product/green-owl.webp",
+    imageAlt:
+      "The Green Owl baby head protector backpack with mint 3D mesh and feathered ivory wings",
     keywords: [
       "baby proofing checklist",
       "baby proofing kit",
@@ -273,15 +276,17 @@ export const posts: BlogPost[] = [
   },
   {
     slug: "furniture-anchoring-guide",
-    title: "Furniture Anchoring: The Complete Guide for Crawling and Cruising Babies",
+    title:
+      "Furniture Anchoring: The Complete Guide for Crawling and Cruising Babies",
     description:
       "How to anchor dressers, bookshelves and TVs correctly, which furniture is highest-risk for tip-overs, and how anchor needs change once your baby starts pulling to stand.",
     category: "Baby Proofing",
     publishedAt: "2026-01-18",
     readingMinutes: 7,
     author: authorDefault,
-    image: "/images/lifestyle/baby-back.webp",
-    imageAlt: "Toddler standing near anchored furniture in a childproofed nursery",
+    image: "/images/product/lion.webp",
+    imageAlt:
+      "The Lion baby head protector backpack with amber stripes and tiny ears",
     keywords: [
       "furniture anchors",
       "furniture tip over prevention",
@@ -292,7 +297,8 @@ export const posts: BlogPost[] = [
       "Anchor any furniture over 30 inches tall or with drawers a child could climb — dressers, bookshelves, TV stands and freestanding wardrobes — using an L-bracket or safety strap screwed into a wall stud, not just drywall. Do this before your baby is mobile, since a child doesn't need to be strong, just curious and climbing, for a tip-over to happen.",
     sections: [
       {
-        heading: "Why furniture tip-overs are a real risk, not a theoretical one",
+        heading:
+          "Why furniture tip-overs are a real risk, not a theoretical one",
         body: [
           "A dresser with a few open drawers becomes a ladder. A baby who has just learned to pull to stand will use whatever's nearby — including furniture never designed to bear that kind of load. Furniture and TV tip-overs send thousands of children to emergency rooms every year, and the age range most affected overlaps almost exactly with the crawling-to-cruising window this entire site is built around.",
         ],
@@ -347,8 +353,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-01-21",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Baby crawling on a hardwood floor while wearing a soft head and back protector",
+    image: "/images/product/frog.webp",
+    imageAlt:
+      "The Frog baby head protector backpack in bright green, built to bounce on hard floors",
     keywords: [
       "hardwood floor baby safety",
       "baby proofing hard floors",
@@ -407,8 +414,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-01-24",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/hero-baby-butterfly.webp",
-    imageAlt: "Toddler taking first steps while wearing a butterfly-print head and back protector backpack",
+    image: "/images/product/flying-pig.webp",
+    imageAlt:
+      "The Flying Pig baby head protector backpack with soft wings, for the age they really can fly",
     keywords: [
       "signs baby ready to walk",
       "baby first steps",
@@ -479,7 +487,8 @@ export const posts: BlogPost[] = [
     readingMinutes: 7,
     author: authorDefault,
     image: "/images/product/dream-little-butterfly.webp",
-    imageAlt: "Dream Little Butterfly baby head protector backpack shown flat with harness straps visible",
+    imageAlt:
+      "Dream Little Butterfly baby head protector backpack shown flat with harness straps visible",
     keywords: [
       "baby head protector backpack",
       "best baby head protector",
@@ -560,7 +569,8 @@ export const posts: BlogPost[] = [
     readingMinutes: 4,
     author: authorDefault,
     image: "/images/product/mesh-detail.webp",
-    imageAlt: "Close-up of breathable 3D mesh fabric on a baby head protector backpack",
+    imageAlt:
+      "Close-up of breathable 3D mesh fabric on a baby head protector backpack",
     keywords: [
       "how to wash baby head protector",
       "baby cushion care instructions",
@@ -615,15 +625,17 @@ export const posts: BlogPost[] = [
   },
   {
     slug: "daycare-safety-what-to-ask",
-    title: "Daycare Safety: What to Ask Before You Enroll a Crawling or Walking Baby",
+    title:
+      "Daycare Safety: What to Ask Before You Enroll a Crawling or Walking Baby",
     description:
       "The specific safety questions worth asking a daycare or nursery for babies in the crawling-to-walking stage, beyond the standard licensing checklist.",
     category: "Parenting Tips",
     publishedAt: "2026-02-02",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "Baby playing on a padded floor in a childcare setting",
+    image: "/images/product/bee.webp",
+    imageAlt:
+      "The Bee baby head protector backpack with honey stripes and soft ivory wings",
     keywords: [
       "daycare safety questions",
       "nursery safety checklist",
@@ -687,8 +699,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-05",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Toddler exploring a hotel room floor while wearing a portable head and back protector",
+    image: "/images/product/flying-pig.webp",
+    imageAlt:
+      "The Flying Pig baby head protector backpack with soft wings, light enough to pack for travel",
     keywords: [
       "traveling with crawling baby",
       "hotel room baby proofing",
@@ -753,8 +766,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-08",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Baby crawling across the floor wearing a soft protective cushion on the back",
+    image: "/images/product/frog.webp",
+    imageAlt:
+      "The Frog baby head protector backpack in bright green with wide eyes, made for crawling",
     keywords: [
       "crawling milestones",
       "when do babies start crawling",
@@ -824,8 +838,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-11",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Baby pulling to stand using a sofa, wearing a head and back protector cushion",
+    image: "/images/product/lion.webp",
+    imageAlt:
+      "The Lion baby head protector backpack with amber stripes and tiny ears, for the pull-to-stand stage",
     keywords: [
       "pulling to stand baby",
       "baby pulls up and falls backward",
@@ -884,7 +899,8 @@ export const posts: BlogPost[] = [
   },
   {
     slug: "best-baby-head-protector-styles-guide",
-    title: "Dream Little Butterfly, Green Owl or Lion? Choosing a Style That Fits Your Nursery",
+    title:
+      "Dream Little Butterfly, Green Owl or Lion? Choosing a Style That Fits Your Nursery",
     description:
       "A friendly guide to the ten Crawl & Cuddle head protector styles — which pairs best with which nursery palette, and why protection is identical across every design.",
     category: "Product Guides",
@@ -892,7 +908,8 @@ export const posts: BlogPost[] = [
     readingMinutes: 5,
     author: authorDefault,
     image: "/images/product/green-owl.webp",
-    imageAlt: "Green Owl baby head protector backpack laid flat next to other style options",
+    imageAlt:
+      "Green Owl baby head protector backpack laid flat next to other style options",
     keywords: [
       "baby head protector styles",
       "butterfly baby head protector",
@@ -947,15 +964,17 @@ export const posts: BlogPost[] = [
   },
   {
     slug: "first-time-parent-safety-mistakes",
-    title: "8 Common Baby Safety Mistakes First-Time Parents Make (and How to Fix Them)",
+    title:
+      "8 Common Baby Safety Mistakes First-Time Parents Make (and How to Fix Them)",
     description:
       "The most frequent, easy-to-miss baby proofing and safety gaps first-time parents run into during the crawling-to-walking stage — and simple fixes for each.",
     category: "Parenting Tips",
     publishedAt: "2026-02-17",
     readingMinutes: 7,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "First-time parent watching baby crawl safely across a padded living room floor",
+    image: "/images/product/unicorn.webp",
+    imageAlt:
+      "The Unicorn baby head protector backpack with a golden horn and pastel wings",
     keywords: [
       "baby safety mistakes",
       "first time parent baby proofing",
@@ -983,7 +1002,8 @@ export const posts: BlogPost[] = [
         ],
       },
       {
-        heading: "Mistake 4: Assuming supervision replaces environmental safety",
+        heading:
+          "Mistake 4: Assuming supervision replaces environmental safety",
         body: [
           "Even attentive, in-the-room supervision can't catch every backward tip — reaction time for an adult is measured in a full second or more, and a fall from standing height takes a fraction of that. Supervision and environmental safety (anchored furniture, padded corners, a head-and-back cushion) work together; neither replaces the other.",
         ],
@@ -1007,7 +1027,8 @@ export const posts: BlogPost[] = [
         ],
       },
       {
-        heading: "Mistake 8: Treating every bump as an emergency (or the reverse)",
+        heading:
+          "Mistake 8: Treating every bump as an emergency (or the reverse)",
         body: [
           "Both overreacting to every minor bump and underreacting to genuine warning signs are common first-time-parent patterns. Knowing the specific signs that warrant a call to the pediatrician (see our head bump guide) resolves this uncertainty ahead of time, rather than in the panic of the moment.",
         ],
@@ -1042,8 +1063,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-20",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-back.webp",
-    imageAlt: "Older sibling playing gently near a crawling baby wearing a soft protective cushion",
+    image: "/images/product/pink-butterfly.webp",
+    imageAlt:
+      "The Pink Butterfly baby head protector backpack in blush and violet, soft enough for gentle play",
     keywords: [
       "sibling safety baby",
       "toddler knocked over by sibling",
@@ -1106,8 +1128,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-23",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Baby standing on grass outdoors wearing a breathable head and back protector",
+    image: "/images/product/bee.webp",
+    imageAlt:
+      "The Bee baby head protector backpack with honey stripes and soft ivory wings, made for outdoor play",
     keywords: [
       "outdoor baby safety",
       "backyard baby proofing",
@@ -1177,8 +1200,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-02-26",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Baby crawling near a kitchen cabinet fitted with a child safety lock",
+    image: "/images/product/green-owl.webp",
+    imageAlt:
+      "The Green Owl baby head protector backpack with mint 3D mesh and feathered ivory wings",
     keywords: [
       "baby proofing cabinets",
       "cabinet locks for babies",
@@ -1228,10 +1252,7 @@ export const posts: BlogPost[] = [
         a: "They're adequate for lower-priority cabinets, but a magnetic or more robust lock is worth the extra setup for anything storing medications or cleaning chemicals.",
       },
     ],
-    related: [
-      "baby-proofing-checklist-by-age",
-      "furniture-anchoring-guide",
-    ],
+    related: ["baby-proofing-checklist-by-age", "furniture-anchoring-guide"],
   },
   {
     slug: "when-toddlers-outgrow-need-head-protector",
@@ -1243,7 +1264,8 @@ export const posts: BlogPost[] = [
     readingMinutes: 5,
     author: authorDefault,
     image: "/images/product/unicorn.webp",
-    imageAlt: "Confident toddler walking steadily without needing a head protector cushion",
+    imageAlt:
+      "Confident toddler walking steadily without needing a head protector cushion",
     keywords: [
       "when do toddlers stop needing head protector",
       "toddler balance development",
@@ -1306,8 +1328,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-04",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "Baby crawling near a coffee table fitted with soft corner guards",
+    image: "/images/product/lion.webp",
+    imageAlt:
+      "The Lion baby head protector backpack with amber stripes and tiny ears",
     keywords: [
       "baby proofing corner guards",
       "coffee table corner guards",
@@ -1370,8 +1393,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-07",
     readingMinutes: 7,
     author: authorDefault,
-    image: "/images/lifestyle/baby-back.webp",
-    imageAlt: "Baby playing safely on a cushioned floor, illustrating evidence-based baby safety",
+    image: "/images/product/green-owl.webp",
+    imageAlt:
+      "The Green Owl baby head protector backpack with mint 3D mesh and feathered ivory wings",
     keywords: [
       "baby safety myths",
       "baby fall myths",
@@ -1405,7 +1429,8 @@ export const posts: BlogPost[] = [
         ],
       },
       {
-        heading: "Myth 5: You should always wake a baby to check on them after any bump",
+        heading:
+          "Myth 5: You should always wake a baby to check on them after any bump",
         body: [
           "For a clearly minor bump with normal behavior, most pediric guidance doesn't require waking a sleeping baby repeatedly through the night — normal, undisturbed sleep is itself a reassuring sign. Waking once during the first couple hours after a more significant bump is a reasonable middle ground, not an all-night vigil.",
         ],
@@ -1452,8 +1477,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-10",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Diaper bag packed with safety essentials for an active crawling baby",
+    image: "/images/product/bee.webp",
+    imageAlt:
+      "The Bee baby head protector backpack with honey stripes and soft ivory wings",
     keywords: [
       "diaper bag checklist",
       "diaper bag essentials crawling baby",
@@ -1516,8 +1542,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-13",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Baby exploring a grandparent's living room safely with supervision",
+    image: "/images/product/tortoise.webp",
+    imageAlt:
+      "The Tortoise baby head protector backpack with an olive shell and ivory limbs",
     keywords: [
       "baby proofing grandparents house",
       "grandma house baby safety",
@@ -1580,8 +1607,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-16",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "Tired toddler being comforted after a fall, wearing a soft head protector cushion",
+    image: "/images/product/lion.webp",
+    imageAlt:
+      "The Lion baby head protector backpack with amber stripes and tiny ears",
     keywords: [
       "tired toddler falls more",
       "toddler fatigue balance",
@@ -1645,7 +1673,8 @@ export const posts: BlogPost[] = [
     readingMinutes: 6,
     author: authorDefault,
     image: "/images/product/turtle.webp",
-    imageAlt: "Turtle-print baby head protector backpack displayed as a baby registry item",
+    imageAlt:
+      "Turtle-print baby head protector backpack displayed as a baby registry item",
     keywords: [
       "baby registry safety items",
       "baby proofing registry checklist",
@@ -1708,8 +1737,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-22",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Baby safely gated away from a staircase in a baby-proofed hallway",
+    image: "/images/product/tortoise.webp",
+    imageAlt:
+      "The Tortoise baby head protector backpack with an olive shell and ivory limbs",
     keywords: [
       "baby gate stairs",
       "stair safety crawling baby",
@@ -1772,8 +1802,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-25",
     readingMinutes: 6,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-left.webp",
-    imageAlt: "Parent doing a floor-level safety sweep in a room with a crawling baby",
+    image: "/images/product/frog.webp",
+    imageAlt:
+      "The Frog baby head protector backpack in bright green with wide eyes",
     keywords: [
       "choking hazards baby",
       "floor level baby proofing",
@@ -1836,8 +1867,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-28",
     readingMinutes: 7,
     author: authorDefault,
-    image: "/images/lifestyle/baby-back.webp",
-    imageAlt: "Pediatrician-recommended milestone tracking for a baby's motor development",
+    image: "/images/product/green-owl.webp",
+    imageAlt:
+      "The Green Owl baby head protector backpack with mint 3D mesh and feathered ivory wings",
     keywords: [
       "baby motor development delay",
       "when to worry about baby not walking",
@@ -1906,8 +1938,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-03-31",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-peek-right.webp",
-    imageAlt: "Multiple babies playing together safely at a supervised playdate",
+    image: "/images/product/pink-butterfly.webp",
+    imageAlt:
+      "The Pink Butterfly baby head protector backpack in blush and violet",
     keywords: [
       "playdate safety babies",
       "multiple babies crawling safety",
@@ -1970,8 +2003,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-04-03",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/lifestyle/baby-standing.webp",
-    imageAlt: "Baby sleeping peacefully after a day of safe, supervised active play",
+    image: "/images/product/dream-little-butterfly.webp",
+    imageAlt:
+      "The Dream Little Butterfly baby head protector backpack with lilac wings and pom-pom antennae",
     keywords: [
       "baby sleep after head bump",
       "toddler fussy sleep after fall",
@@ -2033,8 +2067,9 @@ export const posts: BlogPost[] = [
     publishedAt: "2026-04-06",
     readingMinutes: 5,
     author: authorDefault,
-    image: "/images/product/frog.webp",
-    imageAlt: "Close-up of an adjustable harness and chest clip on a baby head protector backpack",
+    image: "/images/product/pink-butterfly.webp",
+    imageAlt:
+      "The Pink Butterfly baby head protector backpack showing the adjustable harness and chest clip",
     keywords: [
       "how to fit baby head protector",
       "adjust baby harness straps",
