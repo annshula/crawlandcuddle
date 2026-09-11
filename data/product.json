@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "syncedAt": "2026-08-18T11:41:30.278Z",
+  "syncedAt": "2026-09-11T12:51:44.272Z",
   "shop": {
     "domain": "trackify-com.myshopify.com",
     "name": "Trackify",
@@ -10,79 +10,79 @@
     "id": "gid://shopify/Product/9603256975587",
     "handle": "baby-head-protector-backpack",
     "title": "Baby Head Protector Backpack | Toddler Anti-Fall Cushion Pillow",
-    "price": 45.32,
-    "compareAtPrice": 52.57,
+    "price": 30.16,
+    "compareAtPrice": 45.24,
     "currencyCode": "USD",
     "availableForSale": true,
     "variants": [
       {
         "id": "gid://shopify/ProductVariant/49535878234339",
         "title": "Dream Little Butterfly",
-        "price": 45.32,
-        "compareAtPrice": 52.57,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878267107",
         "title": "Lion",
-        "price": 45.32,
-        "compareAtPrice": 55.33,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878299875",
         "title": "Green Owl",
-        "price": 45.32,
-        "compareAtPrice": 57.56,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878332643",
         "title": "Bee",
-        "price": 45.32,
-        "compareAtPrice": 53.93,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878365411",
         "title": "Flying Pig",
-        "price": 45.32,
-        "compareAtPrice": 56.65,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878398179",
         "title": "Pink Butterfly",
-        "price": 45.32,
-        "compareAtPrice": 58.92,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878430947",
         "title": "Frog",
-        "price": 45.32,
-        "compareAtPrice": 53.02,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878463715",
         "title": "Turtle",
-        "price": 45.32,
-        "compareAtPrice": 54.84,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878496483",
         "title": "Tortoise",
-        "price": 45.14,
-        "compareAtPrice": 55.52,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       },
       {
         "id": "gid://shopify/ProductVariant/49535878529251",
         "title": "Unicorn",
-        "price": 45.32,
-        "compareAtPrice": 58.01,
+        "price": 30.16,
+        "compareAtPrice": 45.24,
         "availableForSale": true
       }
     ]

@@ -409,6 +409,7 @@ export const footerLinks = [
       { label: "Milestone guide", href: "/#milestones" },
       { label: "Fitting guide", href: "/#how" },
       { label: "Parent reviews", href: "/#reviews" },
+      { label: "Blog", href: "/blogs" },
     ],
   },
   {
