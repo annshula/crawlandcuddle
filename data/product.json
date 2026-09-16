@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "syncedAt": "2026-09-16T12:02:44.267Z",
+  "syncedAt": "2026-09-16T13:10:28.411Z",
   "shop": {
     "domain": "trackify-com.myshopify.com",
     "name": "Trackify",
@@ -30,20 +30,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -54,11 +59,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -69,20 +69,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -93,11 +98,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -108,20 +108,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -132,11 +137,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -147,20 +147,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -171,11 +176,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -186,20 +186,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -210,11 +215,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -225,20 +225,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -249,11 +254,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -264,20 +264,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -288,11 +293,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -303,20 +303,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -327,11 +332,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -342,20 +342,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -366,11 +371,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       },
@@ -381,20 +381,25 @@
         "compareAtPrice": 45.24,
         "availableForSale": true,
         "pricesByMarket": {
+          "AU": {
+            "amount": 41.79,
+            "compareAtAmount": 62.68,
+            "currencyCode": "AUD"
+          },
           "CA": {
             "amount": 41.64,
             "compareAtAmount": 62.46,
             "currencyCode": "CAD"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
-          },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
+          },
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "US": {
             "amount": 30.16,
@@ -405,11 +410,6 @@
             "amount": 22.25,
             "compareAtAmount": 33.37,
             "currencyCode": "GBP"
-          },
-          "AU": {
-            "amount": 41.79,
-            "compareAtAmount": 62.68,
-            "currencyCode": "AUD"
           }
         }
       }

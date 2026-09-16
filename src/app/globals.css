@@ -622,6 +622,17 @@
   padding-block: var(--section-gap);
 }
 
+/* Scroll still works, the bar itself just never renders — for compact
+   native-scroll strips (e.g. the PDP thumbnail rail) where the branded
+   scrollbar above would be visual noise on a handful of pixels. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility text-stroke-rose {
   -webkit-text-stroke: 1.5px var(--color-rose-500);
   color: transparent;

@@ -11,6 +11,7 @@ import {
   productCurrency,
   productPriceCents,
 } from "@/lib/catalog";
+import { productReviewSummary } from "@/data/reviews";
 
 export type SocialLink = { label: string; href: string };
 
@@ -171,11 +172,19 @@ export const variants: Variant[] = [
   },
 ];
 
-/** Canonical URL for a single style's product page. */
+/** The one product's canonical handle/path — every style lives on this one page, switched client-side by the swatch tiles, never in the URL. */
+export const productHandle = "baby-head-protector-backpack";
+export const productPath = `/products/${productHandle}`;
+
+/** @deprecated Old per-style route — /app/products/[slug]/page.tsx now redirects these to productPath. */
 export const variantHref = (slug: string) => `/products/${slug}`;
 
 export const getVariant = (slug: string) =>
   variants.find((v) => v.slug === slug);
+
+/** The style shown by default on the product page — the featured bestseller. `variants` is a non-empty literal, so this is always a real Variant. */
+export const defaultVariant = (): Variant =>
+  variants.find((v) => v.featured) ?? variants[0]!;
 
 export const heroImage = {
   src: "/images/lifestyle/hero-baby-butterfly.webp",
@@ -299,6 +308,49 @@ export const howItWorks = [
   },
 ] as const;
 
+/**
+ * PLACEHOLDER — generic, plausible-sounding QC checks, not yet verified
+ * against the real manufacturing/QC process. Replace with the actual bench
+ * checks before this copy goes live; treat every claim here as provisional.
+ */
+export const quality = {
+  eyebrow: "Put to the test",
+  heading: "Checked by hand. Only the passers ship.",
+  lede: "Every unit clears the same checks before it goes in a box — six checks, zero exceptions.",
+  checks: [
+    {
+      icon: "shield" as const,
+      title: "Impact-ring integrity",
+      body: "The cushion ring is checked for even padding and no thin spots before it ships — the one part doing the actual protecting.",
+    },
+    {
+      icon: "feather" as const,
+      title: "Seam & stitch check",
+      body: "Every seam is inspected under light for loose stitching or weak joins that could open under a toddler's weight.",
+    },
+    {
+      icon: "leaf" as const,
+      title: "Breathability test",
+      body: "The 3D air-mesh shell is checked for consistent weave and airflow, so it stays cool through an hour of crawling.",
+    },
+    {
+      icon: "refresh" as const,
+      title: "Harness adjustment cycle",
+      body: "Straps are run through their full range — shortest to longest — to confirm the adjuster holds and doesn't slip mid-wear.",
+    },
+    {
+      icon: "check" as const,
+      title: "Wash durability",
+      body: "A sample from each batch goes through a full wash cycle to confirm the mesh and filler keep their shape and loft.",
+    },
+    {
+      icon: "truck" as const,
+      title: "Dispatch and packaging",
+      body: "Each order is packed to arrive clean and intact. If anything arrives damaged, we replace or refund it free.",
+    },
+  ],
+} as const;
+
 export const specs = [
   { label: "Weight", value: "190 g" },
   { label: "Age range", value: "5 – 24 months" },
@@ -359,7 +411,18 @@ export const product = {
     "Free gift: muslin comforter (worth $15)",
     "Wash bag and care card",
   ],
-  rating: { value: 4.9, count: 2841 },
+  /** Sourced from the review dataset (src/data/reviews.ts) so this can never drift from what the reviews section actually shows. */
+  rating: {
+    value: productReviewSummary.average,
+    count: productReviewSummary.count,
+  },
+  /**
+   * PLACEHOLDER — not yet substantiated against real order data. Shown as a
+   * "N sold in the last 3 months" pill on the product page, same convention
+   * as the AccuPenPro reference (site.metrics.unitsSoldLast90Days there) —
+   * only ever display a figure the store can actually back up.
+   */
+  soldLast90Days: 1200,
 };
 
 export const faqs = [
@@ -393,13 +456,8 @@ export const footerLinks = [
   {
     title: "Shop",
     links: [
-      { label: "All ten styles", href: "/products" },
-      {
-        label: "Dream Little Butterfly",
-        href: "/products/dream-little-butterfly",
-      },
-      { label: "Green Owl", href: "/products/green-owl" },
-      { label: "Unicorn", href: "/products/unicorn" },
+      { label: "All styles", href: "/products" },
+      { label: "Baby Head Protector Backpack", href: productPath },
     ],
   },
   {

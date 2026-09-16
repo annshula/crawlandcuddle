@@ -26,7 +26,9 @@ type IconName =
   | "refresh"
   | "clock"
   | "alert"
-  | "spinner";
+  | "spinner"
+  | "zoom"
+  | "camera";
 
 const glyphs: Record<IconName, React.ReactNode> = {
   "arrow-right": <path d="M4 12h16m0 0-6-6m6 6-6 6" />,
@@ -140,6 +142,18 @@ const glyphs: Record<IconName, React.ReactNode> = {
   ),
   // Three-quarter arc — pair with `animate-spin` for a busy indicator.
   spinner: <path d="M12 3a9 9 0 1 0 9 9" />,
+  zoom: (
+    <>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M15.3 15.3 21 21M8 10.5h5" />
+    </>
+  ),
+  camera: (
+    <>
+      <path d="M4 8.5a1 1 0 0 1 1-1h2.2l1-1.7a1 1 0 0 1 .87-.5h5.86a1 1 0 0 1 .87.5l1 1.7H19a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
+      <circle cx="12" cy="13" r="3.4" />
+    </>
+  ),
 };
 
 interface IconProps {

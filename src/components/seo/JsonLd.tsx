@@ -1,9 +1,9 @@
 import {
   faqs,
   product,
+  productPath,
   reviews,
   site,
-  variantHref,
   variants,
 } from "@/content/site";
 import { absoluteUrl } from "@/lib/utils";
@@ -138,7 +138,7 @@ export function JsonLd() {
     })),
     hasVariant: variants.map((variant) => ({
       "@type": "Product",
-      "@id": absoluteUrl(variantHref(variant.slug)),
+      "@id": absoluteUrl(`${productPath}#${variant.slug}`),
       name: `${product.shortName} — ${variant.name}`,
       sku: `${product.sku}-${variant.slug.toUpperCase()}`,
       pattern: variant.name,
@@ -149,7 +149,7 @@ export function JsonLd() {
       offers: offer(
         variant.name,
         `${product.sku}-${variant.slug.toUpperCase()}`,
-        absoluteUrl(variantHref(variant.slug)),
+        absoluteUrl(productPath),
       ),
     })),
   };
@@ -163,7 +163,7 @@ export function JsonLd() {
       "@type": "ListItem",
       position: i + 1,
       name: variant.name,
-      item: absoluteUrl(variantHref(variant.slug)),
+      item: absoluteUrl(productPath),
       image: absoluteUrl(variant.image),
     })),
   };

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { blogHref, posts } from "@/content/blog";
-import { variantHref, variants } from "@/content/site";
+import { productPath } from "@/content/site";
 import { absoluteUrl } from "@/lib/utils";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -20,12 +20,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    ...variants.map((variant) => ({
-      url: absoluteUrl(variantHref(variant.slug)),
+    {
+      url: absoluteUrl(productPath),
       lastModified,
-      changeFrequency: "weekly" as const,
-      priority: variant.featured ? 0.8 : 0.7,
-    })),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
     {
       url: absoluteUrl("/blogs"),
       lastModified,
