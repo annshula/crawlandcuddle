@@ -4,7 +4,7 @@ import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import { ProductViewTracker } from "@/components/analytics/ProductViewTracker";
 import { BuyBox } from "@/components/product/BuyBox";
-import { PdpPrice } from "@/components/product/PdpPrice";
+import { PdpPrice, SaveChip } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
 import { ValueStack } from "@/components/product/ValueStack";
@@ -29,6 +29,56 @@ function scrollToId(e: ReactMouseEvent<HTMLAnchorElement>, id: string) {
   const top =
     target.getBoundingClientRect().top + window.scrollY - navHeight - 12;
   window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+}
+
+/**
+ * Availability, at the two weights this page needs. A phone gets a dot and a
+ * word, because a filled pill sitting under a 48px price is more furniture than
+ * the line needs; from sm up it becomes the pill the rest of the buy panel uses.
+ */
+function StockMark({
+  available,
+  tone,
+}: {
+  available: boolean;
+  tone: "quiet" | "pill";
+}) {
+  const label = available ? "In stock" : "Out of stock";
+
+  if (tone === "quiet") {
+    return (
+      <span
+        className={cn(
+          // Same micro type as the markdown mark beside it, so the phone's meta
+          // line reads as one pair of labels rather than two stray fragments.
+          "inline-flex items-center gap-1.5 font-label text-[0.68rem] leading-none tracking-widest whitespace-nowrap uppercase",
+          available ? "text-ink-soft" : "text-ink-faint",
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-1.5 shrink-0 rounded-full",
+            available ? "bg-mint" : "bg-hairline",
+          )}
+        />
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className={cn(
+        "eyebrow rounded-tag px-3 py-2 whitespace-nowrap",
+        available
+          ? "bg-rose-50 text-rose-600"
+          : "bg-hairline/60 text-ink-faint",
+      )}
+    >
+      {label}
+    </span>
+  );
 }
 
 /**
@@ -121,17 +171,31 @@ export function ProductPurchase({
           </a>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-baseline gap-4">
+        {/* Price block, one deliberate layout per breakpoint.
+            Phone: the prices hold the first line, then a single quiet meta line
+            — markdown, a hairline of dashes to carry the eye across, and
+            availability at the right edge. Both marks go unfilled here: a 48px
+            price with two filled chips under it reads as furniture, and the
+            dashes turn what was a void between them into the line itself.
+            From sm up: one row, the markdown right after the price and
+            availability at the far right of the panel as the filled pill the
+            rest of the buy panel uses. */}
+        <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-3">
           <PdpPrice slug={selected.slug} />
-          {selected.availableForSale ? (
-            <span className="eyebrow rounded-tag bg-rose-50 px-3 py-2 text-rose-600">
-              In stock
-            </span>
-          ) : (
-            <span className="eyebrow rounded-tag bg-hairline/60 px-3 py-2 text-ink-faint">
-              Out of stock
-            </span>
-          )}
+
+          <div className="flex w-full items-center gap-3 sm:hidden">
+            <SaveChip slug={selected.slug} tone="plain" />
+            <span
+              aria-hidden="true"
+              className="h-px min-w-4 flex-1 border-t border-dashed border-hairline"
+            />
+            <StockMark available={selected.availableForSale} tone="quiet" />
+          </div>
+
+          <div className="hidden w-full items-end justify-between gap-4 sm:flex sm:w-auto sm:flex-1">
+            <SaveChip slug={selected.slug} />
+            <StockMark available={selected.availableForSale} tone="pill" />
+          </div>
         </div>
 
         {/* Directly under the price it is being compared against — the value
