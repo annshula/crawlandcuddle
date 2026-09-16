@@ -65,7 +65,7 @@ export type SyncedProduct = {
   media?: SyncedMediaItem[];
 };
 
-export const syncedProduct: SyncedProduct = catalog.product;
+export const syncedProduct: SyncedProduct = catalog.product as SyncedProduct;
 export const syncedShop = catalog.shop;
 /** The product's real Shopify video, or null until one is attached and synced. */
 export const syncedVideo: SyncedVideo | null =

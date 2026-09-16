@@ -18,6 +18,15 @@ import { useScrollLock } from "@/lib/scroll-lock";
 import { cn } from "@/lib/utils";
 
 /**
+ * The currency picker is hidden for now — the header just stops advertising it,
+ * while Shopify Markets still converts prices to the shopper's own country
+ * automatically (see LocalizationProvider's detected `defaultCountry`). Flip
+ * this to true to bring back both the desktop pill and the drawer button; they
+ * render from this one flag.
+ */
+const showCurrencyPicker = false;
+
+/**
  * Transparent while the hero is on screen so the decorative blobs read through
  * it, then a blurred cream bar once the page scrolls. It never hides on scroll
  * down — the cart and navigation have to stay reachable at all times.
@@ -136,9 +145,11 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="hidden sm:block">
-              <CurrencySelector />
-            </div>
+            {showCurrencyPicker && (
+              <div className="hidden sm:block">
+                <CurrencySelector />
+              </div>
+            )}
             <div className="hidden sm:block">
               <AccountMenu />
             </div>
@@ -283,7 +294,7 @@ export function Header() {
                 drawer already carries the full nav, so these stay quiet and let
                 the shop CTA underneath them take the weight. */}
             <div className="flex items-center justify-center gap-3">
-              <CurrencySelector variant="drawer" />
+              {showCurrencyPicker && <CurrencySelector variant="drawer" />}
 
               <AccountMenu variant="list" />
 

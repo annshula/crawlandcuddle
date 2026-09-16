@@ -1,13 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  defaultVariant,
-  styleSlugForVariantId,
-  type Variant,
-} from "@/content/site";
+import { styleSlugForVariantId, type Variant } from "@/content/site";
 import { SaveBadge } from "@/components/product/SaveBadge";
 import { Icon } from "@/components/ui/Icon";
 import { syncedMedia, syncedVideo, type SyncedVideo } from "@/lib/catalog";
@@ -48,45 +44,56 @@ export function ProductGallery({
   selectedSlug: string;
   onSelect: (slug: string) => void;
 }) {
-  const selected =
-    variants.find((v) => v.slug === selectedSlug) ?? defaultVariant();
-
-  const slides: Slide[] =
-    syncedMedia.length > 0
-      ? syncedMedia.map((item) => {
-          if (item.type === "video") {
+  const slides: Slide[] = useMemo(
+    () =>
+      syncedMedia.length > 0
+        ? syncedMedia.map((item) => {
+            if (item.type === "video") {
+              return {
+                kind: "video",
+                poster: item.poster,
+                sources: item.sources,
+              };
+            }
+            const slug = styleSlugForVariantId(item.variantId);
+            const style = slug
+              ? variants.find((v) => v.slug === slug)
+              : undefined;
             return {
-              kind: "video",
-              poster: item.poster,
-              sources: item.sources,
+              kind: "image",
+              url: item.url,
+              slug,
+              tone: style?.tone ?? "bg-cream",
+              alt: style
+                ? `${style.name} baby head protector backpack shown from the back with wings and adjustable harness`
+                : "Baby head protector backpack, anti-fall cushion pillow",
             };
-          }
-          const slug = styleSlugForVariantId(item.variantId);
-          const style = slug
-            ? variants.find((v) => v.slug === slug)
-            : undefined;
-          return {
-            kind: "image",
-            url: item.url,
-            slug,
-            tone: style?.tone ?? "bg-cream",
-            alt: style
-              ? `${style.name} baby head protector backpack shown from the back with wings and adjustable harness`
-              : "Baby head protector backpack, anti-fall cushion pillow",
-          };
-        })
-      : [
-          ...variants.map<Slide>((variant) => ({
-            kind: "image",
-            url: variant.image,
-            slug: variant.slug,
-            tone: variant.tone,
-            alt: `${variant.name} baby head protector backpack shown from the back with wings and adjustable harness`,
-          })),
-          ...(syncedVideo ? [{ kind: "video" as const, ...syncedVideo }] : []),
-        ];
+          })
+        : [
+            ...variants.map<Slide>((variant) => ({
+              kind: "image",
+              url: variant.image,
+              slug: variant.slug,
+              tone: variant.tone,
+              alt: `${variant.name} baby head protector backpack shown from the back with wings and adjustable harness`,
+            })),
+            ...(syncedVideo
+              ? [{ kind: "video" as const, ...syncedVideo }]
+              : []),
+          ],
+    [variants],
+  );
 
-  const [index, setIndex] = useState(0);
+  /* Open on the selected style's photo, not the first one in the list — a
+     `?style=` deep link from the homepage has to land on that print's photo. */
+  const [index, setIndex] = useState(() =>
+    Math.max(
+      slides.findIndex(
+        (slide) => slide.kind === "image" && slide.slug === selectedSlug,
+      ),
+      0,
+    ),
+  );
   const active: Slide = slides[index] ?? slides[0]!;
 
   /* A style picked elsewhere (swatch tiles, a `?style=` deep link) jumps the
@@ -243,7 +250,7 @@ export function ProductGallery({
               sizes="(min-width: 1024px) 40vw, 92vw"
               className="object-cover"
             />
-            {active.slug && <SaveBadge slug={active.slug ?? selected.slug} />}
+            {active.slug && <SaveBadge slug={active.slug} />}
           </div>
         )}
       </div>
