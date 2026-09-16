@@ -31,13 +31,17 @@ export function SwatchPicker({
       <ul className="mt-3 flex flex-wrap gap-3" role="listbox" aria-label="Style">
         {variants.map((variant) => {
           const selected = variant.slug === selectedSlug;
+          const outOfStock = !variant.availableForSale;
           return (
             <li key={variant.slug}>
               <button
                 type="button"
                 role="option"
                 aria-selected={selected}
-                aria-label={variant.name}
+                aria-label={
+                  outOfStock ? `${variant.name} — out of stock` : variant.name
+                }
+                title={outOfStock ? "Out of stock" : undefined}
                 onClick={() => onSelect(variant.slug)}
                 className={cn(
                   "group relative block size-16 overflow-hidden rounded-card border-2 transition-colors duration-300",
@@ -49,7 +53,7 @@ export function SwatchPicker({
                 <span
                   className={cn(
                     "absolute inset-0 block",
-                    variant.tone,
+                    outOfStock ? "bg-hairline" : variant.tone,
                   )}
                 >
                   <Image
@@ -57,9 +61,17 @@ export function SwatchPicker({
                     alt=""
                     fill
                     sizes="4rem"
-                    className="object-cover"
+                    className={cn(
+                      "object-cover",
+                      outOfStock && "grayscale opacity-50",
+                    )}
                   />
                 </span>
+                {outOfStock && (
+                  <span className="absolute inset-x-0 bottom-0 bg-ink/75 py-0.5 text-center text-[0.55rem] font-medium tracking-wide text-paper uppercase">
+                    Sold out
+                  </span>
+                )}
                 {selected && (
                   <span className="absolute inset-0 ring-2 ring-rose-600 ring-inset" />
                 )}

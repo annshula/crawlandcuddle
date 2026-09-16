@@ -82,6 +82,15 @@ type VariantNode = {
   price: string | null;
   compareAtPrice: string | null;
   availableForSale: boolean;
+  image: { url: string } | null;
+};
+
+type VideoSourceNode = {
+  url: string;
+  mimeType: string;
+  format: string;
+  width: number | null;
+  height: number | null;
 };
 
 async function adminRequest<T>(
@@ -168,18 +177,37 @@ query ProductByHandle($handle: String!) {
         price
         compareAtPrice
         availableForSale
+        image { url }
+      }
+    }
+    media(first: 5) {
+      nodes {
+        __typename
+        ... on Video {
+          sources { url mimeType format width height }
+          preview { image { url width height } }
+        }
       }
     }
   }
 }`;
 
 type ShopData = { shop: { name: string; currencyCode: string } | null };
+type MediaNode =
+  | { __typename: "MediaImage" }
+  | {
+      __typename: "Video";
+      sources: VideoSourceNode[];
+      preview: { image: { url: string; width: number; height: number } } | null;
+    }
+  | { __typename: string };
 type ProductData = {
   productByHandle: {
     id: string;
     handle: string;
     title: string;
     variants: { nodes: VariantNode[] } | null;
+    media: { nodes: MediaNode[] } | null;
   } | null;
 };
 
@@ -196,8 +224,28 @@ function normalizeVariants(nodes: VariantNode[]) {
         price,
         compareAtPrice: compare != null && compare > price ? compare : null,
         availableForSale: v.availableForSale,
+        image: v.image?.url ?? null,
       };
     });
+}
+
+/** The product's first real video (Shopify auto-transcodes to several mp4 renditions plus an HLS stream — only mp4 sources are usable in a plain <video> element, sorted HD-first). */
+function extractVideo(
+  nodes: MediaNode[] | undefined,
+): { poster: string; sources: { src: string; type: string }[] } | null {
+  const video = nodes?.find(
+    (n): n is Extract<MediaNode, { __typename: "Video" }> =>
+      n.__typename === "Video",
+  );
+  if (!video) return null;
+  const mp4 = video.sources
+    .filter((s) => s.mimeType === "video/mp4")
+    .sort((a, b) => (b.width ?? 0) - (a.width ?? 0));
+  if (mp4.length === 0) return null;
+  return {
+    poster: video.preview?.image.url ?? "",
+    sources: mp4.map((s) => ({ src: s.url, type: s.mimeType })),
+  };
 }
 
 async function main() {
@@ -263,8 +311,10 @@ async function main() {
     pricesByMarket: pricesByVariant.get(v.id) ?? {},
   }));
 
+  const video = extractVideo(product.media?.nodes);
+
   const record = {
-    version: 3,
+    version: 4,
     syncedAt: new Date().toISOString(),
     shop: {
       domain: cfg.storeDomain,
@@ -281,6 +331,7 @@ async function main() {
       currencyCode: currency,
       availableForSale: variants.some((v) => v.availableForSale),
       variants: variantsWithMarkets,
+      video,
     },
   };
 

@@ -6,7 +6,7 @@ import { LineArt } from "@/components/art/LineArt";
 import { Reveal } from "@/components/motion/Reveal";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { productPath, variants } from "@/content/site";
+import { productHrefForStyle, variants } from "@/content/site";
 import { cn } from "@/lib/utils";
 
 /**
@@ -55,7 +55,7 @@ export function StyleGallery() {
           {variants.map((variant) => (
             <li key={variant.slug} className="group">
               <Link
-                href={productPath}
+                href={productHrefForStyle(variant.slug)}
                 className="flex h-full flex-col gap-4"
                 aria-label={`${variant.name} style — ${variant.tagline}`}
               >

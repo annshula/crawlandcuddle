@@ -26,6 +26,13 @@ export type SyncedVariant = {
   availableForSale: boolean;
   /** Per-country price list, from the store's real curated Shopify Markets only — see scripts/sync-product.ts. Empty until a product has been through that sync. */
   pricesByMarket?: Record<string, MarketPrice>;
+  /** The real Shopify variant image (per style) — null when Shopify has no image for this variant, undefined for a product synced before this field existed. */
+  image?: string | null;
+};
+
+export type SyncedVideo = {
+  poster: string;
+  sources: { src: string; type: string }[];
 };
 
 export type SyncedProduct = {
@@ -37,10 +44,15 @@ export type SyncedProduct = {
   currencyCode: string;
   availableForSale: boolean;
   variants: SyncedVariant[];
+  /** The product's real Shopify video, if one is attached — undefined for a product synced before this field existed, null when Shopify genuinely has none. */
+  video?: SyncedVideo | null;
 };
 
 export const syncedProduct: SyncedProduct = catalog.product;
 export const syncedShop = catalog.shop;
+/** The product's real Shopify video, or null until one is attached and synced. */
+export const syncedVideo: SyncedVideo | null =
+  "video" in catalog.product ? (catalog.product.video as SyncedVideo | null) : null;
 /** Curated market country codes this catalog has real per-market prices for (empty until synced with Storefront access). */
 export const syncedMarkets: string[] =
   "markets" in catalog && Array.isArray(catalog.markets)

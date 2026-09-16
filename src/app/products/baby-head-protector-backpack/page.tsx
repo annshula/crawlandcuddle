@@ -50,7 +50,14 @@ export const metadata: Metadata = (() => {
   };
 })();
 
-export default function ProductDetailPage() {
+export default async function ProductDetailPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ style?: string }>;
+}) {
+  const { style } = await searchParams;
+  const initialSlug = variants.find((v) => v.slug === style)?.slug;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ProductGroup",
@@ -154,7 +161,7 @@ export default function ProductDetailPage() {
             ]}
           />
 
-          <ProductPurchase variants={variants} />
+          <ProductPurchase variants={variants} initialSlug={initialSlug} />
         </div>
       </section>
 

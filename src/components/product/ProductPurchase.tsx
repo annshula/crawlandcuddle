@@ -7,6 +7,7 @@ import { BuyBox } from "@/components/product/BuyBox";
 import { PdpPrice } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
+import { ValueStack } from "@/components/product/ValueStack";
 import { Icon } from "@/components/ui/Icon";
 import { RatingStars } from "@/components/ui/Stars";
 import {
@@ -37,8 +38,17 @@ function scrollToId(e: ReactMouseEvent<HTMLAnchorElement>, id: string) {
  * including its "sold in last 90 days" + rating pill row and the
  * "Hand-built · N checks passed" scroll links under the title.
  */
-export function ProductPurchase({ variants }: { variants: Variant[] }) {
-  const [selectedSlug, setSelectedSlug] = useState(defaultVariant().slug);
+export function ProductPurchase({
+  variants,
+  initialSlug,
+}: {
+  variants: Variant[];
+  /** Pre-selects a style from a `?style=` deep link (e.g. the homepage style gallery) — falls back to the usual default when absent or unrecognized. */
+  initialSlug?: string;
+}) {
+  const [selectedSlug, setSelectedSlug] = useState(
+    initialSlug ?? defaultVariant().slug,
+  );
   const selected =
     variants.find((v) => v.slug === selectedSlug) ?? defaultVariant();
 
@@ -101,13 +111,23 @@ export function ProductPurchase({ variants }: { variants: Variant[] }) {
             <Icon name="shield" className="size-3.5 shrink-0 text-mint" />
             {quality.checks.length} checks passed
           </a>
+          <span aria-hidden="true" className="text-ink-faint">
+            |
+          </span>
+          <ValueStack />
         </p>
 
         <div className="mt-6 flex flex-wrap items-baseline gap-4">
           <PdpPrice slug={selected.slug} />
-          <span className="eyebrow rounded-tag bg-rose-50 px-3 py-2 text-rose-600">
-            In stock
-          </span>
+          {selected.availableForSale ? (
+            <span className="eyebrow rounded-tag bg-rose-50 px-3 py-2 text-rose-600">
+              In stock
+            </span>
+          ) : (
+            <span className="eyebrow rounded-tag bg-hairline/60 px-3 py-2 text-ink-faint">
+              Out of stock
+            </span>
+          )}
         </div>
 
         <p className="mt-6 max-w-lg text-body text-ink-soft">

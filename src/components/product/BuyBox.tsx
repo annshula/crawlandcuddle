@@ -28,6 +28,7 @@ export function BuyBox({ variant }: { variant: Variant }) {
   const [added, setAdded] = useState(false);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const outOfStock = !variant.availableForSale;
 
   const handleAdd = () => {
     add(variant.slug, qty);
@@ -97,25 +98,32 @@ export function BuyBox({ variant }: { variant: Variant }) {
         </p>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <Magnetic strength={0.15} className="w-full sm:w-auto">
+      {outOfStock ? (
+        <p className="mt-5 rounded-tag bg-hairline/50 px-4 py-3 text-body-sm text-ink-soft">
+          This style is out of stock right now. Pick another style above, or
+          check back soon.
+        </p>
+      ) : (
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <Magnetic strength={0.15} className="w-full sm:w-auto">
+            <Button
+              onClick={handleAdd}
+              className="w-full justify-center sm:w-auto"
+            >
+              {added ? "Added to bag" : "Add to bag"}
+            </Button>
+          </Magnetic>
           <Button
-            onClick={handleAdd}
+            onClick={handleBuyNow}
+            variant="outline"
+            withArrow
+            disabled={buying}
             className="w-full justify-center sm:w-auto"
           >
-            {added ? "Added to bag" : "Add to bag"}
+            {buying ? "Taking you to checkout…" : "Buy it now"}
           </Button>
-        </Magnetic>
-        <Button
-          onClick={handleBuyNow}
-          variant="outline"
-          withArrow
-          disabled={buying}
-          className="w-full justify-center sm:w-auto"
-        >
-          {buying ? "Taking you to checkout…" : "Buy it now"}
-        </Button>
-      </div>
+        </div>
+      )}
 
       {buyError && (
         <p className="mt-4 rounded-tag bg-rose-50 px-4 py-3 text-body-sm text-rose-700">

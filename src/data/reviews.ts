@@ -231,12 +231,12 @@ const PHOTO_REVIEWS: { rating: 4 | 5; photo: string; text: string }[] = [
   {
     rating: 5,
     photo: "photo-17.webp",
-    text: "Close up you can see the embroidery is properly stitched, not just printed on — plus the anti-slip knee pads that came with it.",
+    text: "Embroidery is stitched properly, not printed. Also got a pair of grippy 'kids socks' thrown in this time, wasn't expecting those but they've actually been handy for crawling on our wood floor.",
   },
   {
     rating: 5,
     photo: "photo-18.webp",
-    text: "The free gift toys that came bundled in were a nice surprise alongside the cushion itself.",
+    text: "The free gift that comes with it is genuinely useful, not just filler in the box.",
   },
   {
     rating: 5,
@@ -361,7 +361,7 @@ const PHOTO_REVIEWS: { rating: 4 | 5; photo: string; text: string }[] = [
   {
     rating: 5,
     photo: "photo-43.webp",
-    text: "The anti-slip knee pads that come as a free gift are genuinely useful once he started proper crawling.",
+    text: "Got these little grip socks in the box on top of the usual gift, no idea if that's standard but my daughter's still figuring out crawling on the tile so the timing worked out.",
   },
   {
     rating: 5,

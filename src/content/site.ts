@@ -7,6 +7,7 @@
  */
 
 import {
+  getVariantForStyle,
   productCompareAtCents,
   productCurrency,
   productPriceCents,
@@ -95,14 +96,21 @@ export type Variant = {
   /** Tailwind background class for the tile behind the cut-out. */
   tone: string;
   featured?: boolean;
+  /** Live from Shopify's synced inventory (lib/catalog.ts) — false when the real variant is out of stock. */
+  availableForSale: boolean;
 };
 
-export const variants: Variant[] = [
+/** Style content (name, tagline, tone) — never the image or stock status, see `variants` below. */
+type VariantContent = Omit<Variant, "image" | "availableForSale"> & {
+  localImage: string;
+};
+
+const variantContent: VariantContent[] = [
   {
     slug: "dream-little-butterfly",
     name: "Dream Little Butterfly",
     tagline: "The bestseller. Lilac wings, pom-pom antennae.",
-    image: "/images/product/dream-little-butterfly.webp",
+    localImage: "/images/product/dream-little-butterfly.webp",
     tone: "bg-lilac-100",
     featured: true,
   },
@@ -110,7 +118,7 @@ export const variants: Variant[] = [
     slug: "pink-butterfly",
     name: "Pink Butterfly",
     tagline: "Blush body, violet wings, endlessly photogenic.",
-    image: "/images/product/pink-butterfly.webp",
+    localImage: "/images/product/pink-butterfly.webp",
     tone: "bg-rose-100",
     featured: true,
   },
@@ -118,63 +126,88 @@ export const variants: Variant[] = [
     slug: "green-owl",
     name: "Green Owl",
     tagline: "Mint 3D mesh with feathered ivory wings.",
-    image: "/images/product/green-owl.webp",
+    localImage: "/images/product/green-owl.webp",
     tone: "bg-mint/40",
   },
   {
     slug: "lion",
     name: "Lion",
     tagline: "Amber stripes, tiny ears, maximum courage.",
-    image: "/images/product/lion.webp",
+    localImage: "/images/product/lion.webp",
     tone: "bg-butter/60",
   },
   {
     slug: "bee",
     name: "Bee",
     tagline: "Honey stripes and soft ivory wings.",
-    image: "/images/product/bee.webp",
+    localImage: "/images/product/bee.webp",
     tone: "bg-butter/50",
   },
   {
     slug: "flying-pig",
     name: "Flying Pig",
     tagline: "Because they really can fly at this age.",
-    image: "/images/product/flying-pig.webp",
+    localImage: "/images/product/flying-pig.webp",
     tone: "bg-rose-100",
   },
   {
     slug: "frog",
     name: "Frog",
     tagline: "Bright green, wide eyes, built to bounce.",
-    image: "/images/product/frog.webp",
+    localImage: "/images/product/frog.webp",
     tone: "bg-mint/50",
   },
   {
     slug: "turtle",
     name: "Turtle",
     tagline: "A quilted shell for the slow and steady.",
-    image: "/images/product/turtle.webp",
+    localImage: "/images/product/turtle.webp",
     tone: "bg-mint/40",
   },
   {
     slug: "tortoise",
     name: "Tortoise",
     tagline: "Olive shell, ivory limbs, unhurried charm.",
-    image: "/images/product/tortoise.webp",
+    localImage: "/images/product/tortoise.webp",
     tone: "bg-mint/30",
   },
   {
     slug: "unicorn",
     name: "Unicorn",
     tagline: "Golden horn, pastel wings, pure magic.",
-    image: "/images/product/unicorn.webp",
+    localImage: "/images/product/unicorn.webp",
     tone: "bg-lilac-100",
+  },
+  {
+    slug: "yellow-bee",
+    name: "Yellow Bee",
+    tagline: "Bold golden stripes, a bigger buzz than Bee.",
+    localImage: "/images/product/bee.webp",
+    tone: "bg-butter/60",
   },
 ];
 
-/** The one product's canonical handle/path — every style lives on this one page, switched client-side by the swatch tiles, never in the URL. */
+/**
+ * Each style's real Shopify variant image (synced via `npm run shopify:sync`
+ * into data/product.json, matched by title through
+ * lib/catalog.ts's getVariantForStyle) — falls back to the local placeholder
+ * photo only when that variant hasn't been synced with an image yet.
+ */
+export const variants: Variant[] = variantContent.map(
+  ({ localImage, ...content }) => ({
+    ...content,
+    image: getVariantForStyle(content.slug).image || localImage,
+    availableForSale: getVariantForStyle(content.slug).availableForSale,
+  }),
+);
+
+/** The one product's canonical handle/path — every style lives on this one page, normally switched client-side by the swatch tiles with no URL change. */
 export const productHandle = "baby-head-protector-backpack";
 export const productPath = `/products/${productHandle}`;
+
+/** A deep link to the product page with one style pre-selected — for links elsewhere (e.g. the homepage) that point at a specific print, read by the product page's `?style=` search param. */
+export const productHrefForStyle = (slug: string) =>
+  `${productPath}?style=${slug}`;
 
 /** @deprecated Old per-style route — /app/products/[slug]/page.tsx now redirects these to productPath. */
 export const variantHref = (slug: string) => `/products/${slug}`;
@@ -182,9 +215,14 @@ export const variantHref = (slug: string) => `/products/${slug}`;
 export const getVariant = (slug: string) =>
   variants.find((v) => v.slug === slug);
 
-/** The style shown by default on the product page — the featured bestseller. `variants` is a non-empty literal, so this is always a real Variant. */
-export const defaultVariant = (): Variant =>
-  variants.find((v) => v.featured) ?? variants[0]!;
+/** The style shown by default on the product page — the featured bestseller, or the first in-stock style if that one has sold out. `variants` is a non-empty literal, so this is always a real Variant. */
+export const defaultVariant = (): Variant => {
+  const featured = variants.find((v) => v.featured);
+  if (featured?.availableForSale) return featured;
+  return (
+    variants.find((v) => v.availableForSale) ?? featured ?? variants[0]!
+  );
+};
 
 export const heroImage = {
   src: "/images/lifestyle/hero-baby-butterfly.webp",
@@ -410,6 +448,17 @@ export const product = {
     "Adjustable shoulder harness with chest clip",
     "Free gift: muslin comforter (worth $15)",
     "Wash bag and care card",
+  ],
+  /**
+   * PLACEHOLDER retail-style values — not real per-item pricing, just a
+   * plausible breakdown that sums to more than the sale price for the "what
+   * you get" value-stack box. Swap in real figures when available.
+   */
+  valueStack: [
+    { label: "Head & back protector", valueCents: 3400 },
+    { label: "Adjustable harness with chest clip", valueCents: 800 },
+    { label: "Free gift: muslin comforter", valueCents: 1500 },
+    { label: "Wash bag & care card", valueCents: 500 },
   ],
   /** Sourced from the review dataset (src/data/reviews.ts) so this can never drift from what the reviews section actually shows. */
   rating: {
