@@ -101,17 +101,23 @@ export function ProductPurchase({
         </h1>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <p className="font-script text-2xl text-lilac-500">{selected.name}</p>
+
+          {/* The same hairline pill as the "sold" and review marks two rows up,
+              so the buy panel reads as one set: a mint check medallion, the
+              count in headline type, and a link through to the full test list. */}
           <a
             href="#quality-test"
             onClick={(e) => scrollToId(e, "quality-test")}
-            className="group inline-flex items-center gap-1.5 rounded-pill bg-mint px-3 py-1.5 font-headline text-body-sm text-ink transition-colors duration-200 hover:bg-ink hover:text-cream"
+            aria-label={`${quality.checks.length} quality checks passed — see what is tested`}
+            className="group/checks ms-auto inline-flex items-center gap-1.5 rounded-pill border border-hairline bg-cream py-1.5 pr-3 pl-2.5 text-body-sm text-ink-soft transition-colors duration-300 hover:border-ink/30"
           >
-            <Icon
-              name="shield"
-              className="size-3.5 shrink-0 text-ink transition-colors duration-200 group-hover:text-mint"
-              strokeWidth={2.4}
-            />
-            {quality.checks.length} checks passed
+            <span className="grid size-4.5 shrink-0 place-items-center rounded-pill bg-mint/60 text-ink transition-colors duration-300 group-hover/checks:bg-mint">
+              <Icon name="check" className="size-2.5" strokeWidth={2.8} />
+            </span>
+            <span className="font-headline text-ink tabular-nums">
+              {quality.checks.length}
+            </span>
+            checks passed
           </a>
         </div>
 
