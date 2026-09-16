@@ -217,20 +217,28 @@ export function ProductGallery({
         </ul>
 
         {active.kind === "video" ? (
-          <div className="relative mx-auto flex aspect-square w-full max-w-115 items-center justify-center">
-            <div className="w-full overflow-hidden rounded-panel shadow-drift">
-              <video
-                key={active.poster}
-                controls
-                playsInline
-                poster={active.poster}
-                className="block w-full"
-              >
-                {active.sources.map((s) => (
-                  <source key={s.src} src={s.src} type={s.type} />
-                ))}
-              </video>
-            </div>
+          /* The video is a vertical canvas (1080×1920) with the real shot in a
+             horizontal band across the middle (measured: rows 30.5%–69.3% of the
+             height, centred), and blurred padding above and below it. The frame
+             therefore decides what is seen.
+             Phone: 4:3 landscape. A 16:9 frame only keeps the middle 32% of the
+             source, which clipped the top of the baby's head; 4:3 keeps 42% and
+             covers the whole shot, while still being wider than it is tall
+             (325×244 on a 375px screen) so it stays compact.
+             From sm up: the same square frame the photos use, so flipping
+             between a photo and the video never moves the layout. */
+          <div className="relative mx-auto aspect-4/3 w-full max-w-115 overflow-hidden rounded-panel bg-ink shadow-drift sm:aspect-square">
+            <video
+              key={active.poster}
+              controls
+              playsInline
+              poster={active.poster}
+              className="absolute inset-0 size-full object-cover"
+            >
+              {active.sources.map((s) => (
+                <source key={s.src} src={s.src} type={s.type} />
+              ))}
+            </video>
           </div>
         ) : (
           <div
