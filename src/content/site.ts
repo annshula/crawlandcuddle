@@ -11,6 +11,7 @@ import {
   productCompareAtCents,
   productCurrency,
   productPriceCents,
+  variantPositionForStyle,
 } from "@/lib/catalog";
 import { productReviewSummary } from "@/data/reviews";
 
@@ -188,18 +189,22 @@ const variantContent: VariantContent[] = [
 ];
 
 /**
- * Each style's real Shopify variant image (synced via `npm run shopify:sync`
- * into data/product.json, matched by title through
- * lib/catalog.ts's getVariantForStyle) — falls back to the local placeholder
- * photo only when that variant hasn't been synced with an image yet.
+ * The real styles, in the same order as the live Shopify variant list — the
+ * thumbnails, swatches and homepage gallery all read in the order a shopper
+ * sees on the Shopify product page. Each style's real Shopify variant image
+ * (synced via `npm run shopify:sync` into data/product.json, matched by title
+ * through lib/catalog.ts's getVariantForStyle) — falls back to the local
+ * placeholder photo only when that variant hasn't been synced with an image yet.
  */
-export const variants: Variant[] = variantContent.map(
-  ({ localImage, ...content }) => ({
+export const variants: Variant[] = [...variantContent]
+  .sort(
+    (a, b) => variantPositionForStyle(a.slug) - variantPositionForStyle(b.slug),
+  )
+  .map(({ localImage, ...content }) => ({
     ...content,
     image: getVariantForStyle(content.slug).image || localImage,
     availableForSale: getVariantForStyle(content.slug).availableForSale,
-  }),
-);
+  }));
 
 /** The one product's canonical handle/path — every style lives on this one page, normally switched client-side by the swatch tiles with no URL change. */
 export const productHandle = "baby-head-protector-backpack";
@@ -215,13 +220,29 @@ export const variantHref = (slug: string) => `/products/${slug}`;
 export const getVariant = (slug: string) =>
   variants.find((v) => v.slug === slug);
 
+/**
+ * The style slug a Shopify variant id belongs to — the reverse of the lookup
+ * above, so the gallery can tell which style a synced media photo is (and
+ * select that style when the shopper picks its photo, or show its photo when
+ * the shopper picks the style).
+ */
+const slugByVariantId = new Map(
+  variants.map((variant) => [
+    getVariantForStyle(variant.slug).id,
+    variant.slug,
+  ]),
+);
+
+export const styleSlugForVariantId = (
+  variantId?: string | null,
+): string | undefined =>
+  variantId ? slugByVariantId.get(variantId) : undefined;
+
 /** The style shown by default on the product page — the featured bestseller, or the first in-stock style if that one has sold out. `variants` is a non-empty literal, so this is always a real Variant. */
 export const defaultVariant = (): Variant => {
   const featured = variants.find((v) => v.featured);
   if (featured?.availableForSale) return featured;
-  return (
-    variants.find((v) => v.availableForSale) ?? featured ?? variants[0]!
-  );
+  return variants.find((v) => v.availableForSale) ?? featured ?? variants[0]!;
 };
 
 export const heroImage = {
@@ -446,7 +467,7 @@ export const product = {
   includes: [
     "Head & back protector in your chosen style",
     "Adjustable shoulder harness with chest clip",
-    "Free gift: muslin comforter (worth $15)",
+    "Free gift: anti-slip socks",
     "Wash bag and care card",
   ],
   /**
@@ -457,7 +478,10 @@ export const product = {
   valueStack: [
     { label: "Head & back protector", valueCents: 3400 },
     { label: "Adjustable harness with chest clip", valueCents: 800 },
-    { label: "Free gift: muslin comforter", valueCents: 1500 },
+    {
+      label: "Free gift: anti-slip socks",
+      valueCents: 1500,
+    },
     { label: "Wash bag & care card", valueCents: 500 },
   ],
   /** Sourced from the review dataset (src/data/reviews.ts) so this can never drift from what the reviews section actually shows. */

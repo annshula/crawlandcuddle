@@ -1,7 +1,8 @@
 /**
  * `npm run shopify:sync` — fetch the Crawl & Cuddle hero product from the
  * Shopify Admin API and write data/product.json with its live price and
- * compare-at price (in dollars). Everything else on the site stays static.
+ * compare-at price (in dollars), per-market prices, variants and the product's
+ * full media list in Shopify's own order. Everything else on the site stays static.
  *
  * The Admin access token is GENERATED at runtime via the client-credentials
  * grant (Client ID + Secret → 24h token, cached in-process) — never passed in
@@ -17,7 +18,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { adminAuthSource, getAdminToken } from "../src/lib/shopify/admin-token";
-import { isStorefrontConfigured, shopifyConfig } from "../src/lib/shopify/config";
+import {
+  isStorefrontConfigured,
+  shopifyConfig,
+} from "../src/lib/shopify/config";
 import { getLocalizedVariantPrices } from "../src/lib/shopify/localization-service";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -180,9 +184,12 @@ query ProductByHandle($handle: String!) {
         image { url }
       }
     }
-    media(first: 5) {
+    media(first: 50) {
       nodes {
         __typename
+        ... on MediaImage {
+          image { url width height }
+        }
         ... on Video {
           sources { url mimeType format width height }
           preview { image { url width height } }
@@ -193,14 +200,23 @@ query ProductByHandle($handle: String!) {
 }`;
 
 type ShopData = { shop: { name: string; currencyCode: string } | null };
-type MediaNode =
-  | { __typename: "MediaImage" }
-  | {
-      __typename: "Video";
-      sources: VideoSourceNode[];
-      preview: { image: { url: string; width: number; height: number } } | null;
-    }
-  | { __typename: string };
+type MediaImageNode = {
+  __typename: "MediaImage";
+  image: { url: string; width: number | null; height: number | null } | null;
+};
+type VideoNode = {
+  __typename: "Video";
+  sources: VideoSourceNode[];
+  preview: { image: { url: string; width: number; height: number } } | null;
+};
+type MediaNode = MediaImageNode | VideoNode | { __typename: string };
+
+/* The catch-all `{ __typename: string }` member means a bare `__typename`
+   comparison cannot discriminate the union — these guards do it explicitly. */
+const isMediaImage = (node: MediaNode): node is MediaImageNode =>
+  node.__typename === "MediaImage";
+const isVideo = (node: MediaNode): node is VideoNode =>
+  node.__typename === "Video";
 type ProductData = {
   productByHandle: {
     id: string;
@@ -229,15 +245,10 @@ function normalizeVariants(nodes: VariantNode[]) {
     });
 }
 
-/** The product's first real video (Shopify auto-transcodes to several mp4 renditions plus an HLS stream — only mp4 sources are usable in a plain <video> element, sorted HD-first). */
-function extractVideo(
-  nodes: MediaNode[] | undefined,
+/** Shopify auto-transcodes a video into several mp4 renditions plus an HLS stream — only mp4 sources are usable in a plain <video> element, sorted HD-first. */
+function videoFromNode(
+  video: VideoNode,
 ): { poster: string; sources: { src: string; type: string }[] } | null {
-  const video = nodes?.find(
-    (n): n is Extract<MediaNode, { __typename: "Video" }> =>
-      n.__typename === "Video",
-  );
-  if (!video) return null;
   const mp4 = video.sources
     .filter((s) => s.mimeType === "video/mp4")
     .sort((a, b) => (b.width ?? 0) - (a.width ?? 0));
@@ -246,6 +257,64 @@ function extractVideo(
     poster: video.preview?.image.url ?? "",
     sources: mp4.map((s) => ({ src: s.url, type: s.mimeType })),
   };
+}
+
+/** The product's first real video, if one is attached. */
+function extractVideo(
+  nodes: MediaNode[] | undefined,
+): { poster: string; sources: { src: string; type: string }[] } | null {
+  const video = nodes?.find((n): n is VideoNode => isVideo(n));
+  return video ? videoFromNode(video) : null;
+}
+
+type SyncedMediaItem =
+  | {
+      type: "image";
+      url: string;
+      width: number | null;
+      height: number | null;
+      /** The variant whose featured image this is, when it is one — lets the gallery jump to a style's photo, or select a style from it. */
+      variantId: string | null;
+    }
+  | { type: "video"; poster: string; sources: { src: string; type: string }[] };
+
+/** Shopify CDN urls carry a `?v=` cache-buster; compare image urls without it. */
+const bareUrl = (url: string) => url.split("?")[0] ?? url;
+
+/**
+ * The product's media in Shopify's own order — images and video interleaved
+ * exactly as the storefront gallery shows them. This is the axis the PDP
+ * gallery mirrors; the variant ("style") order is a separate matter, see
+ * lib/catalog.ts's variantPositionForStyle.
+ */
+function normalizeMedia(
+  nodes: MediaNode[] | undefined,
+  variants: { id: string; image: string | null }[],
+): SyncedMediaItem[] {
+  const variantByImage = new Map(
+    variants
+      .filter((v): v is { id: string; image: string } => Boolean(v.image))
+      .map((v) => [bareUrl(v.image), v.id] as const),
+  );
+
+  const items: SyncedMediaItem[] = [];
+  for (const node of nodes ?? []) {
+    if (isMediaImage(node)) {
+      const image = node.image;
+      if (!image?.url) continue;
+      items.push({
+        type: "image",
+        url: image.url,
+        width: image.width ?? null,
+        height: image.height ?? null,
+        variantId: variantByImage.get(bareUrl(image.url)) ?? null,
+      });
+    } else if (isVideo(node)) {
+      const video = videoFromNode(node);
+      if (video) items.push({ type: "video", ...video });
+    }
+  }
+  return items;
 }
 
 async function main() {
@@ -276,7 +345,9 @@ async function main() {
   // A permissions gap (e.g. the Admin app is missing the read_markets scope)
   // must not take down the base sync — just skip market prices.
   const markets = await discoverCuratedMarketCountries().catch(() => []);
-  console.log(`· curated markets: ${markets.length > 0 ? markets.join(", ") : "(none)"}`);
+  console.log(
+    `· curated markets: ${markets.length > 0 ? markets.join(", ") : "(none)"}`,
+  );
 
   const pricesByVariant = new Map<string, Record<string, MarketPrice>>(
     variants.map((v) => [v.id, {}]),
@@ -312,9 +383,10 @@ async function main() {
   }));
 
   const video = extractVideo(product.media?.nodes);
+  const media = normalizeMedia(product.media?.nodes, variants);
 
   const record = {
-    version: 4,
+    version: 5,
     syncedAt: new Date().toISOString(),
     shop: {
       domain: cfg.storeDomain,
@@ -332,6 +404,7 @@ async function main() {
       availableForSale: variants.some((v) => v.availableForSale),
       variants: variantsWithMarkets,
       video,
+      media,
     },
   };
 
@@ -343,6 +416,9 @@ async function main() {
   console.log(`✔ wrote ${OUTPUT}`);
   console.log(
     `  ${product.title} → $${price}${record.product.compareAtPrice ? ` (was $${record.product.compareAtPrice})` : ""} ${currency}`,
+  );
+  console.log(
+    `  ${media.length} media items in Shopify order (${media.filter((m) => m.type === "image").length} images + ${media.filter((m) => m.type === "video").length} video)`,
   );
 }
 

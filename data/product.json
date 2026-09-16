@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "syncedAt": "2026-09-16T13:26:44.976Z",
+  "version": 5,
+  "syncedAt": "2026-09-16T13:47:24.492Z",
   "shop": {
     "domain": "trackify-com.myshopify.com",
     "name": "Trackify",
@@ -41,20 +41,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -81,20 +81,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -121,20 +121,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -161,20 +161,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -201,20 +201,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -241,20 +241,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -281,20 +281,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -321,20 +321,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -361,20 +361,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -401,20 +401,20 @@
             "compareAtAmount": 62.68,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2868.22,
+            "compareAtAmount": 4302.34,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2868.22,
-            "compareAtAmount": 4302.34,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 22.25,
@@ -441,20 +441,20 @@
             "compareAtAmount": 65,
             "currencyCode": "AUD"
           },
-          "US": {
-            "amount": 30.16,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
+          "IN": {
+            "amount": 2950.62,
+            "compareAtAmount": 4425.94,
+            "currencyCode": "INR"
           },
           "ZA": {
             "amount": 501,
             "compareAtAmount": 751,
             "currencyCode": "ZAR"
           },
-          "IN": {
-            "amount": 2950.62,
-            "compareAtAmount": 4425.94,
-            "currencyCode": "INR"
+          "US": {
+            "amount": 30.16,
+            "compareAtAmount": 45.24,
+            "currencyCode": "USD"
           },
           "GB": {
             "amount": 23,
@@ -480,6 +480,166 @@
           "type": "video/mp4"
         }
       ]
-    }
+    },
+    "media": [
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163811.jpg?v=1786723698",
+        "width": 800,
+        "height": 800,
+        "variantId": "gid://shopify/ProductVariant/49535878234339"
+      },
+      {
+        "type": "video",
+        "poster": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/preview_images/524acb35c60a411daadd557661dfc1e7.thumbnail.0000000000.jpg?v=1789564162",
+        "sources": [
+          {
+            "src": "https://cdn.shopify.com/videos/c/vp/524acb35c60a411daadd557661dfc1e7/524acb35c60a411daadd557661dfc1e7.HD-1080p-2.5Mbps-94601560.mp4",
+            "type": "video/mp4"
+          },
+          {
+            "src": "https://cdn.shopify.com/videos/c/vp/524acb35c60a411daadd557661dfc1e7/524acb35c60a411daadd557661dfc1e7.HD-720p-1.6Mbps-94601560.mp4",
+            "type": "video/mp4"
+          },
+          {
+            "src": "https://cdn.shopify.com/videos/c/vp/524acb35c60a411daadd557661dfc1e7/524acb35c60a411daadd557661dfc1e7.SD-480p-0.9Mbps-94601560.mp4",
+            "type": "video/mp4"
+          }
+        ]
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Sc2986104fbbf4152af4eafb296f59486m.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Saa44d1ad7ed6462a929cc795e8f37ed4e.jpg?v=1789563971",
+        "width": 800,
+        "height": 800,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Se56581f50d614d51b5e6ab07d974d66bV.jpg?v=1789563971",
+        "width": 800,
+        "height": 800,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163826.jpg?v=1786723699",
+        "width": 800,
+        "height": 800,
+        "variantId": "gid://shopify/ProductVariant/49535878299875"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/S5e02f47d825c4608b90cf49fb440b367O.jpg?v=1789563971",
+        "width": 800,
+        "height": 800,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/S1cef0cb9eb874fda92cc09a02ed48a7fk.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/S505a5748affa45a59edabaa036e2e14dy.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/S7685c09462b744aca3fc8121aeab861cH.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/S870c9133153c4a9080a3c680df6655b8J.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Sf6e870940f4345059da38a62fa2c598bU.jpg?v=1789563971",
+        "width": 1000,
+        "height": 1000,
+        "variantId": "gid://shopify/ProductVariant/49749579268323"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457595840.jpg?v=1786723698",
+        "width": 1001,
+        "height": 1001,
+        "variantId": "gid://shopify/ProductVariant/49535878365411"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/8979740f-6b43-4ef0-9d06-1d8ed344c1b9.jpg?v=1786723698",
+        "width": 677,
+        "height": 695,
+        "variantId": "gid://shopify/ProductVariant/49535878398179"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457592695.jpg?v=1786723698",
+        "width": 1001,
+        "height": 1001,
+        "variantId": "gid://shopify/ProductVariant/49535878332643"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/0f2893b7-4932-40b1-af59-003ba860aedc.jpg?v=1786723698",
+        "width": 1500,
+        "height": 1500,
+        "variantId": "gid://shopify/ProductVariant/49535878463715"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163784.jpg?v=1786723698",
+        "width": 800,
+        "height": 800,
+        "variantId": null
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163814.jpg?v=1786723698",
+        "width": 800,
+        "height": 800,
+        "variantId": "gid://shopify/ProductVariant/49535878267107"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/a89de9f4-bc07-4b76-9f39-53a776676d4b.jpg?v=1786723698",
+        "width": 800,
+        "height": 800,
+        "variantId": "gid://shopify/ProductVariant/49535878430947"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/e72d9d5f-59b7-4a96-a4fe-7bfff8b8ddfc.jpg?v=1786723698",
+        "width": 373,
+        "height": 386,
+        "variantId": "gid://shopify/ProductVariant/49535878496483"
+      },
+      {
+        "type": "image",
+        "url": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1ad9bc4e-8485-4613-92c4-fa39cd7436ba.jpg?v=1786723698",
+        "width": 397,
+        "height": 421,
+        "variantId": "gid://shopify/ProductVariant/49535878529251"
+      }
+    ]
   }
 }

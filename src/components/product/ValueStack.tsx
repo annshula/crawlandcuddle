@@ -10,14 +10,13 @@ import { useScrollLock } from "@/lib/scroll-lock";
 
 /**
  * "Here's what you get" — every included item with its own worth, summing to
- * more than the sale price. A compact trigger sits inline next to the
- * "N checks passed" link (a `|` divider between them) instead of a standalone
- * card, so it never displaces the buy button. Clicking it opens a popover on
- * desktop, anchored under the trigger, and a bottom sheet on mobile — same
- * desktop/mobile split as the currency selector
- * (components/localization/CurrencySelector.tsx). Values are placeholders
- * (see content/site.ts's product.valueStack) — swap in real per-item figures
- * when available.
+ * more than the sale price. The trigger sits on its own line directly under the
+ * price, so the total ("$62 worth of value") is read against the number it
+ * beats. Clicking it opens a popover on desktop, anchored under the trigger,
+ * and a bottom sheet on mobile — same desktop/mobile split as the currency
+ * selector (components/localization/CurrencySelector.tsx). Values are
+ * placeholders (see content/site.ts's product.valueStack) — swap in real
+ * per-item figures when available.
  */
 export function ValueStack() {
   const [open, setOpen] = useState(false);

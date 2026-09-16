@@ -35,6 +35,21 @@ export type SyncedVideo = {
   sources: { src: string; type: string }[];
 };
 
+/** One photo in the product's Shopify media list. */
+export type SyncedMediaImage = {
+  type: "image";
+  url: string;
+  width?: number | null;
+  height?: number | null;
+  /** The Shopify variant this is the featured photo of, when it is one — null for the extra product/gallery shots. */
+  variantId?: string | null;
+};
+
+/** The product's video, in the same list position Shopify gives it. */
+export type SyncedMediaVideo = SyncedVideo & { type: "video" };
+
+export type SyncedMediaItem = SyncedMediaImage | SyncedMediaVideo;
+
 export type SyncedProduct = {
   id: string;
   handle: string;
@@ -46,13 +61,27 @@ export type SyncedProduct = {
   variants: SyncedVariant[];
   /** The product's real Shopify video, if one is attached — undefined for a product synced before this field existed, null when Shopify genuinely has none. */
   video?: SyncedVideo | null;
+  /** Every photo and video in Shopify's own gallery order — undefined for a product synced before this field existed. */
+  media?: SyncedMediaItem[];
 };
 
 export const syncedProduct: SyncedProduct = catalog.product;
 export const syncedShop = catalog.shop;
 /** The product's real Shopify video, or null until one is attached and synced. */
 export const syncedVideo: SyncedVideo | null =
-  "video" in catalog.product ? (catalog.product.video as SyncedVideo | null) : null;
+  "video" in catalog.product
+    ? (catalog.product.video as SyncedVideo | null)
+    : null;
+/**
+ * The product's media in Shopify's own order (20 images + 1 video for the live
+ * product) — the PDP gallery renders this list as-is. Empty until the product
+ * has been synced with the media field, in which case the gallery falls back to
+ * one photo per style.
+ */
+export const syncedMedia: SyncedMediaItem[] =
+  "media" in catalog.product && Array.isArray(catalog.product.media)
+    ? (catalog.product.media as SyncedMediaItem[])
+    : [];
 /** Curated market country codes this catalog has real per-market prices for (empty until synced with Storefront access). */
 export const syncedMarkets: string[] =
   "markets" in catalog && Array.isArray(catalog.markets)
@@ -120,12 +149,13 @@ const slugToWords = (slug: string) =>
   slug.toLowerCase().replace(/[-_]/g, " ").replace(/\s+/g, " ").trim();
 
 /**
- * Map a style slug (e.g. "dream-little-butterfly") to the matching Shopify
- * variant by fuzzy title match, falling back to the first saleable variant.
+ * The Shopify variant a style slug (e.g. "dream-little-butterfly") belongs to,
+ * by fuzzy title match — `undefined` when the synced catalog has no such
+ * variant at all, so callers can tell "not synced yet" from "matched".
  */
-export function getVariantForStyle(slug: string): SyncedVariant {
+function findVariantForStyle(slug: string): SyncedVariant | undefined {
   const words = slugToWords(slug);
-  const match = syncedProduct.variants.find((v) => {
+  return syncedProduct.variants.find((v) => {
     const title = v.title.toLowerCase().replace(/\s+/g, " ").trim();
     if (title === words) return true;
     const titleWords = new Set(title.split(" "));
@@ -136,7 +166,27 @@ export function getVariantForStyle(slug: string): SyncedVariant {
     }
     return false;
   });
-  return match ?? defaultVariant();
+}
+
+/**
+ * Map a style slug to the matching Shopify variant by fuzzy title match,
+ * falling back to the first saleable variant.
+ */
+export function getVariantForStyle(slug: string): SyncedVariant {
+  return findVariantForStyle(slug) ?? defaultVariant();
+}
+
+/**
+ * Where a style sits in the live Shopify variant list — the storefront's style
+ * order should read exactly like the product's style dropdown on Shopify. A
+ * style with no synced variant yet sorts after every real one (never bumps the
+ * queue), and `Array.prototype.sort` is stable, so unsynced styles keep their
+ * hand-written order among themselves.
+ */
+export function variantPositionForStyle(slug: string): number {
+  const match = findVariantForStyle(slug);
+  const index = match ? syncedProduct.variants.indexOf(match) : -1;
+  return index < 0 ? syncedProduct.variants.length : index;
 }
 
 /* ── Brand identity on a shared store ──────────────────────────────────── */

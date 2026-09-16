@@ -26,7 +26,8 @@ function scrollToId(e: ReactMouseEvent<HTMLAnchorElement>, id: string) {
   if (!target) return;
   const nav = document.querySelector<HTMLElement>("header");
   const navHeight = nav?.getBoundingClientRect().height ?? 68;
-  const top = target.getBoundingClientRect().top + window.scrollY - navHeight - 12;
+  const top =
+    target.getBoundingClientRect().top + window.scrollY - navHeight - 12;
   window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
 }
 
@@ -98,24 +99,21 @@ export function ProductPurchase({
         <h1 className="mt-5 font-display text-heading text-ink uppercase">
           {product.shortName}
         </h1>
-        <p className="mt-2 font-script text-2xl text-lilac-500">
-          {selected.name}
-        </p>
-
-        <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-body-sm">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <p className="font-script text-2xl text-lilac-500">{selected.name}</p>
           <a
             href="#quality-test"
             onClick={(e) => scrollToId(e, "quality-test")}
-            className="group inline-flex items-center gap-1.5 text-ink-soft underline-offset-4 transition-colors duration-200 hover:text-ink hover:underline"
+            className="group inline-flex items-center gap-1.5 rounded-pill bg-mint px-3 py-1.5 font-headline text-body-sm text-ink transition-colors duration-200 hover:bg-ink hover:text-cream"
           >
-            <Icon name="shield" className="size-3.5 shrink-0 text-mint" />
+            <Icon
+              name="shield"
+              className="size-3.5 shrink-0 text-ink transition-colors duration-200 group-hover:text-mint"
+              strokeWidth={2.4}
+            />
             {quality.checks.length} checks passed
           </a>
-          <span aria-hidden="true" className="text-ink-faint">
-            |
-          </span>
-          <ValueStack />
-        </p>
+        </div>
 
         <div className="mt-6 flex flex-wrap items-baseline gap-4">
           <PdpPrice slug={selected.slug} />
@@ -130,11 +128,17 @@ export function ProductPurchase({
           )}
         </div>
 
+        {/* Directly under the price it is being compared against — the value
+            stack only means something next to the number it beats. */}
+        <div className="text-body-sm">
+          <ValueStack />
+        </div>
+
         <p className="mt-6 max-w-lg text-body text-ink-soft">
           {selected.tagline} Underneath the design it is the same protector
           every parent trusts: an impact-absorbing ring behind the head, a
-          breathable 3D air-mesh shell and a harness that adjusts from the
-          first crawl to confident walking.
+          breathable 3D air-mesh shell and a harness that adjusts from the first
+          crawl to confident walking.
         </p>
 
         <SwatchPicker
@@ -148,7 +152,10 @@ export function ProductPurchase({
 
         <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
           {specs.map((spec) => (
-            <div key={spec.label} className={cn("border-t border-hairline pt-3")}>
+            <div
+              key={spec.label}
+              className={cn("border-t border-hairline pt-3")}
+            >
               <dt className="eyebrow text-ink-faint">{spec.label}</dt>
               <dd className="mt-1.5 font-headline text-base text-ink">
                 {spec.value}
