@@ -1,6 +1,9 @@
 /**
  * Loads the Shopify-synced product record (data/product.json) and exposes the
- * live price / compare-at price in cents for the UI.
+ * live price / compare-at price in cents for the UI, plus per-market prices
+ * for the currency selector — ported from the AccuPenPro reference
+ * (lib/catalog.ts) to the same fully-static model: no live Shopify call at
+ * request time, every price is a synchronous lookup into the synced catalog.
  *
  * The catalog file is produced by `npm run shopify:sync` — it is a read model
  * only. At buy time the price is re-validated against Shopify's Storefront API,
@@ -9,12 +12,20 @@
 
 import catalog from "../../data/product.json";
 
+export type MarketPrice = {
+  amount: number;
+  compareAtAmount: number | null;
+  currencyCode: string;
+};
+
 export type SyncedVariant = {
   id: string;
   title: string;
   price: number;
   compareAtPrice: number | null;
   availableForSale: boolean;
+  /** Per-country price list, from the store's real curated Shopify Markets only — see scripts/sync-product.ts. Empty until a product has been through that sync. */
+  pricesByMarket?: Record<string, MarketPrice>;
 };
 
 export type SyncedProduct = {
@@ -30,15 +41,53 @@ export type SyncedProduct = {
 
 export const syncedProduct: SyncedProduct = catalog.product;
 export const syncedShop = catalog.shop;
-
-export const productPriceCents = Math.round(syncedProduct.price * 100);
-export const productCompareAtCents =
-  syncedProduct.compareAtPrice != null
-    ? Math.round(syncedProduct.compareAtPrice * 100)
-    : productPriceCents;
-export const productCurrency = syncedProduct.currencyCode ?? "USD";
+/** Curated market country codes this catalog has real per-market prices for (empty until synced with Storefront access). */
+export const syncedMarkets: string[] =
+  "markets" in catalog && Array.isArray(catalog.markets)
+    ? (catalog.markets as string[])
+    : [];
 
 export const syncedAt = catalog.syncedAt;
+
+/**
+ * A variant's price for a given country, straight from the synced catalog —
+ * no live Shopify call. A variant with no pricesByMarket entries (not yet
+ * synced) simply falls back to its own base price for every country.
+ */
+export function priceForMarket(
+  variantId: string,
+  countryCode: string | null | undefined,
+): MarketPrice {
+  const variant = syncedProduct.variants.find((v) => v.id === variantId);
+  const rawDefault: MarketPrice = {
+    amount: variant?.price ?? syncedProduct.price,
+    compareAtAmount: variant?.compareAtPrice ?? syncedProduct.compareAtPrice,
+    currencyCode: syncedProduct.currencyCode,
+  };
+  if (!variant) return rawDefault;
+
+  const us = variant.pricesByMarket?.US ?? rawDefault;
+  if (!countryCode) return us;
+  return variant.pricesByMarket?.[countryCode.toUpperCase()] ?? us;
+}
+
+const mainSaleVariant =
+  syncedProduct.variants.find((v) => v.availableForSale) ??
+  syncedProduct.variants[0];
+// Same US-preferred fallback as priceForMarket — the site's one "no country
+// known yet" price should never be the raw Admin default.
+const mainDefaultPrice = mainSaleVariant?.pricesByMarket?.US ?? {
+  amount: syncedProduct.price,
+  compareAtAmount: syncedProduct.compareAtPrice,
+  currencyCode: syncedProduct.currencyCode,
+};
+
+export const productPriceCents = Math.round(mainDefaultPrice.amount * 100);
+export const productCompareAtCents =
+  mainDefaultPrice.compareAtAmount != null
+    ? Math.round(mainDefaultPrice.compareAtAmount * 100)
+    : productPriceCents;
+export const productCurrency = mainDefaultPrice.currencyCode ?? "USD";
 
 /** The default Shopify variant to buy from (first saleable). */
 export function defaultVariant(): SyncedVariant {

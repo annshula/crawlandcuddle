@@ -17,7 +17,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { adminAuthSource, getAdminToken } from "../src/lib/shopify/admin-token";
-import { shopifyConfig } from "../src/lib/shopify/config";
+import { isStorefrontConfigured, shopifyConfig } from "../src/lib/shopify/config";
+import { getLocalizedVariantPrices } from "../src/lib/shopify/localization-service";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -108,6 +109,52 @@ async function adminRequest<T>(
 
 const SHOP_QUERY = `query { shop { name currencyCode } }`;
 
+const MARKETS_QUERY = `
+query Markets {
+  markets(first: 20) {
+    nodes {
+      name
+      enabled
+      regions(first: 10) {
+        nodes {
+          ... on MarketRegionCountry {
+            code
+          }
+        }
+      }
+    }
+  }
+}`;
+
+type MarketPrice = {
+  amount: number;
+  compareAtAmount: number | null;
+  currencyCode: string;
+};
+
+/** Single-country markets are real, merchant-priced markets; multi-country ones are the "sell everywhere" catch-all — see reference/lib/shopify/sync-product.ts. */
+async function discoverCuratedMarketCountries(): Promise<string[]> {
+  const data = await adminRequest<{
+    markets: {
+      nodes: {
+        name: string;
+        enabled: boolean;
+        regions: { nodes: { code?: string }[] };
+      }[];
+    };
+  }>(MARKETS_QUERY);
+
+  const codes = new Set<string>();
+  for (const market of data.markets.nodes) {
+    if (!market.enabled) continue;
+    const regionCodes = market.regions.nodes
+      .map((r) => r.code)
+      .filter((c): c is string => Boolean(c));
+    if (regionCodes.length === 1) codes.add(regionCodes[0]!);
+  }
+  return [...codes];
+}
+
 const PRODUCT_QUERY = `
 query ProductByHandle($handle: String!) {
   productByHandle(handle: $handle) {
@@ -178,14 +225,53 @@ async function main() {
     process.exit(1);
   }
 
+  // A permissions gap (e.g. the Admin app is missing the read_markets scope)
+  // must not take down the base sync — just skip market prices.
+  const markets = await discoverCuratedMarketCountries().catch(() => []);
+  console.log(`· curated markets: ${markets.length > 0 ? markets.join(", ") : "(none)"}`);
+
+  const pricesByVariant = new Map<string, Record<string, MarketPrice>>(
+    variants.map((v) => [v.id, {}]),
+  );
+
+  if (markets.length > 0 && isStorefrontConfigured(cfg)) {
+    const variantIds = variants.map((v) => v.id);
+    await Promise.all(
+      markets.map(async (country) => {
+        const priceMap = await getLocalizedVariantPrices(
+          variantIds,
+          country,
+        ).catch(() => new Map());
+        for (const [variantId, localized] of priceMap) {
+          const bucket = pricesByVariant.get(variantId);
+          if (!bucket) continue;
+          bucket[country] = {
+            amount: Number(localized.amount),
+            compareAtAmount:
+              localized.compareAtAmount != null
+                ? Number(localized.compareAtAmount)
+                : null,
+            currencyCode: localized.currencyCode,
+          };
+        }
+      }),
+    );
+  }
+
+  const variantsWithMarkets = variants.map((v) => ({
+    ...v,
+    pricesByMarket: pricesByVariant.get(v.id) ?? {},
+  }));
+
   const record = {
-    version: 2,
+    version: 3,
     syncedAt: new Date().toISOString(),
     shop: {
       domain: cfg.storeDomain,
       name: shopData?.shop?.name || "Crawl & Cuddle",
       currencyCode: currency,
     },
+    markets,
     product: {
       id: product.id,
       handle: product.handle,
@@ -194,7 +280,7 @@ async function main() {
       compareAtPrice: compare != null && compare > price ? compare : null,
       currencyCode: currency,
       availableForSale: variants.some((v) => v.availableForSale),
-      variants,
+      variants: variantsWithMarkets,
     },
   };
 

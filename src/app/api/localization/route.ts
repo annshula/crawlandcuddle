@@ -2,52 +2,67 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { readSelectedCountry } from "@/lib/localization/country";
 import { detectVisitorCountry } from "@/lib/localization/geo";
-import { CURATED_MARKET_COUNTRIES } from "@/lib/localization/markets";
-import { getLocalization } from "@/lib/shopify/localization-service";
+import { syncedProduct, syncedMarkets } from "@/lib/catalog";
+import type { LocalizationCountry } from "@/components/providers/LocalizationProvider";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+// Intl.NumberFormat("en", …) falls back to the bare ISO code for a currency
+// with no strong symbol convention in generic English locale data (ZAR is
+// one — only "en-ZA" resolves it to "R"). Overridden here instead of
+// per-locale so every visitor sees the same symbol regardless of the
+// server's locale support.
+const SYMBOL_OVERRIDES: Record<string, string> = { ZAR: "R" };
+
+function currencyFor(countryCode: string): { isoCode: string; symbol: string } {
+  // A market's currency is whatever its synced prices actually came back in —
+  // every variant shares one, so the first is representative.
+  const isoCode =
+    syncedProduct.variants[0]?.pricesByMarket?.[countryCode]?.currencyCode ??
+    syncedProduct.currencyCode;
+  const symbol =
+    SYMBOL_OVERRIDES[isoCode] ??
+    new Intl.NumberFormat("en", { style: "currency", currency: isoCode })
+      .formatToParts(0)
+      .find((p) => p.type === "currency")?.value ??
+    isoCode;
+  return { isoCode, symbol };
+}
+
+function toLocalizationCountry(code: string): LocalizationCountry {
+  return {
+    isoCode: code,
+    name: regionNames.of(code) ?? code,
+    currency: currencyFor(code),
+  };
+}
+
 /**
- * GET /api/localization — this store's curated markets (the ones we've set
- * up our own price for in Shopify Markets — see CURATED_MARKET_COUNTRIES),
- * the shop's default market for this visitor's detected country, and
- * whichever country they already chose. Powers the currency selector.
- *
- * Shopify's `localization.availableCountries` lists every country the
- * catch-all "International" market can sell to (100+ rows) — that's a
- * shipping/checkout list, not a curated currency list, so it's filtered down
- * to just the markets this store has actually priced instead of shown as-is.
+ * GET /api/localization — this store's curated markets (the ones with their
+ * own Shopify price list, discovered and synced by scripts/sync-product.ts
+ * — see data/product.json's `markets`), the shopper's saved country, and a
+ * default guessed from edge geolocation. No live Shopify call: this reads the
+ * synced catalog only, same as the product page. Ported from the AccuPenPro
+ * reference to the same fully-static model.
  */
 export async function GET(request: NextRequest) {
-  try {
-    const [localization, selected] = await Promise.all([
-      getLocalization(detectVisitorCountry(request.headers)),
-      readSelectedCountry(),
-    ]);
+  const countries = syncedMarkets.map(toLocalizationCountry);
 
-    const curated = localization.availableCountries.filter((c) =>
-      CURATED_MARKET_COUNTRIES.includes(c.isoCode),
-    );
+  const selected = await readSelectedCountry();
+  const detected = detectVisitorCountry(request.headers);
+  const defaultCode =
+    (detected && syncedMarkets.includes(detected) ? detected : null) ??
+    (syncedMarkets.includes("US") ? "US" : syncedMarkets[0]) ??
+    null;
 
-    const defaultCountry = CURATED_MARKET_COUNTRIES.includes(
-      localization.defaultCountry.isoCode,
-    )
-      ? localization.defaultCountry
-      : (curated.find((c) => c.isoCode === "US") ?? curated[0] ?? null);
-
-    return NextResponse.json(
-      {
-        defaultCountry,
-        countries: curated,
-        selected,
-      },
-      { headers: { "Cache-Control": "no-store, private" } },
-    );
-  } catch {
-    return NextResponse.json(
-      { defaultCountry: null, countries: [], selected: null },
-      { status: 200, headers: { "Cache-Control": "no-store, private" } },
-    );
-  }
+  return NextResponse.json(
+    {
+      defaultCountry: defaultCode ? toLocalizationCountry(defaultCode) : null,
+      countries,
+      selected,
+    },
+    { headers: { "Cache-Control": "no-store, private" } },
+  );
 }

@@ -2,17 +2,16 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 
 import {
   getVariantForStyle,
+  priceForMarket,
   productCompareAtCents,
   productCurrency,
   productPriceCents,
@@ -36,22 +35,22 @@ type LocalizationValue = {
   defaultCountry: LocalizationCountry | null;
   /** The shopper's explicit country pick, or null for "auto". */
   country: string | null;
-  /** True once a country is known, i.e. a live localized price is on its way. */
+  /** True once a country is known, i.e. localized prices are resolvable. */
   canLocalize: boolean;
   setCountry: (code: string) => void;
-  requestPrices: (variantIds: string[]) => void;
-  localizedPriceFor: (id: string) => LocalizedPrice | null;
-  /** True once this id's fetch for the current country finished — price or not. */
-  isPriceSettled: (id: string) => boolean;
 };
 
 const LocalizationContext = createContext<LocalizationValue | null>(null);
 
 /**
- * Fetches the Shopify Markets country/currency list once, then overlays live
- * Shopify-converted prices (via @inContext) onto the base prices. Requests for
- * visible variants are coalesced into a single POST. Switching country
- * discards the price cache so every amount re-fetches instantly.
+ * Fetches the curated market list once (data/product.json's `markets`, via
+ * GET /api/localization — no live Shopify call, see scripts/sync-product.ts).
+ * Pricing itself is synchronous: every variant's per-market price is already
+ * embedded in the synced catalog, so `useLocalizedAmount`/`useLocalizedCart`
+ * below are a plain lookup (lib/catalog.ts's priceForMarket), not a fetch —
+ * there is no network round trip and no per-price "pending" state, only the
+ * one-time "has the country list loaded yet". Ported from the AccuPenPro
+ * reference to match its fully-static model.
  */
 export function LocalizationProvider({ children }: { children: ReactNode }) {
   const [countries, setCountries] = useState<LocalizationCountry[]>([]);
@@ -59,22 +58,8 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
     useState<LocalizationCountry | null>(null);
   const [country, setCountryState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [priceMap, setPriceMap] = useState<Record<string, LocalizedPrice>>({});
-  /* Ids whose fetch for the current country has come back, with or without a
-     price. Consumers show a placeholder until an id is either priced or
-     settled, so a base-currency amount never flashes before the real one. */
-  const [settledIds, setSettledIds] = useState<Set<string>>(new Set());
 
-  /** variantId → country it was fetched for. Re-fetched whenever the country differs. */
-  const requestedRef = useRef<Map<string, string>>(new Map());
-  const pendingRef = useRef<Set<string>>(new Set());
-  const flushTimer = useRef<number | null>(null);
-  const countryRef = useRef<string | null>(null);
-
-  const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
-  countryRef.current = effectiveCountry;
-
-  /* Load the configured countries + the visitor's saved choice. */
+  /* Load the configured markets + the visitor's saved choice. */
   useEffect(() => {
     fetch("/api/localization")
       .then((r) => r.json())
@@ -89,127 +74,22 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
       .finally(() => setReady(true));
   }, []);
 
-  /* Country changed — every cached price is now wrong. Consumers re-request
-     because their requested id is now tagged with a stale country; pending ids
-     survive and flush against the new country (flush reads the live ref). */
-  useEffect(() => {
-    setPriceMap({});
-    setSettledIds(new Set());
-  }, [effectiveCountry]);
+  const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
+  const canLocalize = effectiveCountry !== null;
 
-  const flush = useCallback(() => {
-    flushTimer.current = null;
-    const ids = [...pendingRef.current];
-    pendingRef.current = new Set();
-    if (ids.length === 0) return;
-    const country = countryRef.current;
-    /* Marking these ids settled says "no live price is coming for them" — only
-       true for the country this batch was sent for. A switch mid-flight resets
-       the settled set and re-requests, so settling the old batch afterwards
-       would let the base price flash while the new one is still loading. */
-    const settle = () => {
-      if (countryRef.current !== country) return;
-      setSettledIds((prev) => {
-        const next = new Set(prev);
-        ids.forEach((id) => next.add(id));
-        return next;
-      });
-    };
-    if (!country) {
-      settle();
-      return;
-    }
-    fetch("/api/localization/prices", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // The country rides along so the answer matches what the shopper sees
-      // right now, rather than whatever the cookie happens to hold — the
-      // cookie write for a currency switch is a separate, racing request.
-      body: JSON.stringify({ variantIds: ids, country }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        // Drop a response that raced a currency switch — its amounts are for
-        // the old country.
-        if (countryRef.current !== country) return;
-        if (data.prices) setPriceMap((prev) => ({ ...prev, ...data.prices }));
-      })
-      .catch(() => {})
-      // Settle either way: a failed fetch must fall back to the base price
-      // rather than leave the placeholder up forever.
-      .finally(settle);
-  }, []);
-
-  const requestPrices = useCallback(
-    (variantIds: string[]) => {
-      const country = countryRef.current;
-      if (!country) return;
-      const toRequest = variantIds.filter(
-        (id) =>
-          id &&
-          requestedRef.current.get(id) !== country &&
-          !pendingRef.current.has(id),
-      );
-      if (toRequest.length === 0) return;
-      toRequest.forEach((id) => {
-        requestedRef.current.set(id, country);
-        pendingRef.current.add(id);
-      });
-      if (flushTimer.current === null) {
-        flushTimer.current = window.setTimeout(flush, 60);
-      }
-    },
-    // Effective country is a dep so consumers re-run their request effect when
-    // the currency changes — every visible variant re-fetches in the new
-    // currency instantly (their cached id is tagged with a stale country).
-    // It is deliberately not read in the body, so the lint rule cannot see it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [flush, effectiveCountry],
-  );
-
-  const setCountry = useCallback((code: string) => {
-    // Optimistic — flip instantly so prices re-fetch; persist in background.
+  const setCountry = (code: string) => {
+    // Optimistic — flip instantly so prices re-resolve; persist in background.
     setCountryState(code === "AUTO" ? null : code);
     fetch("/api/localization/select", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ countryCode: code }),
     }).catch(() => {});
-  }, []);
-
-  const localizedPriceFor = useCallback(
-    (id: string) => priceMap[id] ?? null,
-    [priceMap],
-  );
-  const isPriceSettled = useCallback(
-    (id: string) => settledIds.has(id),
-    [settledIds],
-  );
-  const canLocalize = effectiveCountry !== null;
+  };
 
   const value = useMemo<LocalizationValue>(
-    () => ({
-      ready,
-      countries,
-      defaultCountry,
-      country,
-      canLocalize,
-      setCountry,
-      requestPrices,
-      localizedPriceFor,
-      isPriceSettled,
-    }),
-    [
-      ready,
-      countries,
-      defaultCountry,
-      country,
-      canLocalize,
-      setCountry,
-      requestPrices,
-      localizedPriceFor,
-      isPriceSettled,
-    ],
+    () => ({ ready, countries, defaultCountry, country, canLocalize, setCountry }),
+    [ready, countries, defaultCountry, country, canLocalize],
   );
 
   return (
@@ -229,15 +109,16 @@ export function useLocalization() {
 }
 
 /**
- * Resolves the price to display for a variant: the live Shopify-converted
- * price when one has landed, otherwise the catalog's base values.
+ * Resolves the price to display for a variant: the synced catalog's price
+ * for the shopper's country when known, otherwise the caller's fallback.
  *
- * `pending` is the important part. Rendering the base amount while the live
- * one is in flight made every page flash a base-currency price before
- * snapping to the shopper's, on first load and on every switch. It is true
- * from the first render until we either have the real amount or know none is
- * coming (no country, or the fetch failed), so callers can hold a placeholder
- * and skip the wrong number entirely.
+ * `pending` reflects only whether *localization* has resolved yet — it is
+ * NOT "do we have a price to show". The caller's fallback (the product's
+ * server-rendered default-market price) is always known synchronously, on
+ * the very first render, server-side included. `amount`/`currencyCode`/
+ * `compareAtAmount` below always resolve to a real, displayable price;
+ * `pending` is exposed separately so a caller that wants to show a "still
+ * localizing" affordance still can, without ever blanking the price itself.
  */
 export function useLocalizedAmount(
   variantId: string | null,
@@ -245,104 +126,55 @@ export function useLocalizedAmount(
   fallbackCurrency: string,
   fallbackCompareAt: number | null,
 ) {
-  const {
-    ready,
-    canLocalize,
-    requestPrices,
-    localizedPriceFor,
-    isPriceSettled,
-  } = useLocalization();
+  const { ready, country, defaultCountry } = useLocalization();
+  const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
 
-  useEffect(() => {
-    if (variantId) requestPrices([variantId]);
-  }, [variantId, requestPrices]);
-
-  const localized = variantId ? localizedPriceFor(variantId) : null;
-  const settled = variantId ? isPriceSettled(variantId) : true;
-  // Before the country list lands we do not yet know whether a live price is
-  // coming, so treat that window as pending too.
-  const pending = !ready || (canLocalize && !localized && !settled);
+  const resolved = variantId ? priceForMarket(variantId, effectiveCountry) : null;
+  const pending = !ready;
 
   return useMemo(
     () => ({
-      amount: localized ? Number.parseFloat(localized.amount) : fallbackAmount,
-      currencyCode: localized?.currencyCode ?? fallbackCurrency,
-      compareAtAmount: localized
-        ? localized.compareAtAmount != null
-          ? Number.parseFloat(localized.compareAtAmount)
-          : null
+      amount: resolved ? resolved.amount : fallbackAmount,
+      currencyCode: resolved ? resolved.currencyCode : fallbackCurrency,
+      compareAtAmount: resolved
+        ? resolved.compareAtAmount
         : fallbackCompareAt,
       pending,
-      isLocalized: Boolean(localized),
+      isLocalized: Boolean(resolved && effectiveCountry),
     }),
-    [localized, fallbackAmount, fallbackCurrency, fallbackCompareAt, pending],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      resolved?.amount,
+      resolved?.currencyCode,
+      resolved?.compareAtAmount,
+      fallbackAmount,
+      fallbackCurrency,
+      fallbackCompareAt,
+      pending,
+      effectiveCountry,
+    ],
   );
 }
 
 /**
- * Cart amounts in the shopper's selected currency. Cart lines carry base-price
- * cents from the catalogue, which never change with the currency, so the whole
- * cart is re-priced here from the same live Shopify amounts the product pages
- * use.
- *
- * All-or-nothing on purpose: a half-loaded batch must never render one
- * currency's symbol over another currency's numbers, so the cart stays
- * `pending` until every line has its live amount (or none is coming).
+ * Cart amounts in the shopper's selected currency, resolved from the same
+ * synced per-market prices as useLocalizedAmount — synchronous, no fetch.
  */
 export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
-  const {
-    ready,
-    canLocalize,
-    requestPrices,
-    localizedPriceFor,
-    isPriceSettled,
-  } = useLocalization();
-
-  /* Keyed on the slug list so the effect re-runs when the cart changes, not on
-     every render of a freshly-built lines array. */
-  const slugKey = lines.map((l) => l.slug).join(",");
-  const variantIds = useMemo(
-    () =>
-      slugKey
-        ? slugKey
-            .split(",")
-            .map((slug) => getVariantForStyle(slug).id)
-            .filter(Boolean)
-        : [],
-    [slugKey],
-  );
-
-  useEffect(() => {
-    if (variantIds.length > 0) requestPrices(variantIds);
-  }, [variantIds, requestPrices]);
-
-  const localized = variantIds.map((id) => localizedPriceFor(id));
-  const allLanded =
-    variantIds.length > 0 && localized.every((price) => price !== null);
-  const allSettled = variantIds.every((id) => isPriceSettled(id));
-  const pending =
-    variantIds.length > 0 &&
-    (!ready || (canLocalize && !allLanded && !allSettled));
-
-  const unitBySlug = useMemo(() => {
-    const base = productPriceCents / 100;
-    const map = new Map<string, number>();
-    for (const { slug } of lines) {
-      const id = getVariantForStyle(slug).id;
-      const price = allLanded && id ? localizedPriceFor(id) : null;
-      map.set(slug, price ? Number.parseFloat(price.amount) : base);
-    }
-    return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slugKey, allLanded, localizedPriceFor]);
-
-  const currencyCode = allLanded
-    ? (localized[0]?.currencyCode ?? productCurrency)
-    : productCurrency;
+  const { ready, country, defaultCountry } = useLocalization();
+  const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
+  const pending = !ready;
 
   const unitAmountFor = (slug: string) =>
-    unitBySlug.get(slug) ?? productPriceCents / 100;
+    priceForMarket(getVariantForStyle(slug).id, effectiveCountry).amount;
   const lineTotalFor = (slug: string, qty: number) => unitAmountFor(slug) * qty;
+
+  const currencyCode =
+    lines.length > 0
+      ? priceForMarket(getVariantForStyle(lines[0]!.slug).id, effectiveCountry)
+          .currencyCode
+      : productCurrency;
+
   const subtotal = lines.reduce(
     (total, line) => total + lineTotalFor(line.slug, line.qty),
     0,
@@ -353,8 +185,8 @@ export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
 
 /**
  * Price for one of our ten styles: resolves the style's Shopify variant and
- * overlays the live Shopify-converted amount for the selected currency,
- * falling back to the synced base USD price until a live one lands.
+ * overlays the synced per-market amount for the selected currency, falling
+ * back to the synced base USD price until localization is ready.
  */
 export function useStylePrice(slug: string) {
   const variant = getVariantForStyle(slug);
