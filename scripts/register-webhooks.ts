@@ -1,17 +1,24 @@
 /**
- * `npm run shopify:register-webhooks [callback-url]` — register the
- * server-side conversion webhooks with the Shopify Admin API so they are
+ * `npm run shopify:register-webhooks [callback-url]` — register the webhook
+ * subscriptions this site needs with the Shopify Admin API, so they are
  * signed with the custom app's client secret (== SHOPIFY_WEBHOOK_SECRET) and
- * the HMAC check in `src/app/api/webhooks/shopify-order-paid/route.ts` passes.
+ * the HMAC checks in `src/app/api/webhooks/**` pass.
  *
  * Why not the admin UI? Admin-UI webhooks auto-generate an invisible HMAC
  * secret that can never be matched by SHOPIFY_WEBHOOK_SECRET. App-created
  * webhooks (this script) are signed with the app's client secret instead —
  * which is exactly what SHOPIFY_WEBHOOK_SECRET is set to in `.env`.
  *
+ * Idempotent: it lists what exists, deletes subscriptions for these topics
+ * that point somewhere else (a stale tunnel or old domain), then creates what
+ * is missing. Topics are the same set the reference project registers.
+ *
  * Usage:
- *   npm run shopify:register-webhooks                          # uses $NEXT_PUBLIC_SITE_URL
- *   npm run shopify:register-webhooks https://www.crawlandcuddle.com/api/webhooks/shopify-order-paid
+ *   npm run shopify:register-webhooks                                    # uses $NEXT_PUBLIC_SITE_URL
+ *   npm run shopify:register-webhooks -- --website https://your-site.com
+ *   npm run shopify:register-webhooks -- --url=https://your-site.com
+ *   npm run shopify:register-webhooks -- --list | --list-scopes | --list-topics
+ *   npm run shopify:register-webhooks -- --delete=<webhookSubscriptionId>
  */
 
 import { readFileSync } from "node:fs";
@@ -64,6 +71,19 @@ type WebhookSubscription = {
   topic: string;
   format: string;
 };
+
+/**
+ * Which events this site subscribes to, and the route that handles each:
+ *  - ORDERS_PAID      → /api/webhooks/shopify-order-paid (server-side Meta/GA4/TikTok Purchase)
+ *  - PRODUCTS_CREATE  → /api/webhooks/products (rebuild the static catalog)
+ *  - PRODUCTS_UPDATE  → /api/webhooks/products (rebuild the static catalog)
+ */
+const WEBHOOK_ENDPOINTS: Record<string, string> = {
+  ORDERS_PAID: "/api/webhooks/shopify-order-paid",
+  PRODUCTS_CREATE: "/api/webhooks/products",
+  PRODUCTS_UPDATE: "/api/webhooks/products",
+};
+const REQUIRED_TOPICS = Object.keys(WEBHOOK_ENDPOINTS);
 
 async function graphql<T>(
   token: string,
@@ -235,18 +255,40 @@ async function main() {
     return;
   }
 
+  /* Site URL from `--website https://…` (space or `=`), `--url=…`, the first
+     positional argument, or NEXT_PUBLIC_SITE_URL — in that order. */
+  const urlEquals = process.argv
+    .find((arg) => arg.startsWith("--url="))
+    ?.slice("--url=".length);
+  const websiteEquals = process.argv
+    .find((arg) => arg.startsWith("--website="))
+    ?.slice("--website=".length);
+  const websiteIndex = process.argv.indexOf("--website");
+  const websiteValue =
+    websiteIndex !== -1 ? process.argv[websiteIndex + 1] : undefined;
+  const positional = process.argv[2];
   const siteUrl = (
-    process.argv
-      .find((arg) => arg.startsWith("--url="))
-      ?.slice("--url=".length) ??
-    process.argv[2] ??
+    websiteEquals ??
+    urlEquals ??
+    websiteValue ??
+    (positional && !positional.startsWith("--") ? positional : undefined) ??
     process.env.NEXT_PUBLIC_SITE_URL ??
     `https://${cfg.storeDomain}`
   ).replace(/\/+$/, "");
-  const callbackUrl = siteUrl.endsWith("/api/webhooks/shopify-order-paid")
-    ? siteUrl
-    : `${siteUrl}/api/webhooks/shopify-order-paid`;
-  console.log(`Registering ORDERS_PAID webhook → ${callbackUrl}`);
+
+  console.log(
+    `\nWebhook subscriptions:\n` +
+      REQUIRED_TOPICS.map(
+        (topic) => `  • ${topic}  →  ${siteUrl}${WEBHOOK_ENDPOINTS[topic]}`,
+      ).join("\n") +
+      "\n",
+  );
+  if (siteUrl.includes("localhost")) {
+    console.warn(
+      "⚠ Shopify cannot deliver webhooks to localhost. Pass a public URL:\n" +
+        "  npm run shopify:register-webhooks -- --website https://your-tunnel.example.com\n",
+    );
+  }
 
   /* 1. List what already exists so stale admin-UI subscriptions are visible.
      The `topics` filter on webhookSubscriptions throws if the app lacks access
@@ -273,19 +315,77 @@ async function main() {
     {},
   );
 
-  const subs =
-    existing.webhookSubscriptions?.edges
-      .map((e) => e.node)
-      .filter((s) => s.topic === "ORDERS_PAID") ?? [];
-  const matching = subs.find((s) => s.callbackUrl === callbackUrl);
-  const stray = subs.filter((s) => s.callbackUrl !== callbackUrl);
-
-  if (matching) {
-    console.log(
-      `✓ Already registered: ${matching.id} → ${matching.callbackUrl}`,
-    );
+  const all = existing.webhookSubscriptions?.edges.map((e) => e.node) ?? [];
+  if (all.length === 0) {
+    console.log("  (no webhooks registered)");
   } else {
-    const created = await graphql<{
+    for (const sub of all) {
+      console.log(`  • [${sub.topic}] ${sub.callbackUrl}`);
+    }
+  }
+  console.log(
+    `  ${all.length} subscription(s) currently registered on this store\n`,
+  );
+
+  /* 2. Prune stale subscriptions for our topics — anything pointing at a
+     different callback (an old tunnel, the previous domain) is deleted, so
+     re-pointing the webhooks at a new domain is a single clean run. */
+  let deleted = 0;
+  for (const sub of all) {
+    if (!REQUIRED_TOPICS.includes(sub.topic)) continue;
+    if (sub.callbackUrl === `${siteUrl}${WEBHOOK_ENDPOINTS[sub.topic]}`)
+      continue;
+
+    const removed = await graphql<{
+      webhookSubscriptionDelete: {
+        userErrors?: Array<{ field?: string[]; message?: string }>;
+      };
+    }>(
+      token,
+      endpoint,
+      /* GraphQL */ `
+        mutation WebhookSubscriptionDelete($id: ID!) {
+          webhookSubscriptionDelete(id: $id) {
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `,
+      { id: sub.id },
+    );
+    const errors = removed.webhookSubscriptionDelete?.userErrors ?? [];
+    if (errors.length > 0) {
+      console.error(
+        `  error    delete ${sub.topic}: ${errors.map((e) => e.message).join("; ")}`,
+      );
+      continue;
+    }
+    console.log(`  deleted  ${sub.topic} → ${sub.callbackUrl}`);
+    deleted += 1;
+  }
+
+  const registered = new Set(
+    all
+      .filter(
+        (sub) =>
+          REQUIRED_TOPICS.includes(sub.topic) &&
+          sub.callbackUrl === `${siteUrl}${WEBHOOK_ENDPOINTS[sub.topic]}`,
+      )
+      .map((sub) => sub.topic),
+  );
+
+  /* 3. Create whatever is missing. An already-registered topic is left alone. */
+  let created = 0;
+  for (const topic of REQUIRED_TOPICS) {
+    if (registered.has(topic)) {
+      console.log(`  skip     ${topic} (already registered)`);
+      continue;
+    }
+
+    const callbackUrl = `${siteUrl}${WEBHOOK_ENDPOINTS[topic]}`;
+    const result = await graphql<{
       webhookSubscriptionCreate: {
         userErrors?: Array<{ field?: string[]; message?: string }>;
         webhookSubscription?: WebhookSubscription | null;
@@ -315,40 +415,27 @@ async function main() {
           }
         }
       `,
-      { topic: "ORDERS_PAID", callbackUrl },
+      { topic, callbackUrl },
     );
-    const errors = created.webhookSubscriptionCreate?.userErrors ?? [];
+    const errors = result.webhookSubscriptionCreate?.userErrors ?? [];
     if (errors.length > 0) {
       console.error(
-        "✖ Shopify rejected the webhook:",
-        errors
+        `  error    ${topic}: ${errors
           .map((e) => `${e.field?.join(".") ?? ""} ${e.message}`.trim())
-          .join("; "),
+          .join("; ")}`,
       );
-      process.exit(1);
+      continue;
     }
-    const sub = created.webhookSubscriptionCreate?.webhookSubscription;
-    if (!sub) {
-      console.error("✖ No webhook subscription returned.");
-      process.exit(1);
-    }
-    console.log(`✓ Registered: ${sub.id} → ${sub.callbackUrl}`);
-  }
-
-  if (stray.length > 0) {
-    console.warn(
-      `⚠ Found ${stray.length} other ORDERS_PAID subscription(s) — likely admin-UI ones that 401 or occupy this address. ` +
-        `Delete them with:\n` +
-        stray
-          .map(
-            (s) => `   npm run shopify:register-webhooks -- --delete=${s.id}`,
-          )
-          .join("\n"),
-    );
+    const sub = result.webhookSubscriptionCreate?.webhookSubscription;
+    console.log(`  created  ${topic} → ${sub?.callbackUrl ?? callbackUrl}`);
+    created += 1;
   }
 
   console.log(
-    `\nHMAC note: this app-created webhook is signed with the custom app's client secret, ` +
+    `\n${created} created, ${deleted} stale deleted, ${REQUIRED_TOPICS.length - created} already present.`,
+  );
+  console.log(
+    `HMAC note: app-created webhooks are signed with the custom app's client secret, ` +
       `which must equal SHOPIFY_WEBHOOK_SECRET on the server. ` +
       `Current: ${Boolean(process.env.SHOPIFY_WEBHOOK_SECRET) ? "set ✔" : "MISSING ✖"}.`,
   );
@@ -359,9 +446,10 @@ main().catch((error) => {
   console.error("✖", message);
   if (/access|scope|topic/i.test(message)) {
     console.error(
-      "\nThe custom app token lacks access to the ORDERS_PAID topic.\n" +
+      "\nThe custom app token lacks access to one of the webhook topics.\n" +
         "Fix: Shopify admin → Settings → Apps and sales channels → Develop apps →\n" +
-        "your app → Admin API scopes → add read_orders (Orders) → Save → re-authorize.\n" +
+        "your app → Admin API scopes → add read_orders (Orders) and read_products\n" +
+        "(Products) → Save → re-authorize.\n" +
         "Then rerun this script.",
     );
   }

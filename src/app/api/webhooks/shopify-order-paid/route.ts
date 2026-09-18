@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { syncedProduct } from "@/lib/catalog";
@@ -20,7 +21,7 @@ export const runtime = "nodejs";
  *   • Google Analytics 4 Measurement Protocol (`purchase`)
  *   • TikTok Events API (`Purchase`)
  *
- * Both providers are optional: a missing env config is skipped silently and
+ * Every provider is optional: a missing env config is skipped silently and
  * the webhook still acks Shopify with 200 so it does not retry.
  */
 
@@ -33,6 +34,16 @@ type ShopifyLineItem = {
   title?: string;
 };
 
+type ShopifyAddress = {
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  city?: string | null;
+  province_code?: string | null;
+  zip?: string | null;
+  country_code?: string | null;
+};
+
 type ShopifyOrder = {
   id: number;
   name?: string;
@@ -40,7 +51,42 @@ type ShopifyOrder = {
   total_price?: string | number;
   current_total_price?: string | number;
   line_items?: ShopifyLineItem[];
+  email?: string | null;
+  phone?: string | null;
+  customer?: { email?: string | null; phone?: string | null } | null;
+  billing_address?: ShopifyAddress | null;
 };
+
+/** Meta/TikTok require PII lowercased + trimmed, then SHA-256 hex — never sent raw. */
+function sha256(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function hashField(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim().toLowerCase();
+  return trimmed ? sha256(trimmed) : undefined;
+}
+
+/** Digits only (Meta's phone spec drops symbols/leading zeros, keeps the country code). */
+function hashPhone(value: string | null | undefined): string | undefined {
+  const digits = value?.replace(/[^0-9]/g, "");
+  return digits ? sha256(digits) : undefined;
+}
+
+/** Advanced-matching fields shared by an order's billing contact, hashed once for reuse across providers. */
+function customerMatchData(order: ShopifyOrder) {
+  const address = order.billing_address ?? undefined;
+  return {
+    em: hashField(order.email ?? order.customer?.email),
+    ph: hashPhone(order.phone ?? order.customer?.phone ?? address?.phone),
+    fn: hashField(address?.first_name),
+    ln: hashField(address?.last_name),
+    ct: hashField(address?.city),
+    st: hashField(address?.province_code),
+    zp: hashField(address?.zip),
+    country: hashField(address?.country_code),
+  };
+}
 
 /* Numeric tails of our catalogue ids — Shopify webhooks send plain numbers,
    while the Storefront/Admin APIs return `gid://shopify/…/123` strings. */
@@ -68,12 +114,45 @@ async function sendMetaPurchase(
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
   const accessToken = process.env.META_CAPI_ACCESS_TOKEN?.trim();
   const version = process.env.META_GRAPH_API_VERSION?.trim() || "v21.0";
-  if (!pixelId || !accessToken) return;
+  // Meta Events Manager → Test Events issues a per-account code that tags an
+  // event as test traffic: it shows up live in that tool but is excluded from
+  // ad optimization and reporting. Unset in production; set locally or in a
+  // staging env when verifying this pipeline end-to-end so a manual test never
+  // counts as a real conversion.
+  const testEventCode = process.env.META_TEST_EVENT_CODE?.trim();
+  if (!pixelId || !accessToken) {
+    console.log(
+      `[webhook] Meta CAPI skipped for order ${order.id}: NEXT_PUBLIC_META_PIXEL_ID or META_CAPI_ACCESS_TOKEN not set in this environment`,
+    );
+    return;
+  }
 
   const items = (order.line_items ?? []).filter(isOurLineItem);
-  if (items.length === 0) return;
+  if (items.length === 0) {
+    console.log(
+      `[webhook] Meta CAPI skipped for order ${order.id}: no line items matched this store's catalog`,
+    );
+    return;
+  }
 
   const value = Number(order.current_total_price ?? order.total_price ?? 0);
+
+  // Meta's advanced-matching fields (em/ph/fn/ln/ct/st/zp/country) are the
+  // strongest signals in Event Match Quality — stronger than IP/UA combined —
+  // and each takes an array of hashed values per Meta's spec.
+  const match = customerMatchData(order);
+  const userData = {
+    client_ip_address: ip ?? undefined,
+    client_user_agent: userAgent ?? undefined,
+    em: match.em ? [match.em] : undefined,
+    ph: match.ph ? [match.ph] : undefined,
+    fn: match.fn ? [match.fn] : undefined,
+    ln: match.ln ? [match.ln] : undefined,
+    ct: match.ct ? [match.ct] : undefined,
+    st: match.st ? [match.st] : undefined,
+    zp: match.zp ? [match.zp] : undefined,
+    country: match.country ? [match.country] : undefined,
+  };
 
   try {
     const response = await fetch(
@@ -83,16 +162,14 @@ async function sendMetaPurchase(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           access_token: accessToken,
+          ...(testEventCode ? { test_event_code: testEventCode } : {}),
           data: [
             {
               event_name: "Purchase",
               event_time: Math.floor(Date.now() / 1000),
               event_id: `purchase-${order.id}`,
               action_source: "website",
-              user_data: {
-                client_ip_address: ip ?? undefined,
-                client_user_agent: userAgent ?? undefined,
-              },
+              user_data: userData,
               custom_data: {
                 currency: order.currency ?? "USD",
                 value,
@@ -122,7 +199,12 @@ async function sendMetaPurchase(
 async function sendGa4Purchase(order: ShopifyOrder): Promise<void> {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const apiSecret = process.env.GA_MP_API_SECRET;
-  if (!measurementId || !apiSecret) return;
+  if (!measurementId || !apiSecret) {
+    console.log(
+      `[webhook] GA4 MP skipped for order ${order.id}: NEXT_PUBLIC_GA_MEASUREMENT_ID or GA_MP_API_SECRET not set in this environment`,
+    );
+    return;
+  }
 
   const items = (order.line_items ?? []).filter(isOurLineItem).map((line) => ({
     item_id: String(line.variant_id ?? line.id),
@@ -130,7 +212,12 @@ async function sendGa4Purchase(order: ShopifyOrder): Promise<void> {
     price: Number(line.price ?? 0),
     quantity: line.quantity ?? 1,
   }));
-  if (items.length === 0) return;
+  if (items.length === 0) {
+    console.log(
+      `[webhook] GA4 MP skipped for order ${order.id}: no line items matched this store's catalog`,
+    );
+    return;
+  }
 
   try {
     const response = await fetch(
@@ -178,12 +265,26 @@ async function sendTikTokPurchase(
 ): Promise<void> {
   const pixelId = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID?.trim();
   const accessToken = process.env.TIKTOK_ACCESS_TOKEN?.trim();
-  if (!pixelId || !accessToken) return;
+  if (!pixelId || !accessToken) {
+    console.log(
+      `[webhook] TikTok Events API skipped for order ${order.id}: NEXT_PUBLIC_TIKTOK_PIXEL_ID or TIKTOK_ACCESS_TOKEN not set in this environment`,
+    );
+    return;
+  }
 
   const items = (order.line_items ?? []).filter(isOurLineItem);
-  if (items.length === 0) return;
+  if (items.length === 0) {
+    console.log(
+      `[webhook] TikTok Events API skipped for order ${order.id}: no line items matched this store's catalog`,
+    );
+    return;
+  }
 
   const value = Number(order.current_total_price ?? order.total_price ?? 0);
+
+  // Same hashed-identity boost as Meta CAPI above — TikTok's Events API
+  // matches on `email`/`phone_number` (each a hashed array) too.
+  const match = customerMatchData(order);
 
   try {
     const response = await fetch(
@@ -205,6 +306,8 @@ async function sendTikTokPurchase(
               user: {
                 ip: ip ?? undefined,
                 user_agent: userAgent ?? undefined,
+                email: match.em ? [match.em] : undefined,
+                phone_number: match.ph ? [match.ph] : undefined,
               },
               properties: {
                 contents: items.map((i) => ({
@@ -256,9 +359,22 @@ export async function POST(request: NextRequest) {
   let order: ShopifyOrder;
   try {
     order = JSON.parse(rawBody) as ShopifyOrder;
-  } catch {
+  } catch (error) {
+    console.error(
+      "[webhook] could not parse the orders/paid body as JSON:",
+      error instanceof Error ? error.message : error,
+    );
+    // Ack anyway: retrying would deliver the same unparseable bytes.
     return ack();
   }
+
+  // Logged unconditionally, before any analytics call: the send* helpers can
+  // all no-op silently (missing env config, or no line item matched this
+  // store), which otherwise looks identical in the logs to this route never
+  // having been invoked at all.
+  console.log(
+    `[webhook] order ${order.id} (${order.name ?? "unnamed"}) received, dispatching analytics`,
+  );
 
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
