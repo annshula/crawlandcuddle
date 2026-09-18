@@ -22,6 +22,14 @@ import { put, get, head, del, BlobNotFoundError } from "@vercel/blob";
  * possible) and a lock blob that relies on `put()` without `allowOverwrite`
  * rejecting a second writer.
  *
+ * PRIVATE STORAGE ONLY: every Blob call passes `access: "private"`, so reads
+ * need the read-write token and no blob URL is ever exposed to a browser. This
+ * requires the store itself to have been created with private access — writing
+ * a private blob to a public store fails at runtime. If a sync ever errors
+ * with an access/store complaint, recreate the store as private; do NOT switch
+ * these calls to `access: "public"`, which would make the catalog publicly
+ * fetchable.
+ *
  * NOTE: the reference imports "server-only" here; that package is NOT
  * installed in this project, so it is deliberately omitted. This module must
  * still never be imported from a client component — it pulls in node:fs and

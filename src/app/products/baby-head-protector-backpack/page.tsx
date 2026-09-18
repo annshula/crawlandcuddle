@@ -18,11 +18,20 @@ import { productReviews, productReviewSummary } from "@/data/reviews";
 import { absoluteUrl, formatPrice } from "@/lib/utils";
 
 /**
- * Mirrors the reference's product page: an ISR window as the fallback for the
- * tag/path purges the products/create|update webhook fires. NOTE this page
- * still resolves pricing through `lib/catalog.ts`'s static import (as the
- * reference's does too), so a purge re-renders the same bytes until the
- * pricing path is converted to live reads — see `lib/product-live.ts`.
+ * Mirrors the reference's product page, which exports the same ISR window as
+ * the fallback for the tag/path purges the products/create|update webhook
+ * fires.
+ *
+ * ACCURACY NOTE: on this page the export is currently INERT — the page awaits
+ * `searchParams` (the `?style=` deep link from the homepage), which makes the
+ * route dynamic, so it already re-renders on every request. It is kept to
+ * mirror the reference and to be correct if the page ever stops reading search
+ * params. It also means that IF the pricing path were converted to live reads
+ * (`lib/product-live.ts`), price edits would apply immediately with no
+ * revalidation needed — the render is already per-request.
+ *
+ * The page still resolves pricing through `lib/catalog.ts`'s static import (as
+ * the reference's does too), so today a purge re-renders the same bytes.
  */
 export const revalidate = 3600;
 
