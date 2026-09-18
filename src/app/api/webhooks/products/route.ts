@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { syncedProduct } from "@/lib/catalog";
 import {
+  describeCaller,
   isDuplicateWebhook,
   verifyWebhookSignature,
 } from "@/services/webhooks/verify";
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
     !verifyWebhookSignature(
       rawBody,
       request.headers.get("x-shopify-hmac-sha256"),
+      describeCaller(request.headers),
     )
   ) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });

@@ -8,10 +8,27 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * changes the bytes and invalidates the signature.
  */
 
+/**
+ * Best-effort identification of who called, for the 401 logs. Shopify ALWAYS
+ * signs its deliveries, so a 401 for a *missing* header means the request did
+ * not come from Shopify's webhook system (a bot, a scanner, or a manual probe)
+ * — not a misconfigured webhook. A real Shopify delivery that fails says
+ * "HMAC mismatch" instead. Without this, both look identical in the logs.
+ */
+export function describeCaller(headers: Headers): string {
+  const topic = headers.get("x-shopify-topic") ?? "none";
+  const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const userAgent = (headers.get("user-agent") ?? "none").slice(0, 120);
+  return `topic=${topic} ip=${ip} ua="${userAgent}"`;
+}
+
 export function verifyWebhookSignature(
   rawBody: string | Buffer,
   headerSignature: string | null,
+  /** Who called — see describeCaller(). Included in the 401 logs only. */
+  caller?: string,
 ): boolean {
+  const context = caller ? ` — caller: ${caller}` : "";
   const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
   if (!secret) {
     console.error(
@@ -20,7 +37,10 @@ export function verifyWebhookSignature(
     return false;
   }
   if (!headerSignature) {
-    console.error("[webhook] 401: missing x-shopify-hmac-sha256 header");
+    console.error(
+      `[webhook] 401: missing x-shopify-hmac-sha256 header${context}` +
+        " (Shopify always signs its deliveries, so this request did not come from Shopify)",
+    );
     return false;
   }
 
@@ -43,7 +63,7 @@ export function verifyWebhookSignature(
   const match = timingSafeEqual(provided, computed);
   if (!match) {
     console.error(
-      "[webhook] 401: HMAC mismatch — the secret registered in Shopify does not match SHOPIFY_WEBHOOK_SECRET",
+      `[webhook] 401: HMAC mismatch — the secret registered in Shopify does not match SHOPIFY_WEBHOOK_SECRET${context}`,
     );
   }
   return match;
