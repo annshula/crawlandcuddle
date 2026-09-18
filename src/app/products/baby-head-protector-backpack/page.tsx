@@ -17,6 +17,15 @@ import {
 import { productReviews, productReviewSummary } from "@/data/reviews";
 import { absoluteUrl, formatPrice } from "@/lib/utils";
 
+/**
+ * Mirrors the reference's product page: an ISR window as the fallback for the
+ * tag/path purges the products/create|update webhook fires. NOTE this page
+ * still resolves pricing through `lib/catalog.ts`'s static import (as the
+ * reference's does too), so a purge re-renders the same bytes until the
+ * pricing path is converted to live reads — see `lib/product-live.ts`.
+ */
+export const revalidate = 3600;
+
 export const metadata: Metadata = (() => {
   const hero = defaultVariant();
   const title = product.shortName;
@@ -106,7 +115,12 @@ export default async function ProductDetailPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl("/"),
+      },
       {
         "@type": "ListItem",
         position: 2,
