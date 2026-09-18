@@ -94,8 +94,7 @@ export async function POST(request: NextRequest) {
       "[webhook/products] could not parse the body as JSON:",
       error instanceof Error ? error.message : error,
     );
-    // Ack anyway: retrying would deliver the same unparseable bytes.
-    return ack({ topic, parsed: false });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   if (payload.id === undefined || payload.id === null) {

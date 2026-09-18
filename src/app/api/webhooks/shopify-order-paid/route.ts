@@ -366,8 +366,7 @@ export async function POST(request: NextRequest) {
       "[webhook] could not parse the orders/paid body as JSON:",
       error instanceof Error ? error.message : error,
     );
-    // Ack anyway: retrying would deliver the same unparseable bytes.
-    return ack();
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
   // Logged unconditionally, before any analytics call: the send* helpers can
