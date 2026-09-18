@@ -32,7 +32,7 @@ const DATA_DIR = path.join(process.cwd(), "data");
 export const CATALOG_PATH = path.join(DATA_DIR, "product.json");
 const LOCK_PATH = path.join(DATA_DIR, ".sync.lock");
 
-function useBlobStorage(): boolean {
+function isBlobStorageEnabled(): boolean {
   return Boolean(
     process.env.BLOB_READ_WRITE_TOKEN ||
     (process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID),
@@ -45,7 +45,7 @@ function blobPathname(filePath: string): string {
 }
 
 async function ensureDataDir(): Promise<void> {
-  if (useBlobStorage()) return;
+  if (isBlobStorageEnabled()) return;
   await fs.mkdir(DATA_DIR, { recursive: true });
 }
 
@@ -62,7 +62,7 @@ async function readLocalJsonFile<T>(filePath: string): Promise<T | null> {
 }
 
 export async function readJsonFile<T>(filePath: string): Promise<T | null> {
-  if (useBlobStorage()) {
+  if (isBlobStorageEnabled()) {
     try {
       const result = await get(blobPathname(filePath), {
         access: "private",
@@ -97,7 +97,7 @@ export async function writeJsonFileAtomic(
 ): Promise<void> {
   const serialized = `${JSON.stringify(value, null, 2)}\n`;
 
-  if (useBlobStorage()) {
+  if (isBlobStorageEnabled()) {
     await put(blobPathname(filePath), serialized, {
       access: "private",
       addRandomSuffix: false,
@@ -136,7 +136,7 @@ export async function acquireLock(
   const staleMs = options.staleMs ?? 5 * 60_000;
   const deadline = Date.now() + timeoutMs;
 
-  if (useBlobStorage()) {
+  if (isBlobStorageEnabled()) {
     const lockPathname = blobPathname(LOCK_PATH);
 
     for (;;) {
