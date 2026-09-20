@@ -69,8 +69,14 @@ export function PackPicker({
                 )}
 
                 <span className="flex w-full items-center justify-between gap-2">
-                  <span className="font-headline text-base text-ink">
-                    {tier.label}
+                  <span className="min-w-0 font-headline text-base text-ink">
+                    <span className="wrap-break-word">{tier.label}</span>
+                    {tier.size > 1 && (
+                      <span className="whitespace-nowrap text-sm text-ink-soft">
+                        {" "}
+                        (×{tier.size})
+                      </span>
+                    )}
                   </span>
                   <span
                     aria-hidden="true"
