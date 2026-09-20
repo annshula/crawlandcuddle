@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { Blob } from "@/components/art/Blob";
 import { LineArt } from "@/components/art/LineArt";
+import { CompareTable } from "@/components/product/CompareTable";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { ProductReviews } from "@/components/product/ProductReviews";
 import { QualityChecks } from "@/components/product/QualityChecks";
@@ -187,6 +188,8 @@ export default async function ProductDetailPage({
           <ProductPurchase variants={variants} initialSlug={initialSlug} />
         </div>
       </section>
+
+      <CompareTable />
 
       <QualityChecks />
 

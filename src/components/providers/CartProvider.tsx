@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { product, variants } from "@/content/site";
+import { applyPackDiscount, getPackTier, product, variants } from "@/content/site";
 import { trackAddToCart } from "@/lib/analytics";
 import { useScrollLock } from "@/lib/scroll-lock";
 
@@ -19,12 +19,23 @@ const STORAGE_KEY = "cc.cart.v1";
 
 export type CartLine = {
   slug: string;
+  /**
+   * The Shopify cart-line quantity — this is exactly what CJ fulfils, so a
+   * "3 pack" is never a different SKU, only `qty: 3` against the same mapped
+   * variant. There is deliberately no separate `packSize` field: the pack
+   * tier a line displays at (and is priced at) is always derived from `qty`
+   * itself via `getPackTier` — qty 2 is always the 2-pack, qty 3 is always
+   * the 3-pack, any other qty (e.g. from QuickBuy's plain stepper) is always
+   * full price. A separate flag that could disagree with `qty` was the
+   * source of a real bug: manual +/- edits left the displayed price out of
+   * sync with the actual line quantity. Single source of truth: `qty`.
+   */
   qty: number;
 };
 
 type Action =
   | { type: "hydrate"; lines: CartLine[] }
-  | { type: "add"; slug: string; qty: number }
+  | { type: "add"; slug: string; qty: number; replace?: boolean }
   | { type: "setQty"; slug: string; qty: number }
   | { type: "remove"; slug: string }
   | { type: "clear" };
@@ -38,11 +49,20 @@ function reducer(state: CartLine[], action: Action): CartLine[] {
       if (existing) {
         return state.map((l) =>
           l.slug === action.slug
-            ? { ...l, qty: Math.min(l.qty + action.qty, 20) }
+            ? {
+                ...l,
+                // Picking a pack tile (BuyBox) sets the line to exactly that
+                // tier's quantity — "switch to the 3 pack" means qty 3, not
+                // qty+3. Plain adds (QuickBuy, "add another") stay additive,
+                // the ordinary cart behavior every caller already expects.
+                qty: action.replace
+                  ? Math.min(action.qty, 20)
+                  : Math.min(l.qty + action.qty, 20),
+              }
             : l,
         );
       }
-      return [...state, { slug: action.slug, qty: action.qty }];
+      return [...state, { slug: action.slug, qty: Math.min(action.qty, 20) }];
     }
     case "setQty":
       return action.qty <= 0
@@ -70,12 +90,19 @@ export type ResolvedLine = CartLine & {
 
 interface CartContextValue {
   lines: ResolvedLine[];
+  /** Number of distinct lines in the bag (one per style), not the summed quantity across lines. */
   count: number;
   subtotalCents: number;
   isOpen: boolean;
   open: () => void;
   close: () => void;
-  add: (slug: string, qty?: number) => void;
+  /** `replace: true` (BuyBox's pack tiles) sets the line to exactly `qty`; omitted (QuickBuy, "add another") adds `qty` more to whatever's already there. `openDrawer: false` skips the auto-open (BuyBox shows a toast instead). */
+  add: (
+    slug: string,
+    qty?: number,
+    replace?: boolean,
+    openDrawer?: boolean,
+  ) => void;
   setQty: (slug: string, qty: number) => void;
   remove: (slug: string) => void;
   clear: () => void;
@@ -139,37 +166,60 @@ export function CartProvider({ children }: { children: ReactNode }) {
       raw.flatMap((line) => {
         const variant = variants.find((v) => v.slug === line.slug);
         if (!variant) return [];
+        // Base USD fallback figures only — the drawer/checkout summary always
+        // display through useLocalizedCart, which re-derives these from the
+        // live per-market price. This just keeps the reducer's own total
+        // (used before localization resolves) consistent with the pack tier
+        // the line's own qty implies.
+        const tier = getPackTier(line.qty);
+        const { perUnit, total } = applyPackDiscount(
+          product.priceCents / 100,
+          tier,
+        );
         return [
           {
             ...line,
             name: variant.name,
             image: variant.image,
             tone: variant.tone,
-            unitPriceCents: product.priceCents,
-            lineTotalCents: product.priceCents * line.qty,
+            unitPriceCents: Math.round(perUnit * 100),
+            lineTotalCents: Math.round(total * 100),
           },
         ];
       }),
     [raw],
   );
 
-  const add = useCallback((slug: string, qty = 1) => {
-    dispatch({ type: "add", slug, qty });
-    const variant = variants.find((v) => v.slug === slug);
-    if (variant) {
-      trackAddToCart(
-        { slug, name: variant.name, quantity: qty },
-        product.priceCents,
-        product.currency,
-      );
-    }
-    setOpen(true);
-  }, []);
+  const add = useCallback(
+    (slug: string, qty = 1, replace = false, openDrawer = true) => {
+      dispatch({ type: "add", slug, qty, replace });
+      const variant = variants.find((v) => v.slug === slug);
+      if (variant) {
+        const tier = getPackTier(qty);
+        const { perUnit } = applyPackDiscount(product.priceCents / 100, tier);
+        trackAddToCart(
+          { slug, name: variant.name, quantity: qty },
+          // Report the actual per-unit price paid, so ad-platform ROAS reflects
+          // the pack discount instead of overstating it at full price × qty.
+          Math.round(perUnit * 100),
+          product.currency,
+        );
+      }
+      // BuyBox passes `false` here and shows a toast instead — jumping the
+      // shopper into a full drawer for every single add interrupts browsing
+      // more than it helps. QuickBuy (product cards) keeps the drawer, since
+      // there's no pack picker there to give its own confirmation moment.
+      if (openDrawer) setOpen(true);
+    },
+    [],
+  );
 
   const value = useMemo<CartContextValue>(
     () => ({
       lines,
-      count: lines.reduce((n, l) => n + l.qty, 0),
+      // Number of distinct items in the bag (one per style/line), not the
+      // summed quantity — a 3-pack of one style counts as 1 item here, not 3.
+      count: lines.length,
       subtotalCents: lines.reduce((n, l) => n + l.lineTotalCents, 0),
       isOpen,
       open: () => setOpen(true),

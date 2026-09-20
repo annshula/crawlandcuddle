@@ -16,6 +16,7 @@ import {
   productCurrency,
   productPriceCents,
 } from "@/lib/catalog";
+import { applyPackDiscount, getPackTier } from "@/content/site";
 
 export type LocalizedPrice = {
   amount: string;
@@ -159,15 +160,24 @@ export function useLocalizedAmount(
 /**
  * Cart amounts in the shopper's selected currency, resolved from the same
  * synced per-market prices as useLocalizedAmount — synchronous, no fetch.
+ * The pack tier (and its % off) is derived from each line's own `qty` via
+ * `getPackTier`/`applyPackDiscount` — qty 2 always prices as the 2-pack, qty
+ * 3 always as the 3-pack, matching the Shopify automatic discount so the
+ * drawer/summary total agrees with what checkout actually charges (see
+ * content/site.ts's packTiers). There is no separate pack flag to pass or
+ * fall out of sync with the real quantity.
  */
 export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
   const { ready, country, defaultCountry } = useLocalization();
   const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
   const pending = !ready;
 
-  const unitAmountFor = (slug: string) =>
+  const baseUnitAmountFor = (slug: string) =>
     priceForMarket(getVariantForStyle(slug).id, effectiveCountry).amount;
-  const lineTotalFor = (slug: string, qty: number) => unitAmountFor(slug) * qty;
+  const unitAmountFor = (slug: string, qty = 1) =>
+    applyPackDiscount(baseUnitAmountFor(slug), getPackTier(qty)).perUnit;
+  const lineTotalFor = (slug: string, qty: number) =>
+    applyPackDiscount(baseUnitAmountFor(slug), getPackTier(qty)).total;
 
   const currencyCode =
     lines.length > 0

@@ -13,6 +13,7 @@ import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { CartProvider } from "@/components/providers/CartProvider";
 import { LocalizationProvider } from "@/components/providers/LocalizationProvider";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { site } from "@/content/site";
 import { fontVariables } from "@/lib/fonts";
@@ -112,14 +113,16 @@ export default function RootLayout({
 
         <LocalizationProvider>
           <CartProvider>
-            <SmoothScrollProvider>
-              <ScrollProgress />
-              <AnnouncementBar />
-              <Header />
-              <main>{children}</main>
-              <Footer />
-              <CartDrawer />
-            </SmoothScrollProvider>
+            <ToastProvider>
+              <SmoothScrollProvider>
+                <ScrollProgress />
+                <AnnouncementBar />
+                <Header />
+                <main>{children}</main>
+                <Footer />
+                <CartDrawer />
+              </SmoothScrollProvider>
+            </ToastProvider>
           </CartProvider>
         </LocalizationProvider>
 

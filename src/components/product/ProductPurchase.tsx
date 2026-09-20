@@ -11,10 +11,12 @@ import { ValueStack } from "@/components/product/ValueStack";
 import { Icon } from "@/components/ui/Icon";
 import { RatingStars } from "@/components/ui/Stars";
 import {
+  defaultPackSize,
   defaultVariant,
   product,
   quality,
   specs,
+  type PackTier,
   type Variant,
 } from "@/content/site";
 import { cn } from "@/lib/utils";
@@ -103,6 +105,10 @@ export function ProductPurchase({
   const selected =
     variants.find((v) => v.slug === selectedSlug) ?? defaultVariant();
 
+  // Shared with both the hero price up top and BuyBox's own total lower down
+  // — one selection, so the two numbers on the page can never disagree.
+  const [packSize, setPackSize] = useState<PackTier["size"]>(defaultPackSize);
+
   return (
     <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-16">
       {/* --- imagery --- */}
@@ -123,7 +129,7 @@ export function ProductPurchase({
               <span className="font-headline text-ink tabular-nums">
                 {product.soldLast90Days.toLocaleString("en-US")}+
               </span>
-              sold in the last 3 months
+              sold in the last 6 months
             </span>
           )}
           <a
@@ -181,7 +187,7 @@ export function ProductPurchase({
             availability at the far right of the panel as the filled pill the
             rest of the buy panel uses. */}
         <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-3">
-          <PdpPrice slug={selected.slug} />
+          <PdpPrice slug={selected.slug} packSize={packSize} />
 
           <div className="flex w-full items-center gap-3 sm:hidden">
             <SaveChip slug={selected.slug} tone="plain" />
@@ -204,13 +210,6 @@ export function ProductPurchase({
           <ValueStack />
         </div>
 
-        <p className="mt-6 max-w-lg text-body text-ink-soft">
-          {selected.tagline} Underneath the design it is the same protector
-          every parent trusts: an impact-absorbing ring behind the head, a
-          breathable 3D air-mesh shell and a harness that adjusts from the first
-          crawl to confident walking.
-        </p>
-
         <SwatchPicker
           variants={variants}
           selectedSlug={selected.slug}
@@ -218,7 +217,11 @@ export function ProductPurchase({
         />
 
         <ProductViewTracker slug={selected.slug} name={selected.name} />
-        <BuyBox variant={selected} />
+        <BuyBox
+          variant={selected}
+          packSize={packSize}
+          onPackSizeChange={setPackSize}
+        />
 
         <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
           {specs.map((spec) => (
@@ -233,6 +236,17 @@ export function ProductPurchase({
             </div>
           ))}
         </dl>
+
+        {/* Moved below the specs — a paragraph of prose above the buy box
+            pushed the pack picker and CTA further down the panel than
+            necessary; the specs' hard facts earn the space right under the
+            price/value stack more than a repeat of the tagline does. */}
+        <p className="mt-8 max-w-lg text-body text-ink-soft">
+          {selected.tagline} Underneath the design it is the same protector
+          every parent trusts: an impact-absorbing ring behind the head, a
+          breathable 3D air-mesh shell and a harness that adjusts from the first
+          crawl to confident walking.
+        </p>
       </div>
     </div>
   );

@@ -30,6 +30,11 @@ export type AnalyticsItem = {
   quantity?: number;
 };
 
+/** A checkout line — its own discounted per-unit price, since a multi-line cart can mix pack tiers at different % off. */
+export type CheckoutAnalyticsItem = AnalyticsItem & {
+  priceCents: number;
+};
+
 /** priceCents (int) + quantity → the amount the shopper pays, in the unit currency. */
 function centsToValue(priceCents: number, quantity = 1): number {
   return Math.round(priceCents * quantity) / 100;
@@ -50,12 +55,22 @@ function ttq(event: string, data?: Record<string, unknown>) {
   window.ttq?.track(event, data);
 }
 
-/** GA4 enhanced-ecommerce item array. */
+/** GA4 enhanced-ecommerce item array, one flat price for every item. */
 function toGtagItems(items: AnalyticsItem[], priceCents: number) {
   return items.map((item) => ({
     item_id: item.slug,
     item_name: item.name,
     price: priceCents / 100,
+    quantity: item.quantity ?? 1,
+  }));
+}
+
+/** Same shape, each item priced at its own per-unit cents — for a cart whose lines can be at different pack-discount tiers. */
+function toGtagItemsPerLine(items: CheckoutAnalyticsItem[]) {
+  return items.map((item) => ({
+    item_id: item.slug,
+    item_name: item.name,
+    price: item.priceCents / 100,
     quantity: item.quantity ?? 1,
   }));
 }
@@ -110,15 +125,22 @@ export function trackAddToCart(
   });
 }
 
-/** Checkout started — Meta `InitiateCheckout`, GA4 `begin_checkout`. */
+/**
+ * Checkout started — Meta `InitiateCheckout`, GA4 `begin_checkout`. Each item
+ * carries its own already-discounted per-unit `priceCents`, so a cart mixing
+ * pack tiers (e.g. one style at the 2-pack price, another at the 3-pack
+ * price) reports the real amount the shopper is about to pay, not full price
+ * × quantity for every line.
+ */
 export function trackInitiateCheckout(
-  items: AnalyticsItem[],
-  priceCents: number,
+  items: CheckoutAnalyticsItem[],
   currency: string,
 ) {
   const value =
-    items.reduce((sum, item) => sum + priceCents * (item.quantity ?? 1), 0) /
-    100;
+    items.reduce(
+      (sum, item) => sum + item.priceCents * (item.quantity ?? 1),
+      0,
+    ) / 100;
   fbq("InitiateCheckout", {
     content_type: "product",
     content_ids: items.map((item) => item.slug),
@@ -129,7 +151,7 @@ export function trackInitiateCheckout(
   gtag("begin_checkout", {
     currency,
     value,
-    items: toGtagItems(items, priceCents),
+    items: toGtagItemsPerLine(items),
   });
   ttq("InitiateCheckout", {
     content_type: "product",

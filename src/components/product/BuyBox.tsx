@@ -4,44 +4,81 @@ import { useState } from "react";
 
 import { useCart } from "@/components/providers/CartProvider";
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
+import { PackPicker } from "@/components/product/PackPicker";
 import { PromiseStrip } from "@/components/product/PromiseStrip";
 import { Icon } from "@/components/ui/Icon";
-import { product, type Variant } from "@/content/site";
+import {
+  applyPackDiscount,
+  getPackTier,
+  product,
+  type PackTier,
+  type Variant,
+} from "@/content/site";
 import { formatMoney } from "@/lib/money";
 import { shopifyCheckout } from "@/lib/shopify-checkout";
 
 /**
- * Quantity + add-to-cart + buy-now for one style. Buy now adds the line and
- * goes straight to checkout; add-to-cart opens the drawer so the shopper can
- * keep browsing.
+ * Pack picker + add-to-cart + buy-now for one style. Every pack tier is the
+ * SAME Shopify variant at cart-line qty 1/2/3 (see content/site.ts's
+ * packTiers) — CJ fulfils N units of the one mapped SKU, no new product or
+ * API call. Buy now adds the line and goes straight to checkout; add-to-cart
+ * opens the drawer so the shopper can keep browsing.
+ *
+ * `packSize`/`onPackSizeChange` are controlled by the parent (ProductPurchase)
+ * rather than local state, so the hero price at the top of the page and this
+ * panel's own total always agree on which tier is selected.
  */
-export function BuyBox({ variant }: { variant: Variant }) {
+export function BuyBox({
+  variant,
+  packSize,
+  onPackSizeChange,
+}: {
+  variant: Variant;
+  packSize: PackTier["size"];
+  onPackSizeChange: (size: PackTier["size"]) => void;
+}) {
   const { add, clear } = useCart();
+  const { show: showToast } = useToast();
   const {
     amount: unitAmount,
     currencyCode,
     pending: pricePending,
   } = useStylePrice(variant.slug);
-  const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
   const outOfStock = !variant.availableForSale;
 
+  const tier = getPackTier(packSize);
+  const { total: totalAmount } = applyPackDiscount(unitAmount, tier);
+
   const handleAdd = () => {
-    add(variant.slug, qty);
+    // `replace: true` — picking a pack tile always sets the line to exactly
+    // that tier's quantity, never adds on top of what's already there.
+    // `openDrawer: false` — a toast confirms the add without pulling the
+    // shopper out of the page into the full cart panel.
+    add(variant.slug, packSize, true, false);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2200);
+    showToast({
+      title: `${tier.label} added to your bag`,
+      description: `${variant.name} · ${formatMoney(totalAmount, currencyCode)}`,
+      icon: "bag",
+    });
   };
 
   const handleBuyNow = async () => {
-    add(variant.slug, qty);
+    // No drawer/toast here — checkout redirect happens immediately after.
+    add(variant.slug, packSize, true, false);
     if (buying) return;
     setBuying(true);
     setBuyError(null);
-    const result = await shopifyCheckout([{ slug: variant.slug, qty }]);
+    const result = await shopifyCheckout([
+      { slug: variant.slug, qty: packSize },
+    ]);
     if (result.ok) {
       // The bag is now committed to Shopify's checkout — empty the local cart.
       clear();
@@ -54,47 +91,32 @@ export function BuyBox({ variant }: { variant: Variant }) {
 
   return (
     <div className="mt-9">
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center rounded-btn border border-hairline">
-          <button
-            type="button"
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
-            disabled={qty <= 1}
-            aria-label="Decrease quantity"
-            className="grid size-12 cursor-pointer place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <Icon name="minus" className="size-4" strokeWidth={2} />
-          </button>
-          <span
-            aria-live="polite"
-            aria-label={`Quantity ${qty}`}
-            className="w-10 text-center font-headline text-lg text-ink"
-          >
-            {qty}
-          </span>
-          <button
-            type="button"
-            onClick={() => setQty((q) => Math.min(20, q + 1))}
-            disabled={qty >= 20}
-            aria-label="Increase quantity"
-            className="grid size-12 cursor-pointer place-items-center text-ink transition-colors duration-300 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <Icon name="plus" className="size-4" strokeWidth={2} />
-          </button>
-        </div>
+      <PackPicker
+        slug={variant.slug}
+        selected={packSize}
+        onSelect={onPackSizeChange}
+      />
 
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-tag bg-hairline/40 px-4 py-3">
         <p className="text-body-sm text-ink-soft">
-          Total{" "}
-          <span className="font-headline text-ink">
-            {pricePending ? (
-              <span
-                aria-hidden="true"
-                className="inline-block h-4 w-20 animate-pulse rounded-pill bg-hairline align-middle"
-              />
-            ) : (
-              formatMoney(unitAmount * qty, currencyCode)
-            )}
-          </span>
+          {tier.includesGift ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Icon name="gift" className="size-3.5 text-rose-600" />
+              Includes a free gift
+            </span>
+          ) : (
+            "Order total"
+          )}
+        </p>
+        <p className="font-headline text-lg text-ink">
+          {pricePending ? (
+            <span
+              aria-hidden="true"
+              className="inline-block h-5 w-20 animate-pulse rounded-pill bg-hairline align-middle"
+            />
+          ) : (
+            formatMoney(totalAmount, currencyCode)
+          )}
         </p>
       </div>
 
@@ -104,25 +126,36 @@ export function BuyBox({ variant }: { variant: Variant }) {
           check back soon.
         </p>
       ) : (
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-          <Magnetic strength={0.15} className="w-full sm:w-auto">
+        <>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Magnetic strength={0.15} className="w-full sm:w-auto">
+              <Button
+                onClick={handleAdd}
+                variant="outline"
+                className="w-full justify-center sm:w-auto"
+              >
+                {added ? "Added to bag" : `Add to bag`}
+              </Button>
+            </Magnetic>
             <Button
-              onClick={handleAdd}
+              onClick={handleBuyNow}
+              withArrow
+              disabled={buying}
               className="w-full justify-center sm:w-auto"
             >
-              {added ? "Added to bag" : "Add to bag"}
+              {buying ? "Taking you to checkout…" : "Buy it now"}
             </Button>
-          </Magnetic>
-          <Button
-            onClick={handleBuyNow}
-            variant="outline"
-            withArrow
-            disabled={buying}
-            className="w-full justify-center sm:w-auto"
-          >
-            {buying ? "Taking you to checkout…" : "Buy it now"}
-          </Button>
-        </div>
+          </div>
+
+          {/* Reassurance, directly under the CTA where a hesitating shopper's
+              eye lands right after reading the buttons. The "sold" and
+              rating pills already cover social proof, at the top of
+              ProductPurchase — this only adds the checkout-trust line. */}
+          <p className="mt-4 inline-flex items-center gap-1.5 text-body-sm text-ink-soft">
+            <Icon name="shield" className="size-3.5 text-rose-600" />
+            Secure checkout · 30-day money-back guarantee
+          </p>
+        </>
       )}
 
       {buyError && (
@@ -132,7 +165,9 @@ export function BuyBox({ variant }: { variant: Variant }) {
       )}
 
       <p aria-live="polite" className="sr-only">
-        {added ? `${variant.name} added to your bag` : ""}
+        {added
+          ? `${variant.name} (${tier.label}, ${tier.size} ${tier.size === 1 ? "unit" : "units"}) added to your bag`
+          : ""}
       </p>
 
       <PromiseStrip className="mt-7 border-t border-hairline pt-6" />

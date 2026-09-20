@@ -2,6 +2,7 @@
 
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { discountPercent } from "@/components/ui/Price";
+import { applyPackDiscount, getPackTier, type PackTier } from "@/content/site";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
@@ -48,12 +49,23 @@ export function SaveChip({
  * the shopper's selected currency (from Shopify) or the synced base price.
  * Updates instantly when the currency changes.
  *
+ * `packSize` (from the pack picker below, lifted to the shared parent) applies
+ * that tier's price here too, so the hero number always matches the total the
+ * buy box is about to charge — picking the 3-pack shows the 3-pack's total up
+ * top, not the single-unit price.
+ *
  * The struck compare-at leads, so the row reads as a comparison, and the live
  * price carries the size. Both take `leading-none`: at their default line
  * heights the struck one's box hangs ~5px below the live one's, which drags any
  * bottom-aligned mark in the same row down with it.
  */
-export function PdpPrice({ slug }: { slug: string }) {
+export function PdpPrice({
+  slug,
+  packSize = 1,
+}: {
+  slug: string;
+  packSize?: PackTier["size"];
+}) {
   const { amount, currencyCode, compareAtAmount, pending } =
     useStylePrice(slug);
 
@@ -62,7 +74,7 @@ export function PdpPrice({ slug }: { slug: string }) {
       <div aria-label="Loading price" className="flex flex-col gap-3">
         <span
           aria-hidden="true"
-          className="inline-block h-12 w-52 animate-pulse rounded-tag bg-hairline"
+          className="inline-block h-9 w-44 animate-pulse rounded-tag bg-hairline"
         />
         <span
           aria-hidden="true"
@@ -72,16 +84,23 @@ export function PdpPrice({ slug }: { slug: string }) {
     );
   }
 
+  const tier = getPackTier(packSize);
+  const { total: packTotal } = applyPackDiscount(amount, tier);
+  // The "was" price scales with the pack too — comparing a 3-unit total
+  // against a 1-unit compare-at would overstate the markdown.
+  const compareAtTotal =
+    compareAtAmount != null ? compareAtAmount * tier.size : null;
+
   return (
     <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
-      {compareAtAmount != null && compareAtAmount > amount && (
-        <span className="text-2xl leading-none text-ink-faint line-through">
-          {formatMoney(compareAtAmount, currencyCode)}
+      {compareAtTotal != null && compareAtTotal > packTotal && (
+        <span className="text-xl leading-none text-ink-faint line-through">
+          {formatMoney(compareAtTotal, currencyCode)}
         </span>
       )}
 
-      <span className="font-headline text-5xl leading-none font-bold tracking-tight text-ink">
-        {formatMoney(amount, currencyCode)}
+      <span className="font-headline text-3xl leading-none font-bold tracking-tight text-ink sm:text-4xl">
+        {formatMoney(packTotal, currencyCode)}
       </span>
     </p>
   );

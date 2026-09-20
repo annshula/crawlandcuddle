@@ -8,6 +8,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { useLocalizedCart } from "@/components/providers/LocalizationProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { getPackTier } from "@/content/site";
 import { formatMoney } from "@/lib/money";
 import { shopifyCheckout } from "@/lib/shopify-checkout";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,11 @@ export function CheckoutSummary() {
                   >
                     {line.name}
                   </Link>
+                  {getPackTier(line.qty).size > 1 && (
+                    <span className="mt-1 inline-block rounded-tag bg-rose-100 px-2 py-0.5 font-label text-[0.62rem] tracking-widest text-rose-700 uppercase">
+                      {getPackTier(line.qty).label}
+                    </span>
+                  )}
                   <p className="mt-1 text-body-sm text-ink-faint">
                     {pricePending ? (
                       <span
@@ -100,7 +106,10 @@ export function CheckoutSummary() {
                       />
                     ) : (
                       <>
-                        {formatMoney(unitAmountFor(line.slug), currencyCode)}{" "}
+                        {formatMoney(
+                          unitAmountFor(line.slug, line.qty),
+                          currencyCode,
+                        )}{" "}
                         each
                       </>
                     )}
@@ -145,7 +154,10 @@ export function CheckoutSummary() {
                       className="inline-block h-5 w-20 animate-pulse rounded-pill bg-hairline align-middle"
                     />
                   ) : (
-                    formatMoney(lineTotalFor(line.slug, line.qty), currencyCode)
+                    formatMoney(
+                      lineTotalFor(line.slug, line.qty),
+                      currencyCode,
+                    )
                   )}
                 </span>
               </div>

@@ -4,7 +4,7 @@
  * browser); this only calls the API route and navigates to the checkout URL.
  */
 
-import { product, variants } from "@/content/site";
+import { applyPackDiscount, getPackTier, product, variants } from "@/content/site";
 import { trackInitiateCheckout } from "@/lib/analytics";
 
 export type ShopifyCheckoutResult =
@@ -29,16 +29,24 @@ export async function shopifyCheckout(
       const items = lines
         .map((line) => {
           const variant = variants.find((v) => v.slug === line.slug);
-          return variant
-            ? { slug: line.slug, name: variant.name, quantity: line.qty }
-            : null;
+          if (!variant) return null;
+          // Each line's own pack tier (derived from its qty), so a cart
+          // mixing tiers reports the real discounted price per line rather
+          // than full price for everything.
+          const { perUnit } = applyPackDiscount(
+            product.priceCents / 100,
+            getPackTier(line.qty),
+          );
+          return {
+            slug: line.slug,
+            name: variant.name,
+            quantity: line.qty,
+            priceCents: Math.round(perUnit * 100),
+          };
         })
-        .filter(
-          (item): item is { slug: string; name: string; quantity: number } =>
-            item !== null,
-        );
+        .filter((item): item is NonNullable<typeof item> => item !== null);
       if (items.length > 0) {
-        trackInitiateCheckout(items, product.priceCents, product.currency);
+        trackInitiateCheckout(items, product.currency);
       }
       return { ok: true, checkoutUrl: data.checkoutUrl };
     }

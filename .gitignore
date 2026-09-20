@@ -54,5 +54,6 @@ yarn-error.log*
 .turbo
 .eslintcache
 .gstack/
+.serena
 
 reference

@@ -249,7 +249,14 @@ export function ProductGallery({
               active.tone,
             )}
           >
+            {/* `key` forces a full remount on every slide change — without it
+                a rapid swatch/thumbnail click could leave the previous photo
+                on screen while the new `src` was still resolving, since
+                Next/Image otherwise reuses the same underlying <img>. The
+                video below already keys off `active.poster` for the same
+                reason. */}
             <Image
+              key={active.url}
               src={active.url}
               alt={active.alt}
               fill

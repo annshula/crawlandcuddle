@@ -35,7 +35,7 @@ export const site = {
   domain: "www.crawlandcuddle.com",
   tagline: "Training wheels for falling over",
   description:
-    "The Crawl & Cuddle baby head protector backpack is a feather-light anti-fall cushion for babies aged 5 to 24 months. It shields the head and upper back through crawling, standing and those first wobbly steps — in ten adorable styles.",
+    "The Crawl & Cuddle baby head protector backpack is a feather-light anti-fall cushion for babies aged 5 to 24 months. It shields the head and upper back through crawling, standing and those first wobbly steps, in ten adorable styles.",
   shortDescription:
     "Feather-light anti-fall head & back cushion for babies 5–24 months. Ten styles. One promise.",
   email: "hello@crawlandcuddle.com",
@@ -210,6 +210,88 @@ export const variants: Variant[] = [...variantContent]
 export const productHandle = "baby-head-protector-backpack";
 export const productPath = `/products/${productHandle}`;
 
+/**
+ * Pack tiers — "buy more, save more". Each tier is the SAME Shopify variant
+ * at a higher cart-line quantity, never a separate product/SKU: CJ fulfils it
+ * as N physical units of the one mapped SKU, so packs never need a new CJ
+ * product connection or API call. The % discount is applied at Shopify
+ * checkout by an automatic quantity-break discount configured in Shopify
+ * Admin (see docs/internal/shopify-pack-discount-setup.md) — this file only mirrors those thresholds so
+ * the price shown on the page matches what checkout actually charges.
+ */
+export type PackTier = {
+  size: 1 | 2 | 3;
+  /** Off the per-unit price, applied to the whole line — must match the Shopify automatic discount's percentage for this quantity break. */
+  discountPercent: number;
+  label: string;
+  shortLabel: string;
+  /** Marketing framing shown under the label. */
+  blurb: string;
+  badge?: string;
+  /** Highlighted as the default/recommended tier. */
+  featured?: boolean;
+  /** Shows the free-gift line in the value stack and buy box. */
+  includesGift?: boolean;
+};
+
+export const packTiers: PackTier[] = [
+  {
+    size: 1,
+    discountPercent: 0,
+    label: "Just One",
+    shortLabel: "1 style",
+    blurb: "Try it risk-free",
+  },
+  {
+    size: 2,
+    discountPercent: 10,
+    label: "Duo Deal",
+    shortLabel: "Save 10%",
+    blurb: "One for home, one for daycare",
+    badge: "Most popular",
+    featured: true,
+  },
+  {
+    size: 3,
+    discountPercent: 20,
+    label: "Share the Love",
+    shortLabel: "Save 20% + free gift",
+    blurb: "Keep one, gift two to the little ones you love",
+    badge: "Best value",
+    includesGift: true,
+  },
+];
+
+export const defaultPackSize: PackTier["size"] = 2;
+
+/**
+ * The tier a cart-line quantity displays and prices at — qty IS the pack
+ * size, there is no separate stored flag (see CartProvider's CartLine doc
+ * comment for why). Any qty outside 1/2/3 (e.g. QuickBuy's plain stepper)
+ * gets the 1-pack tier: full price, no badge, exactly like a style bought
+ * before packs existed.
+ */
+export const getPackTier = (qty: number): PackTier =>
+  packTiers.find((t) => t.size === qty) ?? packTiers[0]!;
+
+/**
+ * The one place pack-discount math happens. Every UI surface (PackPicker,
+ * BuyBox, CartDrawer, CheckoutSummary) calls this instead of re-deriving
+ * `amount * (1 - discountPercent / 100)` locally — one formula, one
+ * rounding rule, so a PDP tile and a checkout-summary line can never round
+ * to different cents for the same tier.
+ */
+export function applyPackDiscount(
+  unitAmount: number,
+  tier: PackTier,
+): { perUnit: number; total: number } {
+  const total =
+    Math.round(
+      unitAmount * tier.size * (1 - tier.discountPercent / 100) * 100,
+    ) / 100;
+  return { perUnit: Math.round((total / tier.size) * 100) / 100, total };
+}
+
 /** A deep link to the product page with one style pre-selected — for links elsewhere (e.g. the homepage) that point at a specific print, read by the product page's `?style=` search param. */
 export const productHrefForStyle = (slug: string) =>
   `${productPath}?style=${slug}`;
@@ -310,13 +392,13 @@ export const pillars = [
   {
     index: "03",
     title: "Fully adjustable fit",
-    body: "Flexible, skin-soft straps grow with your child — a snug, secure fit from the first crawl right through to confident walking at two.",
+    body: "Flexible, skin-soft straps grow with your child: a snug, secure fit from the first crawl right through to confident walking at two.",
     accent: "petal",
   },
   {
     index: "04",
     title: "Breathable & washable",
-    body: "A 3D air-mesh shell over high-elastic cotton filler keeps backs cool. When it gets messy — and it will — put it straight in the machine.",
+    body: "A 3D air-mesh shell over high-elastic cotton filler keeps backs cool. When it gets messy (and it will), put it straight in the machine.",
     accent: "mint",
   },
 ] as const;
@@ -335,7 +417,7 @@ export const milestones = [
   {
     month: "10–13 months",
     title: "Pulling up",
-    body: "The sofa, the coffee table, the dog. Everything is a handrail — until it isn't, and the landing is backwards.",
+    body: "The sofa, the coffee table, the dog. Everything is a handrail, until it isn't, and the landing is backwards.",
   },
   {
     month: "13–18 months",
@@ -358,7 +440,7 @@ export const howItWorks = [
   {
     step: "Step two",
     title: "Set the height",
-    body: "Slide the adjuster so the ring sits between the shoulder blades — high enough to catch the head, low enough to never touch the neck.",
+    body: "Slide the adjuster so the ring sits between the shoulder blades: high enough to catch the head, low enough to never touch the neck.",
   },
   {
     step: "Step three",
@@ -375,12 +457,12 @@ export const howItWorks = [
 export const quality = {
   eyebrow: "Put to the test",
   heading: "Checked by hand. Only the passers ship.",
-  lede: "Every unit clears the same checks before it goes in a box — six checks, zero exceptions.",
+  lede: "Every unit clears the same checks before it goes in a box: six checks, zero exceptions.",
   checks: [
     {
       icon: "shield" as const,
       title: "Impact-ring integrity",
-      body: "The cushion ring is checked for even padding and no thin spots before it ships — the one part doing the actual protecting.",
+      body: "The cushion ring is checked for even padding and no thin spots before it ships: the one part doing the actual protecting.",
     },
     {
       icon: "feather" as const,
@@ -395,7 +477,7 @@ export const quality = {
     {
       icon: "refresh" as const,
       title: "Harness adjustment cycle",
-      body: "Straps are run through their full range — shortest to longest — to confirm the adjuster holds and doesn't slip mid-wear.",
+      body: "Straps are run through their full range (shortest to longest) to confirm the adjuster holds and doesn't slip mid-wear.",
     },
     {
       icon: "check" as const,
@@ -418,6 +500,53 @@ export const specs = [
   { label: "Care", value: "Machine washable" },
   { label: "Styles", value: "10 designs" },
 ] as const;
+
+/**
+ * "Us vs. other head protectors" — a generic category comparison, never a
+ * named competitor: every row is a claim this product can back up from its
+ * own specs (see `specs`/`pillars` above), not a claim about a specific
+ * brand, so it never needs a comparative-advertising fact-check against
+ * someone else's product.
+ */
+export const comparison = {
+  eyebrow: "How it stacks up",
+  heading: "Not all head protectors are built the same",
+  script: "here's the honest difference",
+  ourLabel: "Crawl & Cuddle",
+  otherLabel: "Typical head protector",
+  rows: [
+    {
+      feature: "Weight",
+      us: "190 g, barely noticed",
+      other: "Often 250 g+, bulky foam core",
+    },
+    {
+      feature: "Shell material",
+      us: "Breathable 3D air mesh",
+      other: "Sealed foam, traps heat",
+    },
+    {
+      feature: "Harness fit",
+      us: "Adjusts from first crawl to age 2",
+      other: "Fixed sizing, outgrown fast",
+    },
+    {
+      feature: "Care",
+      us: "Machine washable",
+      other: "Spot-clean only",
+    },
+    {
+      feature: "Free gift",
+      us: "Included on multi-packs",
+      other: "Rarely included",
+    },
+    {
+      feature: "Returns",
+      us: "30-day easy returns",
+      other: "Varies, often final sale",
+    },
+  ],
+} as const;
 
 export const reviews = [
   {
@@ -446,7 +575,7 @@ export const reviews = [
   },
   {
     quote:
-      "The 3D mesh is the detail that sold me — no sweaty back after an hour on the playmat.",
+      "The 3D mesh is the detail that sold me: no sweaty back after an hour on the playmat.",
     name: "Liam K.",
     role: "Dad of one · Vancouver, Canada",
   },
@@ -457,7 +586,7 @@ export const reviews = [
  * The `currency` / `locale` stay here as display defaults for formatting.
  */
 export const product = {
-  name: "Baby Head Protector Backpack — Toddler Anti-Fall Cushion Pillow",
+  name: "Baby Head Protector Backpack: Toddler Anti-Fall Cushion Pillow",
   shortName: "Baby Head Protector Backpack",
   sku: "CC-BHP-001",
   priceCents: productPriceCents,
@@ -495,7 +624,7 @@ export const product = {
    * as the AccuPenPro reference (site.metrics.unitsSoldLast90Days there) —
    * only ever display a figure the store can actually back up.
    */
-  soldLast90Days: 1200,
+  soldLast90Days: 17841,
 };
 
 export const faqs = [
@@ -505,11 +634,11 @@ export const faqs = [
   },
   {
     q: "Will it restrict crawling or walking?",
-    a: "It weighs 190 grams — roughly a large apple — and sits above the shoulder blades, clear of the arms. Babies forget they are wearing it within the first couple of minutes.",
+    a: "It weighs 190 grams (roughly a large apple) and sits above the shoulder blades, clear of the arms. Babies forget they are wearing it within the first couple of minutes.",
   },
   {
     q: "Can my baby sleep or lie down in it?",
-    a: "No. It is for supervised, awake play only. Take it off for naps, car seats, prams and high chairs — the cushion changes the lying angle, and we will not compromise on that.",
+    a: "No. It is for supervised, awake play only. Take it off for naps, car seats, prams and high chairs: the cushion changes the lying angle, and we will not compromise on that.",
   },
   {
     q: "How do I wash it?",
@@ -517,7 +646,7 @@ export const faqs = [
   },
   {
     q: "Which of the ten styles should I choose?",
-    a: "They are identical in protection — only the outer design changes. Dream Little Butterfly and Green Owl are the two bestsellers; the Lion and Bee suit warmer neutral nurseries.",
+    a: "They are identical in protection: only the outer design changes. Dream Little Butterfly and Green Owl are the two bestsellers; the Lion and Bee suit warmer neutral nurseries.",
   },
   {
     q: "What is the delivery and returns policy?",
