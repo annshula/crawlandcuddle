@@ -262,7 +262,7 @@ export const packTiers: PackTier[] = [
   },
 ];
 
-export const defaultPackSize: PackTier["size"] = 2;
+export const defaultPackSize: PackTier["size"] = 1;
 
 /**
  * The tier a cart-line quantity displays and prices at — qty IS the pack
