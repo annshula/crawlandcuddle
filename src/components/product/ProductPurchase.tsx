@@ -7,6 +7,7 @@ import { BuyBox } from "@/components/product/BuyBox";
 import { PackPicker } from "@/components/product/PackPicker";
 import { PdpPrice } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ScrollToTop } from "@/components/product/ScrollToTop";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
 import { ValueStack } from "@/components/product/ValueStack";
@@ -115,22 +116,18 @@ export function ProductPurchase({
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <p className="font-script text-2xl text-lilac-500">{selected.name}</p>
 
-          {/* The same hairline pill as the "sold" and review marks two rows up,
-              so the buy panel reads as one set: a mint check medallion, the
-              count in headline type, and a link through to the full test list. */}
+          {/* A plain text link, not a badge — a "?" mark instead of a
+              filled pill reads as "here's more info" rather than
+              competing with the style name for visual weight, and stays
+              easy to tap without crowding this row on a phone width. */}
           <a
             href="#quality-test"
             onClick={(e) => scrollToId(e, "quality-test")}
-            aria-label={`${quality.checks.length} quality checks passed — see what is tested`}
-            className="group/checks ms-auto inline-flex items-center gap-1.5 rounded-pill border border-hairline bg-cream py-1.5 pr-3 pl-2.5 text-body-sm text-ink-soft transition-colors duration-300 hover:border-ink/30"
+            aria-label={`${quality.checks.length}-point quality check, zero exceptions — see what is tested`}
+            className="ms-auto inline-flex items-center gap-1 text-body-sm text-ink-soft underline-offset-4 transition-colors duration-200 hover:text-rose-600 hover:underline"
           >
-            <span className="grid size-4.5 shrink-0 place-items-center rounded-pill bg-mint/60 text-ink transition-colors duration-300 group-hover/checks:bg-mint">
-              <Icon name="check" className="size-2.5" strokeWidth={2.8} />
-            </span>
-            <span className="font-headline text-ink tabular-nums">
-              {quality.checks.length}
-            </span>
-            checks passed
+            {quality.checks.length}-Point Quality Check
+            <Icon name="help" className="size-3.5 shrink-0" strokeWidth={2} />
           </a>
         </div>
 
@@ -198,6 +195,7 @@ export function ProductPurchase({
       </div>
 
       <StickyBuyBar variant={selected} packSize={packSize} ctaRef={ctaRef} />
+      <ScrollToTop ctaRef={ctaRef} />
     </div>
   );
 }

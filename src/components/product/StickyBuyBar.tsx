@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { getPackTier, type PackTier, type Variant } from "@/content/site";
 import { usePurchaseActions } from "@/hooks/usePurchaseActions";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
+import { useScrollPastElement } from "@/hooks/useScrollPastElement";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { formatMoney } from "@/lib/money";
 import { cn } from "@/lib/utils";
@@ -16,10 +17,10 @@ import { cn } from "@/lib/utils";
 /**
  * Floating bottom bar — a fully-rounded card with a gap from every screen
  * edge (not a docked sheet), so it reads as floating above the page rather
- * than attached to the viewport chrome. Appears once BuyBox's own CTA row
- * scrolls out of view (watched via `ctaRef`, an IntersectionObserver on the
- * real buttons above) and stays visible for the rest of the page — it only
- * hides again if the shopper scrolls back up above that row. One shared
+ * than attached to the viewport chrome. Visibility comes from
+ * `useScrollPastElement(ctaRef)` — the same hook ScrollToTop uses on the
+ * same `ctaRef`, so the two show/hide on the exact same scroll crossing
+ * rather than two independently-tuned thresholds drifting apart. One shared
  * `usePurchaseActions` call, so "add to bag" here behaves identically to the
  * one in BuyBox — same toast, same checkout line.
  *
@@ -40,7 +41,7 @@ export function StickyBuyBar({
   /** BuyBox's own CTA row — the bar shows once this scrolls above the fold. */
   ctaRef: RefObject<HTMLElement | null>;
 }) {
-  const [visible, setVisible] = useState(false);
+  const visible = useScrollPastElement(ctaRef);
   // The portal target (document.body) only exists client-side — mounting
   // this after the first client render (not during SSR) keeps server and
   // client markup identical, same pattern as ValueStack's mobile sheet.
@@ -48,59 +49,6 @@ export function StickyBuyBar({
   const barRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    const el = ctaRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-
-    // Direction matters, not just "is the CTA off-screen": scrolling UP
-    // from further down the page (footer, reviews, back toward the hero)
-    // also has the CTA off-screen the whole way, but the bar must stay
-    // hidden through that — it should only ever appear as the result of
-    // scrolling DOWN past the real buttons, never while heading back up
-    // toward them. lastScrollY is read on each observer firing (which only
-    // happens near the CTA's own boundary) to classify that one crossing.
-    let lastScrollY = window.scrollY;
-    let skippedInitial = false;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // IntersectionObserver fires its first callback synchronously on
-        // observe(), reporting whatever the CTA's on-load position already
-        // is — on a short viewport that can be "not intersecting" before
-        // the shopper has scrolled at all. That first, pre-scroll reading
-        // is never a real crossing, so it's ignored.
-        if (!skippedInitial) {
-          skippedInitial = true;
-          lastScrollY = window.scrollY;
-          return;
-        }
-
-        const currentScrollY = window.scrollY;
-        const scrollingDown = currentScrollY > lastScrollY;
-        lastScrollY = currentScrollY;
-
-        if (!entry) {
-          setVisible(false);
-          return;
-        }
-        // Show only on a downward crossing out of view; a crossing while
-        // scrolling up (in either direction of intersection) never shows
-        // it, and re-entering view always hides it regardless of direction.
-        setVisible(!entry.isIntersecting && scrollingDown);
-      },
-      // Top: only count it "gone" once fully past the header, not
-      // mid-scroll. Bottom: a small positive margin grows the viewport's
-      // effective bottom edge, so the real CTA is treated as "back in view"
-      // (and the floating bar starts hiding) a little before it's actually
-      // on screen — the ~0.22s hide tween then finishes right around when
-      // the real buttons are fully visible, instead of the bar lingering
-      // over them.
-      { rootMargin: "-72px 0px 80px 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [ctaRef]);
 
   useIsomorphicLayoutEffect(() => {
     const bar = barRef.current;
@@ -161,7 +109,10 @@ export function StickyBuyBar({
       inert={!visible}
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-panel border border-hairline bg-cream p-3 shadow-drift sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-3">
-        <div className="flex min-w-0 items-center gap-3">
+        {/* flex-1 so this block grows to fill the row on desktop, pushing
+            the buttons to the card's right edge instead of leaving a gap
+            of empty space between two content-sized blocks. */}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
             className={cn(
               "relative size-11 shrink-0 overflow-hidden rounded-card sm:size-14",
@@ -209,9 +160,12 @@ export function StickyBuyBar({
           // fine as a normal CTA, but combined with two buttons in a narrow
           // row that minimum content width pushed past the card's edges.
           // Tighter padding here only, same override pattern Header.tsx
-          // uses on its own "Shop now" button. From sm up they sit inline
-          // beside the item instead, back to the normal button size.
-          <div className="flex min-w-0 shrink-0 items-center gap-2 sm:contents">
+          // uses on its own "Shop now" button. From sm up the group itself
+          // just switches to a plain inline row at the buttons' natural
+          // size — no `display: contents` (it was silently discarding this
+          // box's own sizing, which left the row short of the card's full
+          // width and a gap of empty space at the right edge on desktop).
+          <div className="flex min-w-0 shrink-0 items-center gap-2 sm:w-auto">
             <Button
               onClick={handleAdd}
               variant="outline"

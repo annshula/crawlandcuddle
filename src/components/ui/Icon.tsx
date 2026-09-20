@@ -29,7 +29,8 @@ type IconName =
   | "spinner"
   | "zoom"
   | "camera"
-  | "play";
+  | "play"
+  | "help";
 
 const glyphs: Record<IconName, React.ReactNode> = {
   "arrow-right": <path d="M4 12h16m0 0-6-6m6 6-6 6" />,
@@ -156,6 +157,13 @@ const glyphs: Record<IconName, React.ReactNode> = {
     </>
   ),
   play: <path d="M7 5.5v13l11-6.5z" fill="currentColor" stroke="none" />,
+  help: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M9.3 9.2a2.8 2.8 0 1 1 4.1 2.5c-.9.5-1.4 1-1.4 2.1" />
+      <path d="M12 17.3h.01" />
+    </>
+  ),
 };
 
 interface IconProps {
