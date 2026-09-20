@@ -160,39 +160,41 @@ export function StickyBuyBar({
          drawer and mobile nav panel. */
       inert={!visible}
     >
-      <div className="mx-auto flex max-w-3xl items-center gap-3 rounded-panel border border-hairline bg-cream px-4 py-3 shadow-drift sm:gap-4 sm:px-6">
-        <div
-          className={cn(
-            "relative size-12 shrink-0 overflow-hidden rounded-card sm:size-14",
-            variant.tone,
-          )}
-        >
-          <Image
-            src={variant.image}
-            alt=""
-            fill
-            sizes="56px"
-            className="object-cover"
-          />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-headline text-sm text-ink sm:text-base">
-            {variant.name}
-          </p>
-          <p className="text-body-sm text-ink-soft">
-            {tier.label}
-            {tier.size > 1 && ` (×${tier.size})`}
-            {" · "}
-            {pricePending ? (
-              <span
-                aria-hidden="true"
-                className="inline-block h-3 w-14 animate-pulse rounded-pill bg-hairline align-middle"
-              />
-            ) : (
-              formatMoney(totalAmount, currencyCode)
+      <div className="mx-auto flex max-w-3xl flex-col gap-3 rounded-panel border border-hairline bg-cream p-3 shadow-drift sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            className={cn(
+              "relative size-11 shrink-0 overflow-hidden rounded-card sm:size-14",
+              variant.tone,
             )}
-          </p>
+          >
+            <Image
+              src={variant.image}
+              alt=""
+              fill
+              sizes="56px"
+              className="object-cover"
+            />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-headline text-sm text-ink sm:text-base">
+              {variant.name}
+            </p>
+            <p className="truncate text-body-sm text-ink-soft">
+              {tier.label}
+              {tier.size > 1 && ` (×${tier.size})`}
+              {" · "}
+              {pricePending ? (
+                <span
+                  aria-hidden="true"
+                  className="inline-block h-3 w-14 animate-pulse rounded-pill bg-hairline align-middle"
+                />
+              ) : (
+                formatMoney(totalAmount, currencyCode)
+              )}
+            </p>
+          </div>
         </div>
 
         {outOfStock ? (
@@ -200,15 +202,28 @@ export function StickyBuyBar({
             Out of stock
           </span>
         ) : (
-          <div className="flex shrink-0 items-center gap-2">
+          // Phone: both buttons stack full-width below the item row — a
+          // thumb-friendly tap target beats squeezing "Add to bag" out to
+          // save width. The base button classes (btn-primary/btn-outline)
+          // carry a fixed, generous padding plus `white-space: nowrap` —
+          // fine as a normal CTA, but combined with two buttons in a narrow
+          // row that minimum content width pushed past the card's edges.
+          // Tighter padding here only, same override pattern Header.tsx
+          // uses on its own "Shop now" button. From sm up they sit inline
+          // beside the item instead, back to the normal button size.
+          <div className="flex min-w-0 shrink-0 items-center gap-2 sm:contents">
             <Button
               onClick={handleAdd}
               variant="outline"
-              className="hidden sm:inline-flex"
+              className="min-w-0 flex-1 justify-center px-3! py-2.5! text-[0.7rem]! sm:flex-none sm:px-7! sm:py-3.5! sm:text-[0.8125rem]!"
             >
               {added ? "Added" : "Add to bag"}
             </Button>
-            <Button onClick={handleBuyNow} disabled={buying}>
+            <Button
+              onClick={handleBuyNow}
+              disabled={buying}
+              className="min-w-0 flex-1 justify-center px-3! py-2.5! text-[0.7rem]! sm:flex-none sm:px-7! sm:py-3.5! sm:text-[0.8125rem]!"
+            >
               {buying ? "…" : "Buy now"}
             </Button>
           </div>
