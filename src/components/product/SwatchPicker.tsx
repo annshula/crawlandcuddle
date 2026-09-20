@@ -6,6 +6,32 @@ import type { Variant } from "@/content/site";
 import { cn } from "@/lib/utils";
 
 /**
+ * Availability, as a quiet dot + word — sits at the right of the "Style —
+ * <name>" row so it updates the instant a shopper picks a new swatch, the
+ * same moment the name beside it changes, instead of trailing behind near
+ * the price further down the panel.
+ */
+function StockMark({ available }: { available: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 font-label text-[0.68rem] leading-none tracking-widest whitespace-nowrap uppercase",
+        available ? "text-ink-soft" : "text-ink-faint",
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-1.5 shrink-0 rounded-full",
+          available ? "bg-mint" : "bg-hairline",
+        )}
+      />
+      {available ? "In stock" : "Out of stock"}
+    </span>
+  );
+}
+
+/**
  * Style picker: a row of tiny tile images, each labelled with its own name.
  * Clicking a tile switches the active style — the gallery and buy box above
  * re-render for the new variant, no page navigation. Modeled on AccuPenPro's
@@ -20,14 +46,16 @@ export function SwatchPicker({
   selectedSlug: string;
   onSelect: (slug: string) => void;
 }) {
+  const selected = variants.find((v) => v.slug === selectedSlug);
+
   return (
     <div className="mt-8">
-      <p className="eyebrow text-ink-faint">
-        Style —{" "}
-        <span className="text-ink">
-          {variants.find((v) => v.slug === selectedSlug)?.name}
-        </span>
-      </p>
+      <div className="flex items-center justify-between gap-4">
+        <p className="eyebrow text-ink-faint">
+          Style — <span className="text-ink">{selected?.name}</span>
+        </p>
+        {selected && <StockMark available={selected.availableForSale} />}
+      </div>
       <ul className="mt-3 flex flex-wrap gap-3" role="listbox" aria-label="Style">
         {variants.map((variant) => {
           const selected = variant.slug === selectedSlug;

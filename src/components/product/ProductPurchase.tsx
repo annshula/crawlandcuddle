@@ -4,7 +4,8 @@ import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import { ProductViewTracker } from "@/components/analytics/ProductViewTracker";
 import { BuyBox } from "@/components/product/BuyBox";
-import { PdpPrice, SaveChip } from "@/components/product/PdpPrice";
+import { PackPicker } from "@/components/product/PackPicker";
+import { PdpPrice } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
@@ -35,56 +36,6 @@ function scrollToId(e: ReactMouseEvent<HTMLAnchorElement>, id: string) {
 }
 
 /**
- * Availability, at the two weights this page needs. A phone gets a dot and a
- * word, because a filled pill sitting under a 48px price is more furniture than
- * the line needs; from sm up it becomes the pill the rest of the buy panel uses.
- */
-function StockMark({
-  available,
-  tone,
-}: {
-  available: boolean;
-  tone: "quiet" | "pill";
-}) {
-  const label = available ? "In stock" : "Out of stock";
-
-  if (tone === "quiet") {
-    return (
-      <span
-        className={cn(
-          // Same micro type as the markdown mark beside it, so the phone's meta
-          // line reads as one pair of labels rather than two stray fragments.
-          "inline-flex items-center gap-1.5 font-label text-[0.68rem] leading-none tracking-widest whitespace-nowrap uppercase",
-          available ? "text-ink-soft" : "text-ink-faint",
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            "size-1.5 shrink-0 rounded-full",
-            available ? "bg-mint" : "bg-hairline",
-          )}
-        />
-        {label}
-      </span>
-    );
-  }
-
-  return (
-    <span
-      className={cn(
-        "eyebrow rounded-tag px-3 py-2 whitespace-nowrap",
-        available
-          ? "bg-rose-50 text-rose-600"
-          : "bg-hairline/60 text-ink-faint",
-      )}
-    >
-      {label}
-    </span>
-  );
-}
-
-/**
  * Gallery, swatch picker and buy box for the one product, all under a single
  * `selectedSlug` state — picking a style swaps the gallery's main image and
  * the buy box's price/variant together, no page navigation. Modeled on
@@ -106,8 +57,9 @@ export function ProductPurchase({
   const selected =
     variants.find((v) => v.slug === selectedSlug) ?? defaultVariant();
 
-  // Shared with both the hero price up top and BuyBox's own total lower down
-  // — one selection, so the two numbers on the page can never disagree.
+  // Shared by the pack picker, the hero price right under it, and BuyBox's
+  // own total further down — one selection, so every number on the page
+  // agrees on which tier is picked.
   const [packSize, setPackSize] = useState<PackTier["size"]>(defaultPackSize);
 
   // BuyBox's real CTA row — StickyBuyBar watches when this scrolls out of
@@ -182,52 +134,39 @@ export function ProductPurchase({
           </a>
         </div>
 
-        {/* Price block, one deliberate layout per breakpoint.
-            Phone: the prices hold the first line, then a single quiet meta line
-            — markdown, a hairline of dashes to carry the eye across, and
-            availability at the right edge. Both marks go unfilled here: a 48px
-            price with two filled chips under it reads as furniture, and the
-            dashes turn what was a void between them into the line itself.
-            From sm up: one row, the markdown right after the price and
-            availability at the far right of the panel as the filled pill the
-            rest of the buy panel uses. */}
-        <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-3">
-          <PdpPrice slug={selected.slug} packSize={packSize} />
-
-          <div className="flex w-full items-center gap-3 sm:hidden">
-            <SaveChip slug={selected.slug} tone="plain" />
-            <span
-              aria-hidden="true"
-              className="h-px min-w-4 flex-1 border-t border-dashed border-hairline"
-            />
-            <StockMark available={selected.availableForSale} tone="quiet" />
-          </div>
-
-          <div className="hidden w-full items-end justify-between gap-4 sm:flex sm:w-auto sm:flex-1">
-            <SaveChip slug={selected.slug} />
-            <StockMark available={selected.availableForSale} tone="pill" />
-          </div>
-        </div>
-
-        {/* Directly under the price it is being compared against — the value
-            stack only means something next to the number it beats. */}
-        <div className="text-body-sm">
-          <ValueStack />
-        </div>
-
+        {/* Order down the panel: style, then pack, then price, then the
+            buttons — each step is decided before the next number depends on
+            it, so nothing on screen has to visibly update out from under a
+            choice the shopper already made. */}
         <SwatchPicker
           variants={variants}
           selectedSlug={selected.slug}
           onSelect={setSelectedSlug}
         />
 
-        <ProductViewTracker slug={selected.slug} name={selected.name} />
-        <BuyBox
-          ref={ctaRef}
-          variant={selected}
-          packSize={packSize}
-          onPackSizeChange={setPackSize}
+        <PackPicker
+          slug={selected.slug}
+          selected={packSize}
+          onSelect={setPackSize}
         />
+
+        {/* Stock status moved to the Style row above (SwatchPicker) — it
+            updates the instant a swatch is picked, same moment the style
+            name does, instead of living down here disconnected from the
+            choice that changes it. Price and the value-stack link share one
+            row, value-stack pinned to the far right — the price makes its
+            case and the "here's what that's worth" link answers it in the
+            same glance instead of a line down. */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <PdpPrice slug={selected.slug} packSize={packSize} />
+
+          <div className="text-body-sm">
+            <ValueStack />
+          </div>
+        </div>
+
+        <ProductViewTracker slug={selected.slug} name={selected.name} />
+        <BuyBox ref={ctaRef} variant={selected} packSize={packSize} />
 
         <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
           {specs.map((spec) => (

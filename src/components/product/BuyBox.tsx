@@ -5,23 +5,23 @@ import { forwardRef } from "react";
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
-import { PackPicker } from "@/components/product/PackPicker";
 import { PromiseStrip } from "@/components/product/PromiseStrip";
 import { Icon } from "@/components/ui/Icon";
 import { product, type PackTier, type Variant } from "@/content/site";
 import { usePurchaseActions } from "@/hooks/usePurchaseActions";
-import { formatMoney } from "@/lib/money";
 
 /**
- * Pack picker + add-to-cart + buy-now for one style. Every pack tier is the
+ * Add-to-cart + buy-now for one style + pack tier. Every pack tier is the
  * SAME Shopify variant at cart-line qty 1/2/3 (see content/site.ts's
  * packTiers) — CJ fulfils N units of the one mapped SKU, no new product or
  * API call. Buy now adds the line and goes straight to checkout; add-to-cart
  * opens the drawer so the shopper can keep browsing.
  *
- * `packSize`/`onPackSizeChange` are controlled by the parent (ProductPurchase)
- * rather than local state, so the hero price at the top of the page and this
- * panel's own total always agree on which tier is selected.
+ * The pack picker itself (PackPicker) renders in ProductPurchase, above the
+ * hero price — so the shopper picks a tier, sees the price update, then
+ * reaches these buttons. `packSize` is still controlled by ProductPurchase
+ * (not local state), so the hero price and this panel's own total always
+ * agree on which tier is selected.
  *
  * Forwards its root ref so ProductPurchase can watch when this panel's own
  * CTA row scrolls out of view and show the sticky bottom bar in its place
@@ -33,18 +33,12 @@ export const BuyBox = forwardRef<
   {
     variant: Variant;
     packSize: PackTier["size"];
-    onPackSizeChange: (size: PackTier["size"]) => void;
   }
->(function BuyBox({ variant, packSize, onPackSizeChange }, ref) {
-  const {
-    amount: unitAmount,
-    currencyCode,
-    pending: pricePending,
-  } = useStylePrice(variant.slug);
+>(function BuyBox({ variant, packSize }, ref) {
+  const { amount: unitAmount, currencyCode } = useStylePrice(variant.slug);
 
   const {
     tier,
-    totalAmount,
     added,
     buying,
     buyError,
@@ -55,34 +49,14 @@ export const BuyBox = forwardRef<
 
   return (
     <div className="mt-9">
-      <PackPicker
-        slug={variant.slug}
-        selected={packSize}
-        onSelect={onPackSizeChange}
-      />
-
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-tag bg-hairline/40 px-4 py-3">
-        <p className="text-body-sm text-ink-soft">
-          {tier.includesGift ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Icon name="gift" className="size-3.5 text-rose-600" />
-              Includes a free gift
-            </span>
-          ) : (
-            "Order total"
-          )}
+      {tier.includesGift && (
+        <p className="mb-5 inline-flex items-center gap-2 rounded-tag border border-rose-200 bg-rose-50 px-4 py-3 text-body-sm text-rose-700">
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-rose-600 text-paper">
+            <Icon name="gift" className="size-3.5" strokeWidth={2.2} />
+          </span>
+          <span className="font-headline">Includes a free gift</span>
         </p>
-        <p className="font-headline text-lg text-ink">
-          {pricePending ? (
-            <span
-              aria-hidden="true"
-              className="inline-block h-5 w-20 animate-pulse rounded-pill bg-hairline align-middle"
-            />
-          ) : (
-            formatMoney(totalAmount, currencyCode)
-          )}
-        </p>
-      </div>
+      )}
 
       {outOfStock ? (
         <p className="mt-5 rounded-tag bg-hairline/50 px-4 py-3 text-body-sm text-ink-soft">

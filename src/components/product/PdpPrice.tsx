@@ -4,60 +4,23 @@ import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { discountPercent } from "@/components/ui/Price";
 import { applyPackDiscount, getPackTier, type PackTier } from "@/content/site";
 import { formatMoney } from "@/lib/money";
-import { cn } from "@/lib/utils";
 
 /**
- * The markdown, as a small flat mark: one tint, one shape, no rotation, shadow
- * or hover — it is a label on the price (the struck compare-at beside it already
- * shows the money involved), not something to press.
+ * The PDP hero price for one style — compact, one line where it fits: the
+ * struck "was" price leads, then the live price carrying the size, then the
+ * save badge trailing on the same baseline. That order (was → now → save%)
+ * is the standard markdown read: it sets the anchor before the number that
+ * beats it, so the live price reads as a deal instead of just a price. No
+ * card chrome (border/background) — with stock status now living on the
+ * Style row above, this block only ever needs to be the numbers themselves,
+ * not a bordered panel hosting several pieces of unrelated meta. Updates
+ * instantly when the currency changes.
  *
- * Two tones. `chip` is the filled tag for the roomy row; `plain` drops the fill
- * for the phone, where it sits on a meta line beside availability and two filled
- * chips side by side read as furniture rather than information.
- *
- * It lives outside `PdpPrice` so the buy panel can place it deliberately per
- * breakpoint instead of letting it fall wherever the price row happens to wrap.
- */
-export function SaveChip({
-  slug,
-  tone = "chip",
-  className,
-}: {
-  slug: string;
-  tone?: "chip" | "plain";
-  className?: string;
-}) {
-  const { amount, compareAtAmount, pending } = useStylePrice(slug);
-  const percent = discountPercent(amount, compareAtAmount);
-  if (pending || percent == null) return null;
-
-  return (
-    <span
-      className={cn(
-        "font-label text-[0.68rem] leading-none tracking-widest text-rose-700 uppercase",
-        tone === "chip" && "rounded-tag bg-rose-100 px-2 py-1",
-        className,
-      )}
-    >
-      Save {percent}%
-    </span>
-  );
-}
-
-/**
- * The PDP hero price for one style — the price it was and the price it is — in
- * the shopper's selected currency (from Shopify) or the synced base price.
- * Updates instantly when the currency changes.
- *
- * `packSize` (from the pack picker below, lifted to the shared parent) applies
- * that tier's price here too, so the hero number always matches the total the
- * buy box is about to charge — picking the 3-pack shows the 3-pack's total up
- * top, not the single-unit price.
- *
- * The struck compare-at leads, so the row reads as a comparison, and the live
- * price carries the size. Both take `leading-none`: at their default line
- * heights the struck one's box hangs ~5px below the live one's, which drags any
- * bottom-aligned mark in the same row down with it.
+ * `packSize` (from the pack picker above, lifted to the shared parent)
+ * applies that tier's price here too, so the number always matches the
+ * total the buy box is about to charge. The per-unit note only appears for
+ * a multi-pack, tucked on its own small line so the hero number stays the
+ * one thing the eye reads first.
  */
 export function PdpPrice({
   slug,
@@ -71,37 +34,50 @@ export function PdpPrice({
 
   if (pending) {
     return (
-      <div aria-label="Loading price" className="flex flex-col gap-3">
+      <div aria-label="Loading price" className="flex flex-col gap-2">
         <span
           aria-hidden="true"
-          className="inline-block h-9 w-44 animate-pulse rounded-tag bg-hairline"
+          className="inline-block h-8 w-36 animate-pulse rounded-tag bg-hairline"
         />
         <span
           aria-hidden="true"
-          className="inline-block h-4 w-28 animate-pulse rounded-pill bg-hairline/60"
+          className="inline-block h-3.5 w-24 animate-pulse rounded-pill bg-hairline/60"
         />
       </div>
     );
   }
 
   const tier = getPackTier(packSize);
-  const { total: packTotal } = applyPackDiscount(amount, tier);
+  const { perUnit, total: packTotal } = applyPackDiscount(amount, tier);
   // The "was" price scales with the pack too — comparing a 3-unit total
   // against a 1-unit compare-at would overstate the markdown.
   const compareAtTotal =
     compareAtAmount != null ? compareAtAmount * tier.size : null;
+  const percent = discountPercent(packTotal, compareAtTotal);
 
   return (
-    <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
-      {compareAtTotal != null && compareAtTotal > packTotal && (
-        <span className="text-xl leading-none text-ink-faint line-through">
-          {formatMoney(compareAtTotal, currencyCode)}
+    <div className="flex flex-col gap-1">
+      <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        {compareAtTotal != null && compareAtTotal > packTotal && (
+          <span className="text-base leading-none text-ink-faint line-through">
+            {formatMoney(compareAtTotal, currencyCode)}
+          </span>
+        )}
+        <span className="font-headline text-[2rem] leading-none font-bold tracking-tight text-ink sm:text-3xl">
+          {formatMoney(packTotal, currencyCode)}
         </span>
-      )}
+        {percent != null && (
+          <span className="self-center rounded-tag bg-rose-600 px-2 py-1 font-label text-[0.64rem] leading-none tracking-widest text-paper uppercase">
+            Save {percent}%
+          </span>
+        )}
+      </p>
 
-      <span className="font-headline text-3xl leading-none font-bold tracking-tight text-ink sm:text-4xl">
-        {formatMoney(packTotal, currencyCode)}
-      </span>
-    </p>
+      {tier.size > 1 && (
+        <p className="text-body-sm text-ink-soft">
+          {formatMoney(perUnit, currencyCode)}/unit · {tier.size} units
+        </p>
+      )}
+    </div>
   );
 }
