@@ -1,24 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { forwardRef } from "react";
 
-import { useCart } from "@/components/providers/CartProvider";
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
-import { useToast } from "@/components/providers/ToastProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
 import { PackPicker } from "@/components/product/PackPicker";
 import { PromiseStrip } from "@/components/product/PromiseStrip";
 import { Icon } from "@/components/ui/Icon";
-import {
-  applyPackDiscount,
-  getPackTier,
-  product,
-  type PackTier,
-  type Variant,
-} from "@/content/site";
+import { product, type PackTier, type Variant } from "@/content/site";
+import { usePurchaseActions } from "@/hooks/usePurchaseActions";
 import { formatMoney } from "@/lib/money";
-import { shopifyCheckout } from "@/lib/shopify-checkout";
 
 /**
  * Pack picker + add-to-cart + buy-now for one style. Every pack tier is the
@@ -30,64 +22,36 @@ import { shopifyCheckout } from "@/lib/shopify-checkout";
  * `packSize`/`onPackSizeChange` are controlled by the parent (ProductPurchase)
  * rather than local state, so the hero price at the top of the page and this
  * panel's own total always agree on which tier is selected.
+ *
+ * Forwards its root ref so ProductPurchase can watch when this panel's own
+ * CTA row scrolls out of view and show the sticky bottom bar in its place
+ * (StickyBuyBar) — the same add/buy-now logic (usePurchaseActions), just in
+ * a compact floating strip once this one is out of sight.
  */
-export function BuyBox({
-  variant,
-  packSize,
-  onPackSizeChange,
-}: {
-  variant: Variant;
-  packSize: PackTier["size"];
-  onPackSizeChange: (size: PackTier["size"]) => void;
-}) {
-  const { add, clear } = useCart();
-  const { show: showToast } = useToast();
+export const BuyBox = forwardRef<
+  HTMLDivElement,
+  {
+    variant: Variant;
+    packSize: PackTier["size"];
+    onPackSizeChange: (size: PackTier["size"]) => void;
+  }
+>(function BuyBox({ variant, packSize, onPackSizeChange }, ref) {
   const {
     amount: unitAmount,
     currencyCode,
     pending: pricePending,
   } = useStylePrice(variant.slug);
-  const [added, setAdded] = useState(false);
-  const [buying, setBuying] = useState(false);
-  const [buyError, setBuyError] = useState<string | null>(null);
-  const outOfStock = !variant.availableForSale;
 
-  const tier = getPackTier(packSize);
-  const { total: totalAmount } = applyPackDiscount(unitAmount, tier);
-
-  const handleAdd = () => {
-    // `replace: true` — picking a pack tile always sets the line to exactly
-    // that tier's quantity, never adds on top of what's already there.
-    // `openDrawer: false` — a toast confirms the add without pulling the
-    // shopper out of the page into the full cart panel.
-    add(variant.slug, packSize, true, false);
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 2200);
-    showToast({
-      title: `${tier.label} added to your bag`,
-      description: `${variant.name} · ${formatMoney(totalAmount, currencyCode)}`,
-      icon: "bag",
-    });
-  };
-
-  const handleBuyNow = async () => {
-    // No drawer/toast here — checkout redirect happens immediately after.
-    add(variant.slug, packSize, true, false);
-    if (buying) return;
-    setBuying(true);
-    setBuyError(null);
-    const result = await shopifyCheckout([
-      { slug: variant.slug, qty: packSize },
-    ]);
-    if (result.ok) {
-      // The bag is now committed to Shopify's checkout — empty the local cart.
-      clear();
-      window.location.href = result.checkoutUrl;
-      return;
-    }
-    setBuyError(result.error);
-    setBuying(false);
-  };
+  const {
+    tier,
+    totalAmount,
+    added,
+    buying,
+    buyError,
+    handleAdd,
+    handleBuyNow,
+    outOfStock,
+  } = usePurchaseActions({ variant, packSize, unitAmount, currencyCode });
 
   return (
     <div className="mt-9">
@@ -127,7 +91,10 @@ export function BuyBox({
         </p>
       ) : (
         <>
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <div
+            ref={ref}
+            className="mt-5 flex flex-col gap-3 sm:flex-row"
+          >
             <Magnetic strength={0.15} className="w-full sm:w-auto">
               <Button
                 onClick={handleAdd}
@@ -189,4 +156,4 @@ export function BuyBox({
       </ul>
     </div>
   );
-}
+});

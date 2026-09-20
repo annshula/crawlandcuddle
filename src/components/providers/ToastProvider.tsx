@@ -32,9 +32,12 @@ const AUTO_DISMISS_MS = 3200;
 let nextId = 0;
 
 /**
- * A quiet, corner-anchored confirmation toast, standing in for the cart
+ * A quiet, top-right-anchored confirmation toast, standing in for the cart
  * drawer on actions (like adding a pack from the PDP) that shouldn't yank the
- * shopper into a full panel every time. Same surface language as the rest of
+ * shopper into a full panel every time. Sits just under the sticky header,
+ * clear of the cart icon it's confirming an add for, and slides in from the
+ * right — same direction the cart drawer itself opens from, so the motion
+ * reads as "heading toward the bag." Same surface language as the rest of
  * the site's overlays (CartDrawer, ValueStack's popover): `rounded-panel`,
  * `shadow-drift`, a hairline border on `bg-paper`, GSAP for the motion with a
  * `prefersReducedMotion` fallback.
@@ -76,7 +79,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="pointer-events-none fixed inset-x-4 bottom-5 z-90 flex flex-col items-center gap-2.5 sm:inset-x-auto sm:right-5 sm:items-end"
+        className="pointer-events-none fixed inset-x-4 top-[calc(var(--nav-height)+1rem)] z-90 flex flex-col items-center gap-2.5 sm:inset-x-auto sm:top-5 sm:right-5 sm:items-end"
       >
         {toasts.map((toast) => (
           <ToastCard key={toast.id} toast={toast} onDismiss={dismiss} />
@@ -106,8 +109,8 @@ function ToastCard({
 
     const tween = gsap.fromTo(
       el,
-      { y: 16, opacity: 0, scale: 0.96 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" },
+      { x: 32, opacity: 0 },
+      { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" },
     );
     return () => {
       tween.kill();

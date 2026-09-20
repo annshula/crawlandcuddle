@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import { ProductViewTracker } from "@/components/analytics/ProductViewTracker";
 import { BuyBox } from "@/components/product/BuyBox";
 import { PdpPrice, SaveChip } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
 import { ValueStack } from "@/components/product/ValueStack";
 import { Icon } from "@/components/ui/Icon";
@@ -108,6 +109,10 @@ export function ProductPurchase({
   // Shared with both the hero price up top and BuyBox's own total lower down
   // — one selection, so the two numbers on the page can never disagree.
   const [packSize, setPackSize] = useState<PackTier["size"]>(defaultPackSize);
+
+  // BuyBox's real CTA row — StickyBuyBar watches when this scrolls out of
+  // view and shows its own compact bar in its place.
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-16">
@@ -218,6 +223,7 @@ export function ProductPurchase({
 
         <ProductViewTracker slug={selected.slug} name={selected.name} />
         <BuyBox
+          ref={ctaRef}
           variant={selected}
           packSize={packSize}
           onPackSizeChange={setPackSize}
@@ -248,6 +254,8 @@ export function ProductPurchase({
           crawl to confident walking.
         </p>
       </div>
+
+      <StickyBuyBar variant={selected} packSize={packSize} ctaRef={ctaRef} />
     </div>
   );
 }
