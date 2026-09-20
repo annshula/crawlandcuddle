@@ -1,6 +1,7 @@
 "use client";
 
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
+import { discountPercent } from "@/components/ui/Price";
 import { Icon } from "@/components/ui/Icon";
 import { applyPackDiscount, packTiers, type PackTier } from "@/content/site";
 import { formatMoney } from "@/lib/money";
@@ -28,7 +29,12 @@ export function PackPicker({
   selected: PackTier["size"];
   onSelect: (size: PackTier["size"]) => void;
 }) {
-  const { amount: unitAmount, currencyCode, pending } = useStylePrice(slug);
+  const {
+    amount: unitAmount,
+    compareAtAmount,
+    currencyCode,
+    pending,
+  } = useStylePrice(slug);
 
   return (
     <div className="mt-7">
@@ -39,6 +45,15 @@ export function PackPicker({
           const { perUnit, total: discountedTotal } = applyPackDiscount(
             unitAmount,
             tier,
+          );
+          // The product's own markdown (compareAtAmount) stacked with the
+          // pack discount, scaled to the tier's own unit count — so the
+          // 1-pack shows the real base markdown (its only discount) and the
+          // 2/3-packs show the combined savings against buying that many
+          // units at the un-discounted compare-at price.
+          const savePercent = discountPercent(
+            discountedTotal,
+            compareAtAmount != null ? compareAtAmount * tier.size : null,
           );
 
           return (
@@ -119,10 +134,13 @@ export function PackPicker({
                   )}
                 </span>
 
-                {tier.discountPercent > 0 && !pending && (
+                {!pending && (savePercent != null || tier.size > 1) && (
                   <span className="font-label text-[0.68rem] tracking-widest text-rose-700 uppercase">
-                    {tier.shortLabel} · {formatMoney(discountedTotal, currencyCode)}{" "}
-                    total
+                    {savePercent != null
+                      ? `Save ${savePercent}%`
+                      : tier.shortLabel}
+                    {tier.size > 1 &&
+                      ` · ${formatMoney(discountedTotal, currencyCode)} total`}
                   </span>
                 )}
               </button>

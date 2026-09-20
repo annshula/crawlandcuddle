@@ -240,7 +240,7 @@ export const packTiers: PackTier[] = [
     discountPercent: 0,
     label: "Just One",
     shortLabel: "1 style",
-    blurb: "Try it risk-free",
+    blurb: "One's plenty to start",
   },
   {
     size: 2,
