@@ -150,18 +150,21 @@ export function ProductPurchase({
           onSelect={setPackSize}
         />
 
-        {/* Stock status moved to the Style row above (SwatchPicker) — it
-            updates the instant a swatch is picked, same moment the style
-            name does, instead of living down here disconnected from the
-            choice that changes it. Price and the value-stack link share one
-            row, value-stack pinned to the far right — the price makes its
-            case and the "here's what that's worth" link answers it in the
-            same glance instead of a line down. */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <PdpPrice slug={selected.slug} packSize={packSize} />
+        {/* Same eyebrow-label-then-content rhythm as the Style and Choose
+            your pack rows above (each an "eyebrow" line + its control,
+            flush to the panel's left edge) — the price used to be a bare
+            two-column row with nothing tying it to that pattern, which read
+            as misaligned next to the sections either side of it. Stock
+            status now lives on the Style row above, so this block is just
+            the price and the value-stack link that explains it. */}
+        <div className="mt-6">
+          <p className="eyebrow text-ink-faint">Price</p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <PdpPrice slug={selected.slug} packSize={packSize} />
 
-          <div className="text-body-sm">
-            <ValueStack />
+            <div className="text-body-sm">
+              <ValueStack />
+            </div>
           </div>
         </div>
 
