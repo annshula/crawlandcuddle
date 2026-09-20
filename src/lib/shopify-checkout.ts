@@ -4,7 +4,12 @@
  * browser); this only calls the API route and navigates to the checkout URL.
  */
 
-import { applyPackDiscount, getPackTier, product, variants } from "@/content/site";
+import {
+  applyPackDiscount,
+  getDisplayPackTier,
+  product,
+  variants,
+} from "@/content/site";
 import { trackInitiateCheckout } from "@/lib/analytics";
 
 export type ShopifyCheckoutResult =
@@ -35,7 +40,7 @@ export async function shopifyCheckout(
           // than full price for everything.
           const { perUnit } = applyPackDiscount(
             product.priceCents / 100,
-            getPackTier(line.qty),
+            getDisplayPackTier(line.qty),
           );
           return {
             slug: line.slug,

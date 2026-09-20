@@ -11,7 +11,12 @@ import {
   type ReactNode,
 } from "react";
 
-import { applyPackDiscount, getPackTier, product, variants } from "@/content/site";
+import {
+  applyPackDiscount,
+  getDisplayPackTier,
+  product,
+  variants,
+} from "@/content/site";
 import { trackAddToCart } from "@/lib/analytics";
 import { useScrollLock } from "@/lib/scroll-lock";
 
@@ -170,12 +175,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // display through useLocalizedCart, which re-derives these from the
         // live per-market price. This just keeps the reducer's own total
         // (used before localization resolves) consistent with the pack tier
-        // the line's own qty implies.
-        const tier = getPackTier(line.qty);
-        const { perUnit, total } = applyPackDiscount(
-          product.priceCents / 100,
-          tier,
-        );
+        // the line's own qty implies. getDisplayPackTier (not getPackTier):
+        // qty 4, 5, 6... keep the 3-pack's per-unit rate instead of falling
+        // back to full, undiscounted price; the line total is perUnit × the
+        // real qty, not applyPackDiscount's own total (pinned to the tier's
+        // fixed size).
+        const tier = getDisplayPackTier(line.qty);
+        const { perUnit } = applyPackDiscount(product.priceCents / 100, tier);
+        const total = Math.round(perUnit * line.qty * 100) / 100;
         return [
           {
             ...line,
@@ -195,7 +202,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "add", slug, qty, replace });
       const variant = variants.find((v) => v.slug === slug);
       if (variant) {
-        const tier = getPackTier(qty);
+        const tier = getDisplayPackTier(qty);
         const { perUnit } = applyPackDiscount(product.priceCents / 100, tier);
         trackAddToCart(
           { slug, name: variant.name, quantity: qty },

@@ -275,6 +275,17 @@ export const getPackTier = (qty: number): PackTier =>
   packTiers.find((t) => t.size === qty) ?? packTiers[0]!;
 
 /**
+ * Display-only: the tile a cart line's badge/label should match. Qty 1 and 2
+ * map to their own tile exactly; qty 3 AND UP all show the 3-pack's tile
+ * (label, "+ Free gift" badge) — a manual qty edit to 4, 5, 6... in the cart
+ * drawer still reads as "Share the Love" rather than dropping the badge the
+ * moment it's no longer exactly 3. Pricing itself (`getPackTier`/
+ * `applyPackDiscount`) is untouched by this — display only.
+ */
+export const getDisplayPackTier = (qty: number): PackTier =>
+  qty >= 3 ? packTiers[2]! : getPackTier(qty);
+
+/**
  * The one place pack-discount math happens. Every UI surface (PackPicker,
  * BuyBox, CartDrawer, CheckoutSummary) calls this instead of re-deriving
  * `amount * (1 - discountPercent / 100)` locally — one formula, one

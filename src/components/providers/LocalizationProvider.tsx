@@ -16,7 +16,7 @@ import {
   productCurrency,
   productPriceCents,
 } from "@/lib/catalog";
-import { applyPackDiscount, getPackTier } from "@/content/site";
+import { applyPackDiscount, getDisplayPackTier } from "@/content/site";
 
 export type LocalizedPrice = {
   amount: string;
@@ -161,11 +161,11 @@ export function useLocalizedAmount(
  * Cart amounts in the shopper's selected currency, resolved from the same
  * synced per-market prices as useLocalizedAmount — synchronous, no fetch.
  * The pack tier (and its % off) is derived from each line's own `qty` via
- * `getPackTier`/`applyPackDiscount` — qty 2 always prices as the 2-pack, qty
- * 3 always as the 3-pack, matching the Shopify automatic discount so the
- * drawer/summary total agrees with what checkout actually charges (see
- * content/site.ts's packTiers). There is no separate pack flag to pass or
- * fall out of sync with the real quantity.
+ * `getDisplayPackTier`/`applyPackDiscount` — qty 2 always prices as the
+ * 2-pack, qty 3 AND UP all price at the 3-pack's per-unit rate (see
+ * content/site.ts's packTiers / getDisplayPackTier doc comments) rather
+ * than dropping back to full price the moment qty isn't exactly 3. There is
+ * no separate pack flag to pass or fall out of sync with the real quantity.
  */
 export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
   const { ready, country, defaultCountry } = useLocalization();
@@ -174,10 +174,18 @@ export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
 
   const baseUnitAmountFor = (slug: string) =>
     priceForMarket(getVariantForStyle(slug).id, effectiveCountry).amount;
+  // getDisplayPackTier (not getPackTier): qty 4, 5, 6... still resolve to
+  // the 3-pack's per-unit rate instead of silently falling back to the
+  // full, undiscounted single-unit price — the bug being fixed here was
+  // the drawer's "$X × N" line showing plain full price past qty 3. The
+  // total is `perUnit * qty` explicitly (not applyPackDiscount's own total,
+  // which is pinned to the tier's fixed size) so it's always the real line
+  // total for however many units are actually in the line.
   const unitAmountFor = (slug: string, qty = 1) =>
-    applyPackDiscount(baseUnitAmountFor(slug), getPackTier(qty)).perUnit;
+    applyPackDiscount(baseUnitAmountFor(slug), getDisplayPackTier(qty))
+      .perUnit;
   const lineTotalFor = (slug: string, qty: number) =>
-    applyPackDiscount(baseUnitAmountFor(slug), getPackTier(qty)).total;
+    Math.round(unitAmountFor(slug, qty) * qty * 100) / 100;
 
   const currencyCode =
     lines.length > 0

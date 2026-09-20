@@ -8,7 +8,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { useLocalizedCart } from "@/components/providers/LocalizationProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
-import { getPackTier, product } from "@/content/site";
+import { getDisplayPackTier, product } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { shopifyCheckout } from "@/lib/shopify-checkout";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
@@ -226,12 +226,12 @@ export function CartDrawer() {
                         >
                           {line.name}
                         </Link>
-                        {getPackTier(line.qty).size > 1 && (
+                        {getDisplayPackTier(line.qty).size > 1 && (
                           <span className="mt-1 flex flex-wrap items-center gap-1.5">
                             <span className="rounded-tag bg-rose-100 px-2 py-0.5 font-label text-[0.62rem] tracking-widest text-rose-700 uppercase">
-                              {getPackTier(line.qty).label}
+                              {getDisplayPackTier(line.qty).label}
                             </span>
-                            {getPackTier(line.qty).includesGift && (
+                            {getDisplayPackTier(line.qty).includesGift && (
                               <span className="rounded-tag bg-mint/50 px-2 py-0.5 font-label text-[0.62rem] tracking-widest text-ink uppercase">
                                 + Free gift
                               </span>
