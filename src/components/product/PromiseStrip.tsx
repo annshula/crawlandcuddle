@@ -3,42 +3,33 @@ import { promises } from "@/content/site";
 import { cn } from "@/lib/utils";
 
 /** Same order as `promises` — the content file stays free of UI concerns. */
-const icons: IconName[] = ["truck", "refresh"];
+const icons: IconName[] = ["shield", "truck", "refresh"];
 
 /**
- * Delivery speed and the 30-day return window, shown at the moment of doubt.
- * `compact` drops the detail line for tight columns (product cards, drawers);
- * the full form carries both lines and is what the buy box uses.
+ * Secure payment, free delivery, 30-day returns — one continuous pill-shaped
+ * bar, icon + label inline (not stacked) per segment, thin dividers between.
+ * Reads as a single trust bar rather than three separate tiles, shown right
+ * under the buy box's CTA at the moment of doubt.
  */
-export function PromiseStrip({
-  compact = false,
-  className,
-}: {
-  compact?: boolean;
-  className?: string;
-}) {
+export function PromiseStrip({ className }: { className?: string }) {
   return (
     <ul
       className={cn(
-        "grid gap-x-6 gap-y-3 sm:grid-cols-2",
-        compact ? "gap-y-2.5" : "gap-y-4",
+        "flex overflow-hidden rounded-pill border border-hairline bg-paper",
         className,
       )}
     >
       {promises.map((promise, i) => (
-        <li key={promise.label} className="flex items-start gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-rose-50 text-rose-600">
-            <Icon name={icons[i] ?? "check"} className="size-4" />
-          </span>
-          <span className="min-w-0">
-            <span className="block font-headline text-body-sm text-ink">
-              {promise.label}
-            </span>
-            {!compact && (
-              <span className="mt-0.5 block text-body-sm text-ink-soft">
-                {promise.detail}
-              </span>
-            )}
+        <li
+          key={promise.label}
+          className="flex flex-1 items-center justify-center gap-2 border-hairline px-2 py-3.5 not-last:border-r"
+        >
+          <Icon
+            name={icons[i] ?? "check"}
+            className="size-4 shrink-0 text-rose-600"
+          />
+          <span className="font-headline text-[0.8rem] leading-tight text-ink sm:text-body-sm">
+            {promise.label}
           </span>
         </li>
       ))}

@@ -5,9 +5,9 @@ import { forwardRef } from "react";
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Button } from "@/components/ui/Button";
+import { PaymentIcons } from "@/components/product/PaymentIcons";
 import { PromiseStrip } from "@/components/product/PromiseStrip";
-import { Icon } from "@/components/ui/Icon";
-import { product, type PackTier, type Variant } from "@/content/site";
+import { type PackTier, type Variant } from "@/content/site";
 import { usePurchaseActions } from "@/hooks/usePurchaseActions";
 
 /**
@@ -49,15 +49,6 @@ export const BuyBox = forwardRef<
 
   return (
     <div className="mt-9">
-      {tier.includesGift && (
-        <p className="mb-5 inline-flex items-center gap-2 rounded-tag border border-rose-200 bg-rose-50 px-4 py-3 text-body-sm text-rose-700">
-          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-rose-600 text-paper">
-            <Icon name="gift" className="size-3.5" strokeWidth={2.2} />
-          </span>
-          <span className="font-headline">Includes a free gift</span>
-        </p>
-      )}
-
       {outOfStock ? (
         <p className="mt-5 rounded-tag bg-hairline/50 px-4 py-3 text-body-sm text-ink-soft">
           This style is out of stock right now. Pick another style above, or
@@ -65,15 +56,12 @@ export const BuyBox = forwardRef<
         </p>
       ) : (
         <>
-          <div
-            ref={ref}
-            className="mt-5 flex flex-col gap-3 sm:flex-row"
-          >
-            <Magnetic strength={0.15} className="w-full sm:w-auto">
+          <div ref={ref} className="mt-5 grid grid-cols-2 gap-3">
+            <Magnetic strength={0.15} className="w-full">
               <Button
                 onClick={handleAdd}
                 variant="outline"
-                className="w-full justify-center sm:w-auto"
+                className="w-full justify-center"
               >
                 {added ? "Added to bag" : `Add to bag`}
               </Button>
@@ -82,7 +70,7 @@ export const BuyBox = forwardRef<
               onClick={handleBuyNow}
               withArrow
               disabled={buying}
-              className="w-full justify-center sm:w-auto"
+              className="w-full justify-center"
             >
               {buying ? "Taking you to checkout…" : "Buy it now"}
             </Button>
@@ -91,11 +79,8 @@ export const BuyBox = forwardRef<
           {/* Reassurance, directly under the CTA where a hesitating shopper's
               eye lands right after reading the buttons. The "sold" and
               rating pills already cover social proof, at the top of
-              ProductPurchase — this only adds the checkout-trust line. */}
-          <p className="mt-4 inline-flex items-center gap-1.5 text-body-sm text-ink-soft">
-            <Icon name="shield" className="size-3.5 text-rose-600" />
-            Secure checkout · 30-day money-back guarantee
-          </p>
+              ProductPurchase — this shows how they'll actually pay. */}
+          <PaymentIcons className="mt-4" />
         </>
       )}
 
@@ -111,23 +96,7 @@ export const BuyBox = forwardRef<
           : ""}
       </p>
 
-      <PromiseStrip className="mt-7 border-t border-hairline pt-6" />
-
-      <ul className="mt-7 flex flex-col gap-2.5">
-        {product.includes.map((item) => (
-          <li
-            key={item}
-            className="flex items-start gap-3 text-body-sm text-ink-soft"
-          >
-            <Icon
-              name="check"
-              className="mt-0.5 size-4 shrink-0 text-rose-600"
-              strokeWidth={2.2}
-            />
-            {item}
-          </li>
-        ))}
-      </ul>
+      <PromiseStrip className="mt-7" />
     </div>
   );
 });

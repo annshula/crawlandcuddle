@@ -238,23 +238,24 @@ export const packTiers: PackTier[] = [
   {
     size: 1,
     discountPercent: 0,
-    label: "Just One",
+    label: "1 Pack",
     shortLabel: "1 style",
     blurb: "One's plenty to start",
   },
   {
     size: 2,
     discountPercent: 10,
-    label: "Duo Deal",
-    shortLabel: "Save 10%",
+    label: "2 Pack",
+    shortLabel: "Save 10% + free gift",
     blurb: "One for home, one for daycare",
     badge: "Most popular",
     featured: true,
+    includesGift: true,
   },
   {
     size: 3,
     discountPercent: 20,
-    label: "Share the Love",
+    label: "3 Pack",
     shortLabel: "Save 20% + free gift",
     blurb: "Keep one, gift two to the little ones you love",
     badge: "Best value",
@@ -374,6 +375,11 @@ export const trustBadges = [
  * because a returns policy nobody sees does not reassure anybody.
  */
 export const promises = [
+  {
+    label: "Secure payment",
+    detail: "Checkout is encrypted and PCI-compliant, every time.",
+    short: "Secure payment",
+  },
   {
     label: "Free tracked delivery",
     detail: "Arrives in 3–7 working days, tracked the whole way.",
@@ -605,10 +611,10 @@ export const product = {
   currency: productCurrency,
   locale: "en-US",
   includes: [
-    "Head & back protector in your chosen style",
-    "Adjustable shoulder harness with chest clip",
-    "Free gift: anti-slip socks",
-    "Wash bag and care card",
+    "Cushions every fall — protects head & back the moment they stumble",
+    "Grows with your toddler — chest-clip harness adjusts as they do",
+    "Free gift: anti-slip socks, so first steps stay sure-footed",
+    "Stays fresh wash after wash, with a bag and care card included",
   ],
   /**
    * PLACEHOLDER retail-style values — not real per-item pricing, just a

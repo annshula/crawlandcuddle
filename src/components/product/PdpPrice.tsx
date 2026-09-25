@@ -18,9 +18,8 @@ import { formatMoney } from "@/lib/money";
  *
  * `packSize` (from the pack picker above, lifted to the shared parent)
  * applies that tier's price here too, so the number always matches the
- * total the buy box is about to charge. The per-unit note only appears for
- * a multi-pack, tucked on its own small line so the hero number stays the
- * one thing the eye reads first.
+ * total the buy box is about to charge. The per-unit breakdown lives on the
+ * pack picker's own tiles, not repeated here — this stays just the total.
  */
 export function PdpPrice({
   slug,
@@ -29,37 +28,35 @@ export function PdpPrice({
   slug: string;
   packSize?: PackTier["size"];
 }) {
-  const { amount, currencyCode, compareAtAmount, pending } =
-    useStylePrice(slug);
+  const { amount, currencyCode, pending } = useStylePrice(slug);
 
   if (pending) {
     return (
-      <div aria-label="Loading price" className="flex flex-col gap-2">
+      <div aria-label="Loading price">
         <span
           aria-hidden="true"
           className="inline-block h-8 w-36 animate-pulse rounded-tag bg-hairline"
-        />
-        <span
-          aria-hidden="true"
-          className="inline-block h-3.5 w-24 animate-pulse rounded-pill bg-hairline/60"
         />
       </div>
     );
   }
 
   const tier = getPackTier(packSize);
-  const { perUnit, total: packTotal } = applyPackDiscount(amount, tier);
-  // The "was" price scales with the pack too — comparing a 3-unit total
-  // against a 1-unit compare-at would overstate the markdown.
-  const compareAtTotal =
-    compareAtAmount != null ? compareAtAmount * tier.size : null;
+  const { total: packTotal } = applyPackDiscount(amount, tier);
+  // Pack 1 has no bundle discount to show off — its own compare-at markdown
+  // reads as a generic "sale price" rather than a reason to pick a bigger
+  // pack, so the struck price is hidden there and shown only for 2/3-packs,
+  // where it isolates just the pack discount (that many units at the
+  // regular selling price — `amount` — not the compare-at price stacked up,
+  // which would overstate the save %).
+  const compareAtTotal = tier.size === 1 ? null : amount * tier.size;
   const percent = discountPercent(packTotal, compareAtTotal);
 
   return (
     <div className="flex flex-col gap-1">
       <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
         {compareAtTotal != null && compareAtTotal > packTotal && (
-          <span className="text-base leading-none text-ink-faint line-through">
+          <span className="font-headline text-[1.7rem] leading-none text-ink-faint line-through sm:text-[1.6rem]">
             {formatMoney(compareAtTotal, currencyCode)}
           </span>
         )}
@@ -72,12 +69,6 @@ export function PdpPrice({
           </span>
         )}
       </p>
-
-      {tier.size > 1 && (
-        <p className="text-body-sm text-ink-soft">
-          {formatMoney(perUnit, currencyCode)}/unit · {tier.size} units
-        </p>
-      )}
     </div>
   );
 }

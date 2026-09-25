@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useStylePrice } from "@/components/providers/LocalizationProvider";
 import { discountPercent } from "@/components/ui/Price";
 import { Icon } from "@/components/ui/Icon";
@@ -36,6 +38,12 @@ export function PackPicker({
     pending,
   } = useStylePrice(slug);
 
+  // Which tile's gift tooltip is open — click-toggled so it works on touch;
+  // CSS `group-hover` still reveals it on a mouse without a click.
+  const [giftOpenSize, setGiftOpenSize] = useState<PackTier["size"] | null>(
+    null,
+  );
+
   return (
     <div className="mt-7">
       <p className="eyebrow text-ink-faint">Choose your pack</p>
@@ -46,18 +54,21 @@ export function PackPicker({
             unitAmount,
             tier,
           );
-          // The product's own markdown (compareAtAmount) stacked with the
-          // pack discount, scaled to the tier's own unit count — so the
-          // 1-pack shows the real base markdown (its only discount) and the
-          // 2/3-packs show the combined savings against buying that many
-          // units at the un-discounted compare-at price.
+          // The 1-pack shows the product's own markdown (against its real
+          // compare-at price). The 2/3-packs show just the pack discount
+          // itself — against buying that many units individually at the
+          // regular selling price (unitAmount), not against the compare-at
+          // price stacked up, which would double-count the base markdown on
+          // top of the pack discount and overstate the save %.
           const savePercent = discountPercent(
             discountedTotal,
-            compareAtAmount != null ? compareAtAmount * tier.size : null,
+            tier.size === 1
+              ? compareAtAmount
+              : unitAmount * tier.size,
           );
 
           return (
-            <li key={tier.size}>
+            <li key={tier.size} className="relative">
               <button
                 type="button"
                 role="radio"
@@ -65,6 +76,7 @@ export function PackPicker({
                 onClick={() => onSelect(tier.size)}
                 className={cn(
                   "relative flex h-full w-full flex-col items-start gap-1 rounded-card border-2 px-4 py-3.5 text-left transition-colors duration-200",
+                  tier.includesGift && "pb-4",
                   isSelected
                     ? "border-rose-600 bg-rose-100"
                     : "border-hairline bg-cream hover:border-ink/30",
@@ -86,12 +98,6 @@ export function PackPicker({
                 <span className="flex w-full items-center justify-between gap-2">
                   <span className="min-w-0 font-headline text-base text-ink">
                     <span className="wrap-break-word">{tier.label}</span>
-                    {tier.size > 1 && (
-                      <span className="whitespace-nowrap text-sm text-ink-soft">
-                        {" "}
-                        (×{tier.size})
-                      </span>
-                    )}
                   </span>
                   <span
                     aria-hidden="true"
@@ -112,10 +118,6 @@ export function PackPicker({
                   </span>
                 </span>
 
-                <span className="text-body-sm text-ink-soft">
-                  {tier.blurb}
-                </span>
-
                 <span className="mt-1.5 flex items-baseline gap-2">
                   {pending ? (
                     <span
@@ -134,16 +136,53 @@ export function PackPicker({
                   )}
                 </span>
 
-                {!pending && (savePercent != null || tier.size > 1) && (
+                {!pending && savePercent != null && (
                   <span className="font-label text-[0.68rem] tracking-widest text-rose-700 uppercase">
-                    {savePercent != null
-                      ? `Save ${savePercent}%`
-                      : tier.shortLabel}
-                    {tier.size > 1 &&
-                      ` · ${formatMoney(discountedTotal, currencyCode)} total`}
+                    Save {savePercent}%
                   </span>
                 )}
               </button>
+
+              {tier.includesGift && (
+                <div
+                  className="group/gift absolute right-2.5 bottom-2.5 z-10"
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      setGiftOpenSize(null);
+                    }
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGiftOpenSize((v) =>
+                        v === tier.size ? null : tier.size,
+                      )
+                    }
+                    aria-expanded={giftOpenSize === tier.size}
+                    aria-label="Includes a free gift — show details"
+                    className="grid size-6 place-items-center text-rose-600 transition-colors duration-200 hover:text-rose-700"
+                  >
+                    <Icon
+                      name="gift"
+                      className="size-4 animate-shake"
+                      strokeWidth={2.2}
+                    />
+                  </button>
+
+                  <div
+                    role="tooltip"
+                    className={cn(
+                      "absolute right-0 bottom-full mb-2 w-max max-w-48 rounded-tag border border-rose-200 bg-rose-50 px-3 py-2 text-body-sm text-rose-700 shadow-drift transition-opacity duration-150 group-hover/gift:opacity-100",
+                      giftOpenSize === tier.size
+                        ? "opacity-100"
+                        : "pointer-events-none opacity-0",
+                    )}
+                  >
+                    Free gift: anti-slip socks included
+                  </div>
+                </div>
+              )}
             </li>
           );
         })}

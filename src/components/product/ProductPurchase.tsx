@@ -131,6 +131,23 @@ export function ProductPurchase({
           </a>
         </div>
 
+        {/* What's in the box, right above the style picker — the shopper
+            sees what they're getting before they pick a print, instead of
+            finding out only after choosing and reaching the CTA below. */}
+        <ul className="mt-6 flex flex-col gap-2.5">
+          {product.includes.map((item) => (
+            <li
+              key={item}
+              className="flex items-start gap-3 text-body-sm text-ink-soft"
+            >
+              <span className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full bg-rose-600 text-paper">
+                <Icon name="check" className="size-3" strokeWidth={2.6} />
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
+
         {/* Order down the panel: style, then pack, then price, then the
             buttons — each step is decided before the next number depends on
             it, so nothing on screen has to visibly update out from under a

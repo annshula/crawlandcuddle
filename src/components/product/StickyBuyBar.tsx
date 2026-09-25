@@ -134,7 +134,6 @@ export function StickyBuyBar({
             </p>
             <p className="truncate text-body-sm text-ink-soft">
               {tier.label}
-              {tier.size > 1 && ` (×${tier.size})`}
               {" · "}
               {pricePending ? (
                 <span
