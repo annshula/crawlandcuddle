@@ -327,8 +327,15 @@
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
     /* Clip on the root (not just body) so decorative blobs and marquees that
-       extend past the viewport can never create a horizontal page scroll. */
+       extend past the viewport can never create a horizontal page scroll.
+       `overflow-y: visible` is explicit and load-bearing: setting only
+       `overflow-x` leaves the y-axis at its "auto" used value (per spec,
+       overflow-x != visible forces overflow-y to compute as auto), which is
+       enough in Chrome/Safari to break `position: sticky` for every
+       descendant on the page — the root stops reading as a plain
+       non-scrolling box and sticky's containing-block math misfires. */
     overflow-x: clip;
+    overflow-y: visible;
   }
 
   /* Lenis owns scrolling once mounted; disable native smooth to avoid fighting */

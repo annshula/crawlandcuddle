@@ -18,8 +18,7 @@ import { cn } from "@/lib/utils";
 const FREE_SHIPPING_OVER = 0; // Shipping is free on every order.
 
 export function CartDrawer() {
-  const { lines, count, subtotalCents, isOpen, close, setQty, remove } =
-    useCart();
+  const { lines, count, subtotalCents, isOpen, close, remove } = useCart();
   const {
     currencyCode,
     lineTotalFor,
@@ -250,29 +249,8 @@ export function CartDrawer() {
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
-                      <span className="inline-flex items-center rounded-btn border border-hairline">
-                        <button
-                          type="button"
-                          onClick={() => setQty(line.slug, line.qty - 1)}
-                          aria-label={`Decrease quantity of ${line.name}`}
-                          className="grid size-9 cursor-pointer place-items-center text-ink transition-colors hover:text-rose-600"
-                        >
-                          −
-                        </button>
-                        <span
-                          aria-live="polite"
-                          className="w-8 text-center font-headline text-base text-ink"
-                        >
-                          {line.qty}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setQty(line.slug, line.qty + 1)}
-                          aria-label={`Increase quantity of ${line.name}`}
-                          className="grid size-9 cursor-pointer place-items-center text-ink transition-colors hover:text-rose-600"
-                        >
-                          +
-                        </button>
+                      <span className="text-body-sm text-ink-soft">
+                        Qty {line.qty}
                       </span>
                       <span className="font-headline text-base text-ink">
                         {pricePending ? (

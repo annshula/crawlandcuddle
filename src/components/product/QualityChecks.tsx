@@ -21,6 +21,7 @@ export function QualityChecks() {
           id="quality-heading"
           align="center"
           eyebrow={quality.eyebrow}
+          eyebrowDash={false}
           title={[quality.heading]}
           body={quality.lede}
           className="mx-auto"

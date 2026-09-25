@@ -18,6 +18,9 @@ interface SectionHeadingProps {
   /** Scale type by viewport height so the heading fits pinned full-screen
    *  sections on shorter windows without shrinking the cards below. */
   size?: "default" | "sm";
+  /** The short rule line before the eyebrow text — on by default, off for
+   *  sections that want the label on its own with no leading dash. */
+  eyebrowDash?: boolean;
   className?: string;
   children?: ReactNode;
 }
@@ -37,6 +40,7 @@ export function SectionHeading({
   tone = "ink",
   compact = false,
   size = "default",
+  eyebrowDash = true,
   className,
   children,
 }: SectionHeadingProps) {
@@ -60,13 +64,15 @@ export function SectionHeading({
               light ? "text-rose-200" : "text-rose-600",
             )}
           >
-            <span
-              className={cn(
-                "inline-block h-px w-8",
-                light ? "bg-rose-200/60" : "bg-rose-600/40",
-              )}
-              aria-hidden="true"
-            />
+            {eyebrowDash && (
+              <span
+                className={cn(
+                  "inline-block h-px w-8",
+                  light ? "bg-rose-200/60" : "bg-rose-600/40",
+                )}
+                aria-hidden="true"
+              />
+            )}
             {eyebrow}
           </p>
         </Reveal>

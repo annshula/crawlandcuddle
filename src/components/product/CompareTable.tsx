@@ -30,6 +30,7 @@ export function CompareTable() {
           id="compare-heading"
           align="center"
           eyebrow={comparison.eyebrow}
+          eyebrowDash={false}
           title={[comparison.heading]}
           script={comparison.script}
           className="mx-auto"

@@ -90,6 +90,7 @@ export function ProductReviews({
         <SectionHeading
           align="center"
           eyebrow="Parent reviews"
+          eyebrowDash={false}
           title={["Bought once.", "Worn every day since."]}
           body="Every review below is from a parent who's actually used it. Reviews with a photo show it as it really arrived."
           className="mx-auto"

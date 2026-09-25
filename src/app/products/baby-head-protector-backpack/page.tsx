@@ -157,24 +157,31 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
-      <section
-        style={{ clipPath: "inset(-160px 0 0 0)" }}
-        className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28"
-      >
-        <Blob
-          shape="d"
-          spin={22}
-          className="pointer-events-none absolute -top-28 -left-40 w-120 text-rose-50"
-        />
-        <Blob
-          shape="a"
-          spin={-18}
-          className="pointer-events-none absolute -right-56 -bottom-40 w-136 text-lilac-100"
-        />
-        <LineArt
-          name="butterfly"
-          className="pointer-events-none absolute top-24 right-[6%] hidden w-16 rotate-6 text-rose-200 lg:block"
-        />
+      <section className="relative -mt-(--nav-height) flex min-h-[calc(100svh-var(--announce-height))] flex-col justify-center bg-cream pt-[calc(var(--nav-height)+2.5rem)] pb-20 md:pb-28">
+        {/* Decorative bleed lives in its own clipped layer, separate from the
+            content below — `clip-path` on an ancestor of the sticky product
+            gallery breaks `position: sticky` in Chrome/Safari (a known
+            compositing quirk), so it must never wrap `container-page`. */}
+        <div
+          aria-hidden="true"
+          style={{ clipPath: "inset(-160px 0 0 0)" }}
+          className="absolute inset-0"
+        >
+          <Blob
+            shape="d"
+            spin={22}
+            className="pointer-events-none absolute -top-28 -left-40 w-120 text-rose-50"
+          />
+          <Blob
+            shape="a"
+            spin={-18}
+            className="pointer-events-none absolute -right-56 -bottom-40 w-136 text-lilac-100"
+          />
+          <LineArt
+            name="butterfly"
+            className="pointer-events-none absolute top-24 right-[6%] hidden w-16 rotate-6 text-rose-200 lg:block"
+          />
+        </div>
 
         <div className="container-page relative z-10">
           <Breadcrumbs
