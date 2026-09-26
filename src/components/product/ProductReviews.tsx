@@ -324,8 +324,14 @@ function ReviewCard({ review }: { review: ProductReview }) {
               {review.country}
               {review.verified && (
                 <span className="inline-flex items-center gap-1 font-medium text-ink-soft">
-                  <Icon name="check" className="size-3 text-rose-500" strokeWidth={2.4} />
-                  Verified purchase
+                  {review.country && (
+                    <Icon
+                      name="check"
+                      className="size-3 text-rose-500"
+                      strokeWidth={2.4}
+                    />
+                  )}
+                  {review.country ? "Verified purchase" : "Verified Buyer"}
                 </span>
               )}
             </span>
@@ -336,7 +342,11 @@ function ReviewCard({ review }: { review: ProductReview }) {
       <ReviewImageLightbox
         src={openPhoto}
         onClose={() => setOpenPhoto(null)}
-        caption={`${maskName(review.author)} · ${review.country}`}
+        caption={
+          review.country
+            ? `${maskName(review.author)} · ${review.country}`
+            : maskName(review.author)
+        }
       />
     </li>
   );
@@ -533,6 +543,9 @@ function maskWord(word: string): string {
 }
 
 function maskName(full: string): string {
+  // Judge.me's imported reviews carry no real customer name — "Verified
+  // Buyer" is already the display label, not a name to mask.
+  if (full === "Verified Buyer") return full;
   const parts = full.split(" ").filter(Boolean);
   if (parts.length === 0) return "***";
   return parts.map(maskWord).join(" ");

@@ -11,11 +11,13 @@ import {
   defaultVariant,
   faqs,
   product,
+  productHandle,
   productPath,
   site,
   variants,
 } from "@/content/site";
 import { productReviews, productReviewSummary } from "@/data/reviews";
+import { getLiveReviews } from "@/lib/judgeme/reviews";
 import { absoluteUrl, formatPrice } from "@/lib/utils";
 
 /**
@@ -77,6 +79,14 @@ export default async function ProductDetailPage({
   const { style } = await searchParams;
   const initialSlug = variants.find((v) => v.slug === style)?.slug;
 
+  // Live Judge.me reviews when configured and available; the local
+  // placeholder dataset otherwise (missing token, API down, or genuinely no
+  // reviews yet for this handle) — the page never has an empty reviews
+  // section because of an external outage.
+  const live = await getLiveReviews(productHandle);
+  const reviews = live?.reviews ?? productReviews;
+  const reviewSummary = live?.summary ?? productReviewSummary;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ProductGroup",
@@ -93,13 +103,19 @@ export default async function ProductDetailPage({
       suggestedMinAge: 0.4,
       suggestedMaxAge: 2,
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.rating.value,
-      reviewCount: product.rating.count,
-      bestRating: 5,
-      worstRating: 1,
-    },
+    // Only emitted when reviews are genuinely live from Judge.me — the
+    // placeholder dataset (src/data/reviews.ts) is explicitly documented as
+    // never going into schema.org markup, since those numbers are made up,
+    // not real customer ratings.
+    ...(live && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: reviewSummary.average,
+        reviewCount: reviewSummary.count,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
     variesBy: ["https://schema.org/pattern"],
     hasVariant: variants.map((v) => ({
       "@type": "Product",
@@ -192,11 +208,18 @@ export default async function ProductDetailPage({
             ]}
           />
 
-          <ProductPurchase variants={variants} initialSlug={initialSlug} />
+          <ProductPurchase
+            variants={variants}
+            initialSlug={initialSlug}
+            ratingSummary={{
+              value: reviewSummary.average,
+              count: reviewSummary.count,
+            }}
+          />
         </div>
       </section>
 
-      <ProductReviews reviews={productReviews} summary={productReviewSummary} />
+      <ProductReviews reviews={reviews} summary={reviewSummary} />
 
       <CompareTable />
 

@@ -24,6 +24,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "cdn.shopify.com" },
       { protocol: "https", hostname: "*.myshopify.com" },
+      // Judge.me's imported review photos (AliExpress/CJ-sourced orders) are
+      // served from AliExpress's own CDN, not re-hosted on Shopify.
+      { protocol: "https", hostname: "*.aliexpress-media.com" },
     ],
   },
   experimental: {

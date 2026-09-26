@@ -48,10 +48,15 @@ function scrollToId(e: ReactMouseEvent<HTMLAnchorElement>, id: string) {
 export function ProductPurchase({
   variants,
   initialSlug,
+  ratingSummary,
 }: {
   variants: Variant[];
   /** Pre-selects a style from a `?style=` deep link (e.g. the homepage style gallery) — falls back to the usual default when absent or unrecognized. */
   initialSlug?: string;
+  /** Live review count/average when Judge.me is reachable, the placeholder
+   *  dataset's otherwise — passed down so this pill always agrees with
+   *  whatever ProductReviews ends up showing further down the page. */
+  ratingSummary: { value: number; count: number };
 }) {
   const [selectedSlug, setSelectedSlug] = useState(
     initialSlug ?? defaultVariant().slug,
@@ -99,15 +104,15 @@ export function ProductPurchase({
           <a
             href="#reviews"
             onClick={(e) => scrollToId(e, "reviews")}
-            aria-label={`Rated ${product.rating.value.toFixed(1)} out of 5 by ${product.rating.count.toLocaleString("en-US")} parents. Read the reviews.`}
+            aria-label={`Rated ${ratingSummary.value.toFixed(1)} out of 5 by ${ratingSummary.count.toLocaleString("en-US")} parents. Read the reviews.`}
             className="group inline-flex items-center gap-2 rounded-pill border border-hairline bg-cream py-1.5 pr-3.5 pl-2.5 transition-colors duration-200 hover:border-ink/30"
           >
-            <RatingStars value={product.rating.value} starClassName="size-3" />
+            <RatingStars value={ratingSummary.value} starClassName="size-3" />
             <span className="font-headline text-ink tabular-nums">
-              {product.rating.value.toFixed(1)}
+              {ratingSummary.value.toFixed(1)}
             </span>
             <span className="hidden text-body-sm text-ink-faint sm:inline">
-              {product.rating.count.toLocaleString("en-US")} reviews
+              {ratingSummary.count.toLocaleString("en-US")} reviews
             </span>
             <Icon
               name="chevron-down"

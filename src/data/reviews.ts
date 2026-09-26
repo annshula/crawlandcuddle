@@ -26,11 +26,17 @@
 
 export type ProductReview = {
   id: string;
-  rating: 4 | 5;
-  /** Real-looking full name; the UI masks it for display (e.g. "An***il"). */
+  /** Placeholder data only ever generates 4–5★ (see the module doc above);
+   *  live Judge.me reviews can be any star rating, hence the wider type. */
+  rating: 1 | 2 | 3 | 4 | 5;
+  /** Real-looking full name for the placeholder set; the UI masks it for
+   *  display (e.g. "An***il"). Judge.me's imported reviews carry no real
+   *  name — this is "Verified Buyer" there, and the card skips masking it. */
   author: string;
-  /** Full country name shown under the masked name. */
-  country: string;
+  /** Full country name shown under the masked name — undefined for a live
+   *  Judge.me review, which carries no country data; the card shows
+   *  "Verified Buyer" alone in that case instead of a blank line. */
+  country?: string;
   /** Milliseconds since epoch — drives ordering + human "date" formatting. */
   createdAt: number;
   text: string;
@@ -554,14 +560,17 @@ function buildReviews(): ProductReview[] {
 
 export const productReviews: ProductReview[] = buildReviews();
 
-function summarize(reviews: ProductReview[]): ReviewSummary {
+/** Exported so lib/judgeme/reviews.ts can build the same ReviewSummary shape
+ *  from live data — one tally implementation, not two copies that could
+ *  drift (e.g. disagreeing on how "recommended" is rounded). */
+export function summarize(reviews: ProductReview[]): ReviewSummary {
   const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   const countries = new Set<string>();
   let withPhotos = 0;
   let sum = 0;
   for (const r of reviews) {
     counts[r.rating] = (counts[r.rating] ?? 0) + 1;
-    countries.add(r.country);
+    if (r.country) countries.add(r.country);
     if (r.images?.length) withPhotos++;
     sum += r.rating;
   }
