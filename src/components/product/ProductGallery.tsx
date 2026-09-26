@@ -139,7 +139,7 @@ export function ProductGallery({
   };
 
   return (
-    <div className="lg:sticky lg:top-28 lg:self-start">
+    <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
       <div className="flex flex-col-reverse gap-4 lg:flex-row">
         <ul
           data-lenis-prevent

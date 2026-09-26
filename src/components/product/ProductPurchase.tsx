@@ -7,6 +7,7 @@ import { BuyBox } from "@/components/product/BuyBox";
 import { PackPicker } from "@/components/product/PackPicker";
 import { PdpPrice } from "@/components/product/PdpPrice";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductVideos } from "@/components/product/ProductVideos";
 import { ScrollToTop } from "@/components/product/ScrollToTop";
 import { StickyBuyBar } from "@/components/product/StickyBuyBar";
 import { SwatchPicker } from "@/components/product/SwatchPicker";
@@ -69,14 +70,19 @@ export function ProductPurchase({
 
   return (
     <div className="mt-8 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-16">
-      {/* --- imagery --- */}
-      <div className="min-w-0">
-        <ProductGallery
-          variants={variants}
-          selectedSlug={selected.slug}
-          onSelect={setSelectedSlug}
-        />
-      </div>
+      {/* --- imagery ---
+          No wrapping div here: `position: sticky` only "sticks" correctly
+          when the sticky element is the CSS Grid's own direct child. One
+          extra plain wrapper in between — even completely unstyled — gives
+          the browser nowhere to let the sticky element roam (its immediate
+          parent's box just auto-sizes to match it, leaving zero scroll
+          room), so it silently never engages at all. `min-w-0` moves onto
+          ProductGallery's own root (its `lg:sticky` element) instead. */}
+      <ProductGallery
+        variants={variants}
+        selectedSlug={selected.slug}
+        onSelect={setSelectedSlug}
+      />
 
       {/* --- buy panel --- */}
       <div className="min-w-0">
@@ -184,6 +190,8 @@ export function ProductPurchase({
 
         <ProductViewTracker slug={selected.slug} name={selected.name} />
         <BuyBox ref={ctaRef} variant={selected} packSize={packSize} />
+
+        <ProductVideos />
 
         <dl className="mt-10 grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
           {specs.map((spec) => (
