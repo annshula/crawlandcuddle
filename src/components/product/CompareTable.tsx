@@ -47,12 +47,9 @@ export function CompareTable() {
               phone width was the thing actually breaking here. */}
           <div className="hidden border-b border-hairline sm:grid sm:grid-cols-[1fr_1fr_1fr]">
             <div className="p-5" />
-            <div className="flex items-center justify-center gap-1.5 border-x border-hairline bg-rose-50 p-5 text-center">
-              <Icon
-                name="shield"
-                className="size-3.5 shrink-0 text-rose-600"
-              />
-              <span className="font-headline text-base text-ink">
+            <div className="flex items-center justify-center gap-1.5 border-x border-hairline bg-rose-600 p-5 text-center">
+              <Icon name="shield" className="size-3.5 shrink-0 text-paper" />
+              <span className="font-headline text-base text-paper">
                 {comparison.ourLabel}
               </span>
             </div>
@@ -74,10 +71,10 @@ export function CompareTable() {
                 <div className="font-headline text-sm text-ink sm:flex sm:items-center sm:p-5">
                   {row.feature}
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-body-sm text-ink sm:mt-0 sm:border-x sm:border-hairline sm:bg-rose-50/40 sm:p-5">
+                <div className="mt-2 flex items-center gap-2 rounded-tag bg-rose-50 px-3 py-2 text-body-sm text-ink sm:mt-0 sm:rounded-none sm:border-x sm:border-hairline sm:bg-rose-600 sm:px-5 sm:py-5 sm:text-paper">
                   <Icon
                     name="check"
-                    className="size-4 shrink-0 text-rose-600"
+                    className="size-4 shrink-0 text-rose-600 sm:text-paper"
                     strokeWidth={2.4}
                   />
                   <span className="font-label text-[0.62rem] tracking-widest text-rose-600 uppercase sm:hidden">
