@@ -196,6 +196,8 @@ export default async function ProductDetailPage({
         </div>
       </section>
 
+      <ProductReviews reviews={productReviews} summary={productReviewSummary} />
+
       <CompareTable />
 
       <QualityChecks />
@@ -233,8 +235,6 @@ export default async function ProductDetailPage({
           </ul>
         </div>
       </section>
-
-      <ProductReviews reviews={productReviews} summary={productReviewSummary} />
     </>
   );
 }
