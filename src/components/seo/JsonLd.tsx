@@ -1,11 +1,14 @@
 import {
   faqs,
   product,
+  productHandle,
   productPath,
   reviews,
   site,
   variants,
 } from "@/content/site";
+import { productReviewSummary } from "@/data/reviews";
+import { getLiveReviews } from "@/lib/judgeme/reviews";
 import { absoluteUrl } from "@/lib/utils";
 
 const price = (product.priceCents / 100).toFixed(2);
@@ -17,7 +20,14 @@ const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
  * hasVariant entries — the shape Google expects for "same product, many
  * styles" — plus Organization, WebSite, Breadcrumb, ItemList and FAQPage.
  */
-export function JsonLd() {
+export async function JsonLd() {
+  // Same live-with-fallback pattern as the product page itself — see
+  // lib/judgeme/reviews.ts's doc comment. `aggregateRating` below is only
+  // included when this resolves to real Judge.me data; the placeholder
+  // dataset's own numbers must never be emitted as schema.org markup.
+  const live = await getLiveReviews(productHandle);
+  const reviewSummary = live?.summary ?? productReviewSummary;
+
   const organization = {
     "@type": "Organization",
     "@id": absoluteUrl("/#organization"),
@@ -106,13 +116,17 @@ export function JsonLd() {
     },
   });
 
-  const aggregateRating = {
-    "@type": "AggregateRating",
-    ratingValue: product.rating.value,
-    reviewCount: product.rating.count,
-    bestRating: 5,
-    worstRating: 1,
-  };
+  // Only built (and only ever spread in below) when reviews are genuinely
+  // live from Judge.me — see the getLiveReviews() call above.
+  const aggregateRating = live
+    ? {
+        "@type": "AggregateRating",
+        ratingValue: reviewSummary.average,
+        reviewCount: reviewSummary.count,
+        bestRating: 5,
+        worstRating: 1,
+      }
+    : null;
 
   const productGroup = {
     "@type": "ProductGroup",
@@ -129,7 +143,7 @@ export function JsonLd() {
     },
     weight: { "@type": "QuantitativeValue", value: 190, unitCode: "GRM" },
     material: "Breathable 3D air mesh with high-elastic cotton filler",
-    aggregateRating,
+    ...(aggregateRating && { aggregateRating }),
     review: reviews.map((review) => ({
       "@type": "Review",
       reviewBody: review.quote,
@@ -145,7 +159,7 @@ export function JsonLd() {
       description: variant.tagline,
       image: absoluteUrl(variant.image),
       brand: { "@type": "Brand", name: site.name },
-      aggregateRating,
+      ...(aggregateRating && { aggregateRating }),
       offers: offer(
         variant.name,
         `${product.sku}-${variant.slug.toUpperCase()}`,
