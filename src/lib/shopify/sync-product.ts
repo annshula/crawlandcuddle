@@ -1,10 +1,5 @@
 import { getAdminToken } from "@/lib/shopify/admin-token";
-import {
-  adminEndpoint,
-  isStorefrontConfigured,
-  shopifyConfig,
-} from "@/lib/shopify/config";
-import { getLocalizedVariantPrices } from "@/lib/shopify/localization-service";
+import { adminEndpoint, shopifyConfig } from "@/lib/shopify/config";
 import {
   CATALOG_PATH,
   acquireLock,
@@ -26,14 +21,14 @@ import {
  * there). A cross-process lock serialises concurrent webhook deliveries.
  *
  * Everything here is Shopify-sourced and overwritten on every run: title,
- * price, compare-at, per-market prices, variants and the media list in
- * Shopify's own order. The record is a read model — the price is re-validated
- * against the Storefront API at buy time, never trusted from this file.
+ * price, compare-at, variants and the media list in Shopify's own order. The
+ * record is a read model — the price is re-validated against the Storefront API
+ * at buy time, never trusted from this file.
  *
- * Market prices come from the Storefront API once per curated market. A
- * single-country market is a real, merchant-priced market; a multi-country one
- * is the "sell everywhere" catch-all whose price is live-FX-converted, so
- * snapshotting it would only go stale.
+ * Local-currency prices are deliberately NOT snapshotted: the storefront asks
+ * Shopify for them live per country (`@inContext`, GET /api/localization/prices),
+ * so a Markets price edit shows up without a re-sync. Only the curated country
+ * list (`markets`) is synced here.
  */
 
 /** The one product this storefront publishes. */
@@ -56,12 +51,6 @@ type VideoSourceNode = {
   height: number | null;
 };
 
-type MarketPrice = {
-  amount: number;
-  compareAtAmount: number | null;
-  currencyCode: string;
-};
-
 /** One variant as persisted — the shape `lib/catalog.ts` reads back. */
 export type SyncedVariantRecord = {
   id: string;
@@ -70,7 +59,6 @@ export type SyncedVariantRecord = {
   compareAtPrice: number | null;
   availableForSale: boolean;
   image: string | null;
-  pricesByMarket: Record<string, MarketPrice>;
 };
 
 export type SyncedMediaItemRecord =
@@ -357,41 +345,8 @@ export async function syncProduct(
   }
 
   // A permissions gap (e.g. the Admin app is missing read_markets) must not
-  // take down the base sync — just skip market prices.
+  // take down the base sync — just skip the country list.
   const markets = await discoverCuratedMarketCountries().catch(() => []);
-
-  const pricesByVariant = new Map<string, Record<string, MarketPrice>>(
-    variants.map((v) => [v.id, {}]),
-  );
-
-  if (markets.length > 0 && isStorefrontConfigured(cfg)) {
-    const variantIds = variants.map((v) => v.id);
-    await Promise.all(
-      markets.map(async (country) => {
-        const priceMap = await getLocalizedVariantPrices(
-          variantIds,
-          country,
-        ).catch(() => new Map());
-        for (const [variantId, localized] of priceMap) {
-          const bucket = pricesByVariant.get(variantId);
-          if (!bucket) continue;
-          bucket[country] = {
-            amount: Number(localized.amount),
-            compareAtAmount:
-              localized.compareAtAmount != null
-                ? Number(localized.compareAtAmount)
-                : null,
-            currencyCode: localized.currencyCode,
-          };
-        }
-      }),
-    );
-  }
-
-  const variantsWithMarkets: SyncedVariantRecord[] = variants.map((v) => ({
-    ...v,
-    pricesByMarket: pricesByVariant.get(v.id) ?? {},
-  }));
 
   const video = extractVideo(product.media?.nodes);
   const media = normalizeMedia(product.media?.nodes, variants);
@@ -413,7 +368,7 @@ export async function syncProduct(
       compareAtPrice: compare != null && compare > price ? compare : null,
       currencyCode: currency,
       availableForSale: variants.some((v) => v.availableForSale),
-      variants: variantsWithMarkets,
+      variants,
       video,
       media,
     },

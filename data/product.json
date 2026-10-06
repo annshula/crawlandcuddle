@@ -1,6 +1,6 @@
 {
   "version": 5,
-  "syncedAt": "2026-09-25T14:36:39.249Z",
+  "syncedAt": "2026-10-06T19:43:41.336Z",
   "shop": {
     "domain": "trackify-com.myshopify.com",
     "name": "Trackify",
@@ -17,451 +17,99 @@
   "product": {
     "id": "gid://shopify/Product/9603256975587",
     "handle": "baby-head-protector-backpack",
-    "title": "Baby Head Protector Backpack | Toddler Anti-Fall Cushion Pillow",
-    "price": 24.89,
-    "compareAtPrice": 45.24,
+    "title": "CrawlandCuddle Baby Head Protector Backpack | Toddler Anti-Fall Cushion Pillow",
+    "price": 29.99,
+    "compareAtPrice": 39.99,
     "currencyCode": "USD",
     "availableForSale": true,
     "variants": [
       {
         "id": "gid://shopify/ProductVariant/49535878234339",
         "title": "Dream Little Butterfly",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163811.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163811.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878267107",
         "title": "Lion",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163814.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163814.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878299875",
         "title": "Green Owl",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163826.jpg?v=1786723699",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1614912163826.jpg?v=1786723699"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878332643",
         "title": "Bee",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457592695.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457592695.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878365411",
         "title": "Flying Pig",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457595840.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1617457595840.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878398179",
         "title": "Pink Butterfly",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/8979740f-6b43-4ef0-9d06-1d8ed344c1b9.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/8979740f-6b43-4ef0-9d06-1d8ed344c1b9.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878430947",
         "title": "Frog",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/a89de9f4-bc07-4b76-9f39-53a776676d4b.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/a89de9f4-bc07-4b76-9f39-53a776676d4b.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878463715",
         "title": "Turtle",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/0f2893b7-4932-40b1-af59-003ba860aedc.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/0f2893b7-4932-40b1-af59-003ba860aedc.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878496483",
         "title": "Tortoise",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/e72d9d5f-59b7-4a96-a4fe-7bfff8b8ddfc.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/e72d9d5f-59b7-4a96-a4fe-7bfff8b8ddfc.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49535878529251",
         "title": "Unicorn",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": true,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1ad9bc4e-8485-4613-92c4-fa39cd7436ba.jpg?v=1786723698",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/1ad9bc4e-8485-4613-92c4-fa39cd7436ba.jpg?v=1786723698"
       },
       {
         "id": "gid://shopify/ProductVariant/49749579268323",
         "title": "Yellow Bee",
-        "price": 24.89,
-        "compareAtPrice": 45.24,
+        "price": 29.99,
+        "compareAtPrice": 39.99,
         "availableForSale": false,
-        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Sf6e870940f4345059da38a62fa2c598bU.jpg?v=1789563971",
-        "pricesByMarket": {
-          "US": {
-            "amount": 24.89,
-            "compareAtAmount": 45.24,
-            "currencyCode": "USD"
-          },
-          "CA": {
-            "amount": 36,
-            "compareAtAmount": 64,
-            "currencyCode": "CAD"
-          },
-          "GB": {
-            "amount": 20,
-            "compareAtAmount": 35,
-            "currencyCode": "GBP"
-          },
-          "IN": {
-            "amount": 2432.19,
-            "compareAtAmount": 4420.74,
-            "currencyCode": "INR"
-          },
-          "ZA": {
-            "amount": 415,
-            "compareAtAmount": 754,
-            "currencyCode": "ZAR"
-          },
-          "AU": {
-            "amount": 37,
-            "compareAtAmount": 66,
-            "currencyCode": "AUD"
-          }
-        }
+        "image": "https://cdn.shopify.com/s/files/1/0721/8869/0659/files/Sf6e870940f4345059da38a62fa2c598bU.jpg?v=1789563971"
       }
     ],
     "video": {

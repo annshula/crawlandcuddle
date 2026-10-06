@@ -5,13 +5,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 
 import {
   getVariantForStyle,
-  priceForMarket,
   productCompareAtCents,
   productCurrency,
   productPriceCents,
@@ -30,8 +30,19 @@ export type LocalizationCountry = {
   currency: { isoCode: string; symbol: string };
 };
 
+/** One variant's price in the shopper's country currency, as Shopify reports it. */
+type VariantPrice = {
+  amount: number;
+  compareAtAmount: number | null;
+  currencyCode: string;
+};
+
 type LocalizationValue = {
   ready: boolean;
+  /** True while the live prices for the current country are still loading. */
+  pricesLoading: boolean;
+  /** The variant's live price for the shopper's country, or null until loaded. */
+  priceFor: (variantId: string) => VariantPrice | null;
   countries: LocalizationCountry[];
   defaultCountry: LocalizationCountry | null;
   /** The shopper's explicit country pick, or null for "auto". */
@@ -45,13 +56,12 @@ const LocalizationContext = createContext<LocalizationValue | null>(null);
 
 /**
  * Fetches the curated market list once (data/product.json's `markets`, via
- * GET /api/localization — no live Shopify call, see scripts/sync-product.ts).
- * Pricing itself is synchronous: every variant's per-market price is already
- * embedded in the synced catalog, so `useLocalizedAmount`/`useLocalizedCart`
- * below are a plain lookup (lib/catalog.ts's priceForMarket), not a fetch —
- * there is no network round trip and no per-price "pending" state, only the
- * one-time "has the country list loaded yet". Ported from the AccuPenPro
- * reference to match its fully-static model.
+ * GET /api/localization), then asks Shopify for every variant's price in the
+ * shopper's country (GET /api/localization/prices -> Storefront `@inContext`).
+ * Nothing is snapshotted or converted here: amounts and currency are exactly
+ * what Shopify Markets returns. Until they arrive - and if the request fails -
+ * `useLocalizedAmount`/`useLocalizedCart` fall back to the synced shop-currency
+ * base price, so a price is always renderable.
  */
 export function LocalizationProvider({ children }: { children: ReactNode }) {
   const [countries, setCountries] = useState<LocalizationCountry[]>([]);
@@ -59,6 +69,13 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
     useState<LocalizationCountry | null>(null);
   const [country, setCountryState] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [prices, setPrices] = useState<{
+    country: string;
+    byVariant: Record<string, VariantPrice>;
+  } | null>(null);
+  const [loadingCountry, setLoadingCountry] = useState<string | null>(null);
+  // Per-country response cache so flipping back to a country is instant.
+  const priceCache = useRef(new Map<string, Record<string, VariantPrice>>());
 
   /* Load the configured markets + the visitor's saved choice. */
   useEffect(() => {
@@ -78,6 +95,39 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
   const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
   const canLocalize = effectiveCountry !== null;
 
+  /* Ask Shopify for the live prices whenever the effective country changes. */
+  useEffect(() => {
+    if (!effectiveCountry) return;
+    const cached = priceCache.current.get(effectiveCountry);
+    if (cached) {
+      setPrices({ country: effectiveCountry, byVariant: cached });
+      return;
+    }
+    let cancelled = false;
+    setLoadingCountry(effectiveCountry);
+    fetch(`/api/localization/prices?country=${effectiveCountry}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled || !data?.ok) return;
+        priceCache.current.set(effectiveCountry, data.prices);
+        setPrices({ country: effectiveCountry, byVariant: data.prices });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingCountry(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveCountry]);
+
+  // Only ever show prices that belong to the country in effect - never a stale
+  // currency left over from the previous pick.
+  const activePrices =
+    prices && prices.country === effectiveCountry ? prices : null;
+  const priceFor = (variantId: string) =>
+    activePrices?.byVariant[variantId] ?? null;
+
   const setCountry = (code: string) => {
     // Optimistic — flip instantly so prices re-resolve; persist in background.
     setCountryState(code === "AUTO" ? null : code);
@@ -89,8 +139,28 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
   };
 
   const value = useMemo<LocalizationValue>(
-    () => ({ ready, countries, defaultCountry, country, canLocalize, setCountry }),
-    [ready, countries, defaultCountry, country, canLocalize],
+    () => ({
+      ready,
+      pricesLoading:
+        loadingCountry !== null && loadingCountry === effectiveCountry,
+      priceFor,
+      countries,
+      defaultCountry,
+      country,
+      canLocalize,
+      setCountry,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      ready,
+      loadingCountry,
+      effectiveCountry,
+      activePrices,
+      countries,
+      defaultCountry,
+      country,
+      canLocalize,
+    ],
   );
 
   return (
@@ -110,12 +180,12 @@ export function useLocalization() {
 }
 
 /**
- * Resolves the price to display for a variant: the synced catalog's price
- * for the shopper's country when known, otherwise the caller's fallback.
+ * Resolves the price to display for a variant: Shopify's live price for the
+ * shopper's country once loaded, otherwise the caller's fallback.
  *
  * `pending` reflects only whether *localization* has resolved yet — it is
  * NOT "do we have a price to show". The caller's fallback (the product's
- * server-rendered default-market price) is always known synchronously, on
+ * server-rendered shop-currency price) is always known synchronously, on
  * the very first render, server-side included. `amount`/`currencyCode`/
  * `compareAtAmount` below always resolve to a real, displayable price;
  * `pending` is exposed separately so a caller that wants to show a "still
@@ -127,11 +197,12 @@ export function useLocalizedAmount(
   fallbackCurrency: string,
   fallbackCompareAt: number | null,
 ) {
-  const { ready, country, defaultCountry } = useLocalization();
+  const { ready, pricesLoading, country, defaultCountry, priceFor } =
+    useLocalization();
   const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
 
-  const resolved = variantId ? priceForMarket(variantId, effectiveCountry) : null;
-  const pending = !ready;
+  const resolved = variantId ? priceFor(variantId) : null;
+  const pending = !ready || pricesLoading;
 
   return useMemo(
     () => ({
@@ -159,7 +230,7 @@ export function useLocalizedAmount(
 
 /**
  * Cart amounts in the shopper's selected currency, resolved from the same
- * synced per-market prices as useLocalizedAmount — synchronous, no fetch.
+ * live Shopify prices as useLocalizedAmount.
  * The pack tier (and its % off) is derived from each line's own `qty` via
  * `getDisplayPackTier`/`applyPackDiscount` — qty 2 always prices as the
  * 2-pack, qty 3 AND UP all price at the 3-pack's per-unit rate (see
@@ -168,12 +239,13 @@ export function useLocalizedAmount(
  * no separate pack flag to pass or fall out of sync with the real quantity.
  */
 export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
-  const { ready, country, defaultCountry } = useLocalization();
-  const effectiveCountry = country ?? defaultCountry?.isoCode ?? null;
-  const pending = !ready;
+  const { ready, pricesLoading, priceFor } = useLocalization();
+  const pending = !ready || pricesLoading;
 
-  const baseUnitAmountFor = (slug: string) =>
-    priceForMarket(getVariantForStyle(slug).id, effectiveCountry).amount;
+  const baseUnitAmountFor = (slug: string) => {
+    const variant = getVariantForStyle(slug);
+    return priceFor(variant.id)?.amount ?? variant.price;
+  };
   // getDisplayPackTier (not getPackTier): qty 4, 5, 6... still resolve to
   // the 3-pack's per-unit rate instead of silently falling back to the
   // full, undiscounted single-unit price — the bug being fixed here was
@@ -188,10 +260,9 @@ export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
     Math.round(unitAmountFor(slug, qty) * qty * 100) / 100;
 
   const currencyCode =
-    lines.length > 0
-      ? priceForMarket(getVariantForStyle(lines[0]!.slug).id, effectiveCountry)
-          .currencyCode
-      : productCurrency;
+    (lines.length > 0
+      ? priceFor(getVariantForStyle(lines[0]!.slug).id)?.currencyCode
+      : null) ?? productCurrency;
 
   const subtotal = lines.reduce(
     (total, line) => total + lineTotalFor(line.slug, line.qty),
@@ -203,8 +274,8 @@ export function useLocalizedCart(lines: { slug: string; qty: number }[]) {
 
 /**
  * Price for one of our ten styles: resolves the style's Shopify variant and
- * overlays the synced per-market amount for the selected currency, falling
- * back to the synced base USD price until localization is ready.
+ * overlays Shopify's live amount for the selected country's currency, falling
+ * back to the synced base price until it has loaded.
  */
 export function useStylePrice(slug: string) {
   const variant = getVariantForStyle(slug);

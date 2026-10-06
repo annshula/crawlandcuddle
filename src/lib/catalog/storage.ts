@@ -80,13 +80,22 @@ export async function readJsonFile<T>(filePath: string): Promise<T | null> {
         return JSON.parse(await new Response(result.stream).text()) as T;
       }
     } catch (error) {
-      if (!(error instanceof BlobNotFoundError)) throw error;
+      // A missing blob is expected; anything else (e.g. a 403 from a token that
+      // can't read the store) must not take down a build or page render — warn
+      // and serve the committed seed instead.
+      if (!(error instanceof BlobNotFoundError)) {
+        console.warn(
+          `[catalog] Vercel Blob read failed, falling back to the committed seed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
     }
 
-    // Blob miss — no sync has run in this environment yet (or the blob was
-    // purged). Fall back to the committed seed shipped with the deployment
-    // instead of serving an empty catalog. Once a sync runs, the blob becomes
-    // the live source and wins on every subsequent read.
+    // Blob miss or unreadable — no sync has run in this environment yet (or the
+    // blob was purged). Fall back to the committed seed shipped with the
+    // deployment instead of serving an empty catalog. Once a sync runs, the blob
+    // becomes the live source and wins on every subsequent read.
     return readLocalJsonFile(filePath);
   }
 

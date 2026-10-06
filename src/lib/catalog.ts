@@ -1,9 +1,9 @@
 /**
  * Loads the Shopify-synced product record (data/product.json) and exposes the
- * live price / compare-at price in cents for the UI, plus per-market prices
- * for the currency selector — ported from the AccuPenPro reference
- * (lib/catalog.ts) to the same fully-static model: no live Shopify call at
- * request time, every price is a synchronous lookup into the synced catalog.
+ * live price / compare-at price in cents for the UI — ported from the
+ * AccuPenPro reference (lib/catalog.ts). Prices here are the shop-currency
+ * base prices only; local-currency prices are fetched live from Shopify per
+ * country (see components/providers/LocalizationProvider.tsx).
  *
  * The catalog file is produced by `npm run shopify:sync` — it is a read model
  * only. At buy time the price is re-validated against Shopify's Storefront API,
@@ -12,20 +12,12 @@
 
 import catalog from "../../data/product.json";
 
-export type MarketPrice = {
-  amount: number;
-  compareAtAmount: number | null;
-  currencyCode: string;
-};
-
 export type SyncedVariant = {
   id: string;
   title: string;
   price: number;
   compareAtPrice: number | null;
   availableForSale: boolean;
-  /** Per-country price list, from the store's real curated Shopify Markets only — see scripts/sync-product.ts. Empty until a product has been through that sync. */
-  pricesByMarket?: Record<string, MarketPrice>;
   /** The real Shopify variant image (per style) — null when Shopify has no image for this variant, undefined for a product synced before this field existed. */
   image?: string | null;
 };
@@ -82,7 +74,7 @@ export const syncedMedia: SyncedMediaItem[] =
   "media" in catalog.product && Array.isArray(catalog.product.media)
     ? (catalog.product.media as SyncedMediaItem[])
     : [];
-/** Curated market country codes this catalog has real per-market prices for (empty until synced with Storefront access). */
+/** Curated market country codes the storefront offers in its currency selector (empty until synced with Admin access). */
 export const syncedMarkets: string[] =
   "markets" in catalog && Array.isArray(catalog.markets)
     ? (catalog.markets as string[])
@@ -90,36 +82,14 @@ export const syncedMarkets: string[] =
 
 export const syncedAt = catalog.syncedAt;
 
-/**
- * A variant's price for a given country, straight from the synced catalog —
- * no live Shopify call. A variant with no pricesByMarket entries (not yet
- * synced) simply falls back to its own base price for every country.
- */
-export function priceForMarket(
-  variantId: string,
-  countryCode: string | null | undefined,
-): MarketPrice {
-  const variant = syncedProduct.variants.find((v) => v.id === variantId);
-  const rawDefault: MarketPrice = {
-    amount: variant?.price ?? syncedProduct.price,
-    compareAtAmount: variant?.compareAtPrice ?? syncedProduct.compareAtPrice,
-    currencyCode: syncedProduct.currencyCode,
-  };
-  if (!variant) return rawDefault;
-
-  const us = variant.pricesByMarket?.US ?? rawDefault;
-  if (!countryCode) return us;
-  return variant.pricesByMarket?.[countryCode.toUpperCase()] ?? us;
-}
-
 const mainSaleVariant =
   syncedProduct.variants.find((v) => v.availableForSale) ??
   syncedProduct.variants[0];
-// Same US-preferred fallback as priceForMarket — the site's one "no country
-// known yet" price should never be the raw Admin default.
-const mainDefaultPrice = mainSaleVariant?.pricesByMarket?.US ?? {
-  amount: syncedProduct.price,
-  compareAtAmount: syncedProduct.compareAtPrice,
+// The site's one "no country known yet" price: the shop-currency base price.
+const mainDefaultPrice = {
+  amount: mainSaleVariant?.price ?? syncedProduct.price,
+  compareAtAmount:
+    mainSaleVariant?.compareAtPrice ?? syncedProduct.compareAtPrice,
   currencyCode: syncedProduct.currencyCode,
 };
 
