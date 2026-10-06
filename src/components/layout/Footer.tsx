@@ -4,7 +4,7 @@ import { FooterWave } from "@/components/layout/FooterWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Logo";
-import { footerLinks, site } from "@/content/site";
+import { footerLinks, freeGiftEnabled, site } from "@/content/site";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -102,10 +102,12 @@ export function Footer() {
                 <Icon name="shield" className="size-4" />
                 Trusted by parents
               </li>
-              <li className="flex items-center gap-2">
-                <Icon name="gift" className="size-4" />
-                Free gift included
-              </li>
+              {freeGiftEnabled && (
+                <li className="flex items-center gap-2">
+                  <Icon name="gift" className="size-4" />
+                  Free gift included
+                </li>
+              )}
             </ul>
           </div>
         </div>

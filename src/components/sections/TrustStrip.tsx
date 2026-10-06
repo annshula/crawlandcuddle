@@ -1,9 +1,7 @@
 import { LineArt } from "@/components/art/LineArt";
 import { Reveal } from "@/components/motion/Reveal";
-import { Icon, type IconName } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui/Icon";
 import { hero, trustBadges } from "@/content/site";
-
-const icons: IconName[] = ["shield", "star", "gift", "feather"];
 
 /**
  * The hero's headline stats (10 styles / 190 g / 5–24 m) land here instead —
@@ -49,10 +47,10 @@ export function TrustStrip() {
           delay={0.1}
           className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {trustBadges.map((badge, i) => (
+          {trustBadges.map((badge) => (
             <li key={badge.label} className="flex items-start gap-4">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-rose-50 text-rose-600">
-                <Icon name={icons[i] ?? "check"} />
+                <Icon name={badge.icon} />
               </span>
               <span>
                 <span className="eyebrow block text-ink">{badge.label}</span>

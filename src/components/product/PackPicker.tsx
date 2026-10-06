@@ -47,25 +47,29 @@ export function PackPicker({
   return (
     <div className="mt-7">
       <p className="eyebrow text-ink-faint">Choose your pack</p>
-      <ul role="radiogroup" aria-label="Pack size" className="mt-3 grid gap-3 sm:grid-cols-3">
+      <ul
+        role="radiogroup"
+        aria-label="Pack size"
+        className="mt-3 grid gap-3 sm:grid-cols-3"
+      >
         {packTiers.map((tier) => {
           const isSelected = tier.size === selected;
-          const { perUnit, total: discountedTotal } = applyPackDiscount(
+          const { total: discountedTotal } = applyPackDiscount(
             unitAmount,
             tier,
           );
-          // The 1-pack shows the product's own markdown (against its real
-          // compare-at price). The 2/3-packs show just the pack discount
-          // itself — against buying that many units individually at the
-          // regular selling price (unitAmount), not against the compare-at
-          // price stacked up, which would double-count the base markdown on
-          // top of the pack discount and overstate the save %.
-          const savePercent = discountPercent(
-            discountedTotal,
-            tier.size === 1
-              ? compareAtAmount
-              : unitAmount * tier.size,
-          );
+          // The struck-through figure is the compare-at price for the whole
+          // pack, and the save % is measured against that same number so the
+          // tile never claims a saving the reader can't see. Without a
+          // compare-at price, multi-packs fall back to buying that many units
+          // at the regular price; the 1-pack just shows its price.
+          const compareTotal =
+            compareAtAmount != null
+              ? compareAtAmount * tier.size
+              : tier.size > 1
+                ? unitAmount * tier.size
+                : null;
+          const savePercent = discountPercent(discountedTotal, compareTotal);
 
           return (
             <li key={tier.size} className="relative">
@@ -127,11 +131,14 @@ export function PackPicker({
                   ) : (
                     <>
                       <span className="font-headline text-lg text-ink tabular-nums">
-                        {formatMoney(perUnit, currencyCode)}
+                        {formatMoney(discountedTotal, currencyCode)}
                       </span>
-                      <span className="text-body-sm text-ink-faint">
-                        /unit
-                      </span>
+                      {compareTotal != null &&
+                        compareTotal > discountedTotal && (
+                          <s className="text-body-sm text-ink-faint tabular-nums">
+                            {formatMoney(compareTotal, currencyCode)}
+                          </s>
+                        )}
                     </>
                   )}
                 </span>

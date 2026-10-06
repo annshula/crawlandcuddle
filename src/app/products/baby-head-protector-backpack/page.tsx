@@ -10,6 +10,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import {
   defaultVariant,
   faqs,
+  freeGiftEnabled,
   product,
   productHandle,
   productPath,
@@ -41,7 +42,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = (() => {
   const hero = defaultVariant();
   const title = product.shortName;
-  const description = `${site.shortDescription} A 190 g breathable anti-fall cushion that protects the head and back from 5 to 24 months. ${formatPrice(product.priceCents)} with a free gift and free tracked shipping. Ten styles to choose from.`;
+  const description = `${site.shortDescription} A 190 g breathable anti-fall cushion that protects the head and back from 5 to 24 months. ${formatPrice(product.priceCents)} with ${freeGiftEnabled ? "a free gift and " : ""}free tracked shipping. Ten styles to choose from.`;
 
   return {
     title,

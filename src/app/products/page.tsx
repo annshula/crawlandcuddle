@@ -5,13 +5,19 @@ import Link from "next/link";
 import { ProductPrice } from "@/components/product/ProductPrice";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Icon } from "@/components/ui/Icon";
-import { defaultVariant, product, productPath, site, variants } from "@/content/site";
+import {
+  defaultVariant,
+  freeGiftEnabled,
+  product,
+  productPath,
+  site,
+  variants,
+} from "@/content/site";
 import { absoluteUrl, cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Shop — Baby Head Protector Backpack, 10 Styles",
-  description:
-    "The Crawl & Cuddle baby head protector backpack. Identical anti-fall protection, 190 g, breathable 3D mesh, 5–24 months, in ten styles. Free gift and free tracked shipping.",
+  description: `The Crawl & Cuddle baby head protector backpack. Identical anti-fall protection, 190 g, breathable 3D mesh, 5–24 months, in ten styles. ${freeGiftEnabled ? "Free gift and free" : "Free"} tracked shipping.`,
   alternates: { canonical: "/products" },
   openGraph: {
     type: "website",

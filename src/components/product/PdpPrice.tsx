@@ -18,8 +18,8 @@ import { formatMoney } from "@/lib/money";
  *
  * `packSize` (from the pack picker above, lifted to the shared parent)
  * applies that tier's price here too, so the number always matches the
- * total the buy box is about to charge. The per-unit breakdown lives on the
- * pack picker's own tiles, not repeated here — this stays just the total.
+ * total the buy box is about to charge, struck against the same compare-at
+ * total the pack picker's tiles show.
  */
 export function PdpPrice({
   slug,
@@ -28,7 +28,8 @@ export function PdpPrice({
   slug: string;
   packSize?: PackTier["size"];
 }) {
-  const { amount, currencyCode, pending } = useStylePrice(slug);
+  const { amount, compareAtAmount, currencyCode, pending } =
+    useStylePrice(slug);
 
   if (pending) {
     return (
@@ -43,13 +44,16 @@ export function PdpPrice({
 
   const tier = getPackTier(packSize);
   const { total: packTotal } = applyPackDiscount(amount, tier);
-  // Pack 1 has no bundle discount to show off — its own compare-at markdown
-  // reads as a generic "sale price" rather than a reason to pick a bigger
-  // pack, so the struck price is hidden there and shown only for 2/3-packs,
-  // where it isolates just the pack discount (that many units at the
-  // regular selling price — `amount` — not the compare-at price stacked up,
-  // which would overstate the save %).
-  const compareAtTotal = tier.size === 1 ? null : amount * tier.size;
+  // Same struck figure as the matching PackPicker tile: the compare-at price
+  // for the whole pack, so the hero price and the tile never disagree. With
+  // no compare-at price, multi-packs fall back to that many units at the
+  // regular price; the 1-pack just shows its price.
+  const compareAtTotal =
+    compareAtAmount != null
+      ? compareAtAmount * tier.size
+      : tier.size > 1
+        ? amount * tier.size
+        : null;
   const percent = discountPercent(packTotal, compareAtTotal);
 
   return (

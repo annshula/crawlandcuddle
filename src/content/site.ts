@@ -15,6 +15,15 @@ import {
 } from "@/lib/catalog";
 import { productReviewSummary } from "@/data/reviews";
 
+/**
+ * Master switch for the "free gift" promotion (anti-slip socks on the 2- and
+ * 3-packs). Off unless NEXT_PUBLIC_FREE_GIFT_ENABLED=true — every gift
+ * mention across the site (banner, nav tag, pack tiles, value stack, cart,
+ * metadata) keys off this one flag. NEXT_PUBLIC_ so client components see it.
+ */
+export const freeGiftEnabled =
+  process.env.NEXT_PUBLIC_FREE_GIFT_ENABLED?.trim().toLowerCase() === "true";
+
 export type SocialLink = { label: string; href: string };
 
 /**
@@ -78,7 +87,7 @@ export const nav = [
 ] as const;
 
 export const announcements = [
-  "Free gift worth $15 in every box",
+  ...(freeGiftEnabled ? ["Free gift worth $15 in every box"] : []),
   "Free tracked delivery · 3–7 days",
   "30-day easy returns",
   "Ten styles · one promise",
@@ -246,20 +255,20 @@ export const packTiers: PackTier[] = [
     size: 2,
     discountPercent: 10,
     label: "2 Pack",
-    shortLabel: "Save 10% + free gift",
+    shortLabel: freeGiftEnabled ? "Save 10% + free gift" : "Save 10%",
     blurb: "One for home, one for daycare",
     badge: "Most popular",
     featured: true,
-    includesGift: true,
+    includesGift: freeGiftEnabled,
   },
   {
     size: 3,
     discountPercent: 20,
     label: "3 Pack",
-    shortLabel: "Save 20% + free gift",
+    shortLabel: freeGiftEnabled ? "Save 20% + free gift" : "Save 20%",
     blurb: "Keep one, gift two to the little ones you love",
     badge: "Best value",
-    includesGift: true,
+    includesGift: freeGiftEnabled,
   },
 ];
 
@@ -362,10 +371,24 @@ export const hero = {
 } as const;
 
 export const trustBadges = [
-  { label: "Protects head & back", detail: "Impact-absorbing cushion" },
-  { label: "Soft & lightweight", detail: "Just 190 grams" },
-  { label: "Breathable comfort", detail: "3D air-mesh shell" },
-  { label: "Free gift inside", detail: "Worth $15" },
+  {
+    label: "Protects head & back",
+    detail: "Impact-absorbing cushion",
+    icon: "shield",
+  },
+  { label: "Soft & lightweight", detail: "Just 190 grams", icon: "star" },
+  { label: "Breathable comfort", detail: "3D air-mesh shell", icon: "feather" },
+  freeGiftEnabled
+    ? ({
+        label: "Free gift inside",
+        detail: "Worth $15",
+        icon: "gift",
+      } as const)
+    : ({
+        label: "Free tracked delivery",
+        detail: "Arrives in 3–7 days",
+        icon: "truck",
+      } as const),
 ] as const;
 
 /**
@@ -552,11 +575,15 @@ export const comparison = {
       us: "Machine washable",
       other: "Spot-clean only",
     },
-    {
-      feature: "Free gift",
-      us: "Included on multi-packs",
-      other: "Rarely included",
-    },
+    ...(freeGiftEnabled
+      ? [
+          {
+            feature: "Free gift",
+            us: "Included on multi-packs",
+            other: "Rarely included",
+          },
+        ]
+      : []),
     {
       feature: "Returns",
       us: "30-day easy returns",
@@ -613,7 +640,9 @@ export const product = {
   includes: [
     "Cushions every fall — protects head & back the moment they stumble",
     "Grows with your toddler — chest-clip harness adjusts as they do",
-    "Free gift: anti-slip socks, so first steps stay sure-footed",
+    ...(freeGiftEnabled
+      ? ["Free gift: anti-slip socks, so first steps stay sure-footed"]
+      : []),
     "Stays fresh wash after wash, with a bag and care card included",
   ],
   /**
@@ -624,10 +653,9 @@ export const product = {
   valueStack: [
     { label: "Head & back protector", valueCents: 3400 },
     { label: "Adjustable harness with chest clip", valueCents: 800 },
-    {
-      label: "Free gift: anti-slip socks",
-      valueCents: 1500,
-    },
+    ...(freeGiftEnabled
+      ? [{ label: "Free gift: anti-slip socks", valueCents: 1500 }]
+      : []),
     { label: "Wash bag & care card", valueCents: 500 },
   ],
   /** Sourced from the review dataset (src/data/reviews.ts) so this can never drift from what the reviews section actually shows. */

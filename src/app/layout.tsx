@@ -15,7 +15,7 @@ import { LocalizationProvider } from "@/components/providers/LocalizationProvide
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { site } from "@/content/site";
+import { freeGiftEnabled, site } from "@/content/site";
 import { fontVariables } from "@/lib/fonts";
 import { absoluteUrl } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description:
-    "Baby head protector backpack for 5–24 months. A 190 g breathable anti-fall cushion that shields the head and back through crawling, standing and first steps. Ten styles, free gift, free tracked shipping.",
+    `Baby head protector backpack for 5–24 months. A 190 g breathable anti-fall cushion that shields the head and back through crawling, standing and first steps. Ten styles, ${freeGiftEnabled ? "free gift, " : ""}free tracked shipping.`,
   applicationName: site.name,
   authors: [{ name: site.legalName }],
   creator: site.legalName,

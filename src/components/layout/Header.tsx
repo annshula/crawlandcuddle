@@ -11,7 +11,7 @@ import { useCart } from "@/components/providers/CartProvider";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Logo } from "@/components/ui/Logo";
-import { nav } from "@/content/site";
+import { freeGiftEnabled, nav } from "@/content/site";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { useIsomorphicLayoutEffect } from "@/hooks/useIsomorphicLayoutEffect";
 import { useScrollLock } from "@/lib/scroll-lock";
@@ -174,34 +174,36 @@ export function Header() {
               </Button>
               {/* Free-gift tag roped to the navbar Shop button — decorative,
                   never intercepts clicks, hidden on small screens. */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute top-full z-20 hidden flex-col items-center sm:flex"
-              >
-                <svg
-                  width="2"
-                  height="44"
-                  viewBox="0 0 2 44"
-                  className="text-ink-faint/50"
+              {freeGiftEnabled && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-full z-20 hidden flex-col items-center sm:flex"
                 >
-                  <line
-                    x1="1"
-                    y1="0"
-                    x2="1"
-                    y2="44"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeDasharray="2 3"
-                  />
-                </svg>
-                <div className="origin-top animate-wobble rotate-2 rounded-tag bg-rose-600 px-3.5 py-1.5 text-center text-paper shadow-lift">
-                  <p className="font-label text-[0.58rem] leading-snug tracking-[0.14em] uppercase">
-                    Free gift
-                    <br />
-                    $15 value
-                  </p>
+                  <svg
+                    width="2"
+                    height="44"
+                    viewBox="0 0 2 44"
+                    className="text-ink-faint/50"
+                  >
+                    <line
+                      x1="1"
+                      y1="0"
+                      x2="1"
+                      y2="44"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeDasharray="2 3"
+                    />
+                  </svg>
+                  <div className="origin-top animate-wobble rotate-2 rounded-tag bg-rose-600 px-3.5 py-1.5 text-center text-paper shadow-lift">
+                    <p className="font-label text-[0.58rem] leading-snug tracking-[0.14em] uppercase">
+                      Free gift
+                      <br />
+                      $15 value
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <button
